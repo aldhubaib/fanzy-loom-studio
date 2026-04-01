@@ -97,7 +97,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE",
-    description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"],
+    description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge",
     generatedImages: [
       { id: "g5a", src: frame5, description: "Two silhouettes on bridge — wide", actors: ["a1", "a2"] },
       { id: "g5b", src: frame1, description: "Marlowe alone on bridge", actors: ["a1"] },
