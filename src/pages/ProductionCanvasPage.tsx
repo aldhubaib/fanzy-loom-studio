@@ -117,6 +117,7 @@ type SelectedItem =
   | { type: "frame"; id: string }
   | { type: "cast"; id: string }
   | { type: "location"; id: string }
+  | { type: "script"; id: string }
   | { type: "zone"; id: string }
   | null;
 
