@@ -446,27 +446,33 @@ function AttributePickerDialog({
 }
 
 // ─── Picker Row ─────────────────────────────────────────────
-function AttributeRow({ label, value, options, onClick }: {
+function AttributeRow({ label, value, options, onClick, hasError }: {
   label: string;
   value: string;
   options: VisualOption[];
   onClick: () => void;
+  hasError?: boolean;
 }) {
   const opt = options.find(o => o.label === value);
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-border bg-card hover:border-muted-foreground/40 transition-all text-left"
+      className={cn(
+        "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border bg-card transition-all text-left",
+        hasError
+          ? "border-destructive/60 animate-shake"
+          : "border-border hover:border-muted-foreground/40"
+      )}
     >
       {opt?.image ? (
         <img src={opt.image} alt={value} className="w-8 h-8 rounded-lg object-cover" />
       ) : (
-        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", hasError ? "bg-destructive/10" : "bg-secondary")}>
+          <Plus className={cn("w-3.5 h-3.5", hasError ? "text-destructive" : "text-muted-foreground")} />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-0.5">{label}</p>
+        <p className={cn("text-[10px] uppercase tracking-wider leading-none mb-0.5", hasError ? "text-destructive/70" : "text-muted-foreground")}>{label}</p>
         <p className="text-sm font-medium text-foreground truncate">{value || "Choose..."}</p>
       </div>
       <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -492,6 +498,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
   const [customWardrobeImages, setCustomWardrobeImages] = useState<Record<string, string[]>>({});
   const [lookTab, setLookTab] = useState<"build" | "custom">("build");
   const [customPortraits, setCustomPortraits] = useState<string[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
@@ -566,7 +573,8 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                     label={cat.label}
                     value={character[cat.key] as string}
                     options={attrOptions[cat.key]}
-                    onClick={() => setPickerOpen(cat.key)}
+                    onClick={() => { setPickerOpen(cat.key); if (showErrors) setShowErrors(false); }}
+                    hasError={showErrors && !(character[cat.key] as string)}
                   />
                 ))}
               </div>
@@ -580,7 +588,10 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                     <h3 className="text-sm font-semibold text-foreground">Portraits</h3>
                     <p className="text-[11px] text-muted-foreground">Generate & pick a portrait</p>
                   </div>
-                  <Button size="sm" className="gap-1.5 h-8">
+                  <Button size="sm" className="gap-1.5 h-8" onClick={() => {
+                    const allFilled = attributeCategories.every(cat => !!(character[cat.key] as string));
+                    if (!allFilled) { setShowErrors(true); return; }
+                  }}>
                     <Sparkles className="w-3.5 h-3.5" />
                     Generate
                   </Button>
