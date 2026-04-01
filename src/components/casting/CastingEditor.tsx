@@ -998,6 +998,8 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
             onChange={updateCharacter}
             onClose={() => setSelectedCharacterId(null)}
             onDelete={() => deleteCharacter(selectedCharacter.id)}
+            allCharacters={characters}
+            onSwap={swapCharacters}
           />
         )}
       </AnimatePresence>
