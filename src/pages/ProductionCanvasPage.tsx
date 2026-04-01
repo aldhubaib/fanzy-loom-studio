@@ -90,15 +90,22 @@ interface LocationNode {
   zoneId: string;
 }
 
+interface ScriptNode {
+  id: string;
+  heading: string;
+  body: string;
+  x: number;
+  y: number;
+  zoneId: string;
+}
+
 interface Zone {
   id: string;
   label: string;
-  type: "casting" | "shots" | "locations";
-  // Zone position is the anchor — children are positioned relative to world coords
-  // but zone bounds are computed from children
+  type: "casting" | "shots" | "locations" | "script";
   x: number;
   y: number;
-  color: string; // tailwind-friendly hsl
+  color: string;
 }
 
 interface Connection {
@@ -110,6 +117,7 @@ type SelectedItem =
   | { type: "frame"; id: string }
   | { type: "cast"; id: string }
   | { type: "location"; id: string }
+  | { type: "script"; id: string }
   | { type: "zone"; id: string }
   | null;
 
@@ -124,6 +132,8 @@ const CAST_W = 160;
 const CAST_H = 220;
 const LOC_W = 180;
 const LOC_H = 140;
+const SCRIPT_W = 280;
+const SCRIPT_H = 160;
 const DRAWER_W = 360;
 const ZONE_PAD = 40;
 const ZONE_LABEL_H = 40;
@@ -172,6 +182,7 @@ const initialZones: Zone[] = [
   { id: "z-casting", label: "Casting", type: "casting", x: -500, y: 0, color: "190 80% 50%" },
   { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
   { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
+  { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
 ];
 
 const initialFrames: FrameData[] = [
@@ -196,12 +207,18 @@ const initialLocationNodes: LocationNode[] = [
   { id: "ln4", locationName: "Street", x: 1460, y: 260, zoneId: "z-locations" },
 ];
 
+const initialScriptNodes: ScriptNode[] = [
+  { id: "sn1", heading: "INT. MARLOWE'S OFFICE - NIGHT", body: "Marlowe sits at his desk, the room thick with cigarette smoke. A knock at the door.", x: 80, y: -460, zoneId: "z-script" },
+  { id: "sn2", heading: "EXT. RAIN-SLICKED ALLEY - NIGHT", body: "Vivian emerges from the shadows, heels clicking on wet pavement.", x: 400, y: -460, zoneId: "z-script" },
+  { id: "sn3", heading: "INT. THE BLUE NOTE JAZZ CLUB - NIGHT", body: "A saxophone wails. Eddie leans against the bar, watching the door.", x: 720, y: -460, zoneId: "z-script" },
+];
+
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" }, { from: "f2", to: "f3" },
   { from: "f3", to: "f4" }, { from: "f4", to: "f5" }, { from: "f5", to: "f6" },
-  // Zone-level connections: casting → shots, locations → shots
   { from: "z-casting", to: "z-shots" },
   { from: "z-locations", to: "z-shots" },
+  { from: "z-script", to: "z-shots" },
 ];
 
 // ─── Zone Bounds Helper ─────────────────────────────────────
@@ -210,6 +227,7 @@ function computeZoneBounds(
   frames: FrameData[],
   castNodes: CastNode[],
   locationNodes: LocationNode[],
+  scriptNodes: ScriptNode[] = [],
 ) {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -219,6 +237,8 @@ function computeZoneBounds(
     castNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: CAST_W, h: CAST_H }));
   } else if (zone.type === "locations") {
     locationNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: LOC_W, h: LOC_H }));
+  } else if (zone.type === "script") {
+    scriptNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: SCRIPT_W, h: SCRIPT_H }));
   }
 
   if (children.length === 0) {
@@ -447,6 +467,7 @@ export default function ProductionCanvasPage() {
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
   const [locationNodes, setLocationNodes] = useState<LocationNode[]>(initialLocationNodes);
+  const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(initialScriptNodes);
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -467,9 +488,9 @@ export default function ProductionCanvasPage() {
   // Compute zone bounds
   const zoneBounds = useMemo(() => {
     const map: Record<string, { x: number; y: number; w: number; h: number }> = {};
-    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes); });
+    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes); });
     return map;
-  }, [zones, frames, castNodes, locationNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes]);
 
   // Get actors connected to a shots zone via zone connections
   const getConnectedActors = useCallback((shotsZoneId: string): Actor[] => {
@@ -539,6 +560,7 @@ export default function ProductionCanvasPage() {
       setFrames(prev => prev.map(f => f.zoneId === draggingZone ? { ...f, x: f.x + dx, y: f.y + dy } : f));
       setCastNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
       setLocationNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
+      setScriptNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
     }
     if (dragging) {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -548,6 +570,7 @@ export default function ProductionCanvasPage() {
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
       setCastNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
+      setScriptNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
     }
   }, [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart]);
 
@@ -597,8 +620,10 @@ export default function ProductionCanvasPage() {
     if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
     const ln = locationNodes.find(n => n.id === nodeId);
     if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
+    const sn = scriptNodes.find(n => n.id === nodeId);
+    if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
     return { x: 0, y: 0 };
-  }, [frames, castNodes, locationNodes, zoneBounds]);
+  }, [frames, castNodes, locationNodes, scriptNodes, zoneBounds]);
 
   const connectors = connections.map(c => {
     const p1 = getPortPos(c.from, "right");
@@ -655,12 +680,13 @@ export default function ProductionCanvasPage() {
   const selectedFrame = selected?.type === "frame" ? frames.find(f => f.id === selected.id) : null;
   const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
   const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
+  const selectedScript = selected?.type === "script" ? scriptNodes.find(n => n.id === selected.id) : null;
   const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
   const selectedActor = selectedCast ? actors.find(a => a.id === selectedCast.actorId) : null;
 
   const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
 
-  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedZone ? selectedZone.label : null;
+  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedScript ? "Scene" : selectedZone ? selectedZone.label : null;
   const showDrawer = !!selected;
 
   return (
@@ -893,6 +919,28 @@ export default function ProductionCanvasPage() {
                 </div>
               );
             })}
+
+            {/* Script nodes */}
+            {scriptNodes.map(node => (
+              <div key={node.id} data-node
+                className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                  selected?.id === node.id ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-border hover:border-muted-foreground/40")}
+                style={{ left: node.x, top: node.y, width: SCRIPT_W }}
+                onMouseDown={(e) => startDrag(e, node, { type: "script", id: node.id })}>
+                <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                  <X className="w-3 h-3" />
+                </button>
+                <div className="p-3 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider truncate">{node.heading}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed">{node.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Context menu */}
@@ -922,6 +970,21 @@ export default function ProductionCanvasPage() {
                     setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: targetZone });
                     setCanvasMenu(null);
                   }}><MapPin className="w-4 h-4" /> Add Location</button>
+                )}
+                {(!zone || zone.type === "script") && (
+                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "script")?.id || "z-script";
+                    const zb = zoneBounds[targetZone];
+                    setScriptNodes(prev => [...prev, {
+                      id: `sn-${Date.now()}`,
+                      heading: "INT. NEW LOCATION - DAY",
+                      body: "Description of the scene...",
+                      x: canvasMenu.worldX - SCRIPT_W / 2,
+                      y: canvasMenu.worldY,
+                      zoneId: targetZone,
+                    }]);
+                    setCanvasMenu(null);
+                  }}><FileText className="w-4 h-4" /> Add Scene</button>
                 )}
                 <div className="h-px bg-border my-1" />
                 <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
@@ -985,6 +1048,7 @@ export default function ProductionCanvasPage() {
             {frames.map(f => <rect key={f.id} x={f.x} y={f.y} width={FRAME_W} height={FRAME_H} rx={4} fill={selected?.id === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={selected?.id === f.id ? 0.6 : 0.2} />)}
             {castNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={4} fill="hsl(190 80% 50%)" fillOpacity={0.3} />)}
             {locationNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={4} fill="hsl(150 60% 45%)" fillOpacity={0.3} />)}
+            {scriptNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={SCRIPT_W} height={SCRIPT_H} rx={4} fill="hsl(280 60% 55%)" fillOpacity={0.3} />)}
           </svg>
         </div>
       </div>
@@ -1005,9 +1069,11 @@ export default function ProductionCanvasPage() {
               {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
               {selectedActor && <User className="w-4 h-4 text-cyan-500" />}
               {selectedLocation && <MapPin className="w-4 h-4 text-emerald-500" />}
+              {selectedScript && <FileText className="w-4 h-4 text-purple-400" />}
               {selectedZone && (
                 selectedZone.type === "casting" ? <Users className="w-4 h-4 text-cyan-500" /> :
                 selectedZone.type === "shots" ? <Camera className="w-4 h-4 text-primary" /> :
+                selectedZone.type === "script" ? <FileText className="w-4 h-4 text-purple-400" /> :
                 <MapPin className="w-4 h-4 text-emerald-500" />
               )}
               <h2 className="text-sm font-bold text-foreground">{drawerTitle}</h2>
@@ -1036,6 +1102,38 @@ export default function ProductionCanvasPage() {
               />
             )}
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
+            {selectedScript && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Scene Heading</Label>
+                  <input
+                    value={selectedScript.heading}
+                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, heading: e.target.value } : n))}
+                    className="w-full text-sm font-bold bg-secondary/50 border border-border rounded-lg px-3 py-2 mt-1 text-foreground outline-none focus:border-purple-500/50"
+                  />
+                </div>
+                <Separator />
+                <div>
+                  <Label className="text-xs text-muted-foreground">Scene Description</Label>
+                  <Textarea
+                    value={selectedScript.body}
+                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, body: e.target.value } : n))}
+                    className="mt-1 min-h-[120px] text-sm"
+                    placeholder="Describe what happens in this scene..."
+                  />
+                </div>
+                <Separator />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                  onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== selectedScript.id)); setSelected(null); }}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  Delete Scene
+                </Button>
+              </div>
+            )}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
         </motion.div>
