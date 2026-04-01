@@ -824,7 +824,7 @@ export function StoryboardCanvas() {
                           </Tooltip>
                         );
                       })}
-                      {frame.location && locationImages[frame.location] && (
+                      {frame.location && locationImages[frame.location] ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-border ml-auto">
@@ -832,6 +832,15 @@ export function StoryboardCanvas() {
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="text-xs">{frame.location}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-dashed border-muted-foreground/30 ml-auto flex items-center justify-center bg-muted/20">
+                              <span className="text-[8px] text-muted-foreground/40">LOC</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">No location set</TooltipContent>
                         </Tooltip>
                       )}
                     </TooltipProvider>
