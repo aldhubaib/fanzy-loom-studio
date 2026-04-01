@@ -1181,10 +1181,13 @@ export function StoryboardCanvas() {
               <button
                 key={name}
                 className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   const newId = `loc-${Date.now()}`;
-                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos.worldX, y: locationPickerPos.worldY }]);
+                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos!.worldX - LOC_W / 2, y: locationPickerPos!.worldY }]);
                   setLocationPickerPos(null);
+                  setDraggingNode(null);
+                  setDragging(null);
                 }}
               >
                 <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
