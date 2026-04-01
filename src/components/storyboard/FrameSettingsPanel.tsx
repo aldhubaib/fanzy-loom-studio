@@ -192,6 +192,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [mood, setMood] = useState("Noir");
   const [imageCount, setImageCount] = useState(4);
+  const [shotOpen, setShotOpen] = useState(false);
+  const [moodOpen, setMoodOpen] = useState(false);
 
   useEffect(() => {
     setPrompt(frame.description);
