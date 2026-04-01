@@ -851,7 +851,9 @@ export function StoryboardCanvas() {
                 </div>
               </div>
             </FrameContextMenu>
-          ))}
+          );
+          });
+          })()}
         </div>
 
         {/* Canvas context menu */}
