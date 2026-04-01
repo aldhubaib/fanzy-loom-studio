@@ -69,12 +69,24 @@ export function StoryboardCanvas() {
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
 
-  // Zoom with scroll wheel
+  // Zoom with scroll wheel — zoom towards mouse position
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(z => Math.min(3, Math.max(0.2, z + delta)));
+      setZoom(prevZoom => {
+        const newZoom = Math.min(3, Math.max(0.2, prevZoom + delta));
+        const scale = newZoom / prevZoom;
+        setPan(p => ({
+          x: mouseX - scale * (mouseX - p.x),
+          y: mouseY - scale * (mouseY - p.y),
+        }));
+        return newZoom;
+      });
     } else {
       setPan(p => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
     }
