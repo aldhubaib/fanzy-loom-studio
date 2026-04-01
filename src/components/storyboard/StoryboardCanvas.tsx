@@ -852,8 +852,8 @@ export function StoryboardCanvas() {
                 </div>
               </div>
             </FrameContextMenu>
-          );
-          });
+              );
+            });
           })()}
         </div>
 
