@@ -824,20 +824,6 @@ export default function ProductionCanvasPage() {
                       <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
                     )}
                   </div>
-                  {/* Zone port — right side */}
-                  <div
-                    className="absolute -right-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
-                    style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
-                  />
-                  {/* Zone port — left side */}
-                  <div
-                    className="absolute -left-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
-                    style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
-                  />
                 </div>
               );
             })}
