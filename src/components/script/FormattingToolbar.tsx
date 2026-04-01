@@ -134,48 +134,7 @@ export function FormattingToolbar({
           <span className="text-[10px] text-muted-foreground hidden lg:inline ml-1">⌘1-7 to switch type</span>
         )}
 
-        {/* Right — Editor controls (always visible) */}
-        <div className="ml-auto flex items-center gap-3">
-          {/* Font size */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onFontSizeChange(Math.max(12, fontSize - 2))}
-              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors px-1"
-            >
-              A-
-            </button>
-            <span className="text-[10px] text-muted-foreground w-6 text-center">{fontSize}pt</span>
-            <button
-              onClick={() => onFontSizeChange(Math.min(16, fontSize + 2))}
-              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors px-1"
-            >
-              A+
-            </button>
-          </div>
-
-          <div className="w-px h-5 bg-border" />
-
-          {/* Focus mode */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Focus className={cn("w-3.5 h-3.5", focusMode ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-[10px] text-muted-foreground">Focus</span>
-            <Switch checked={focusMode} onCheckedChange={onFocusModeChange} className="h-4 w-7 [&>span]:h-3 [&>span]:w-3" />
-          </label>
-
-          <div className="w-px h-5 bg-border" />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="text-muted-foreground hover:text-foreground transition-colors">
-                <Info className="w-3.5 h-3.5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
-              <p className="font-semibold mb-1">Screenplay Format</p>
-              <p>Scene headings use INT./EXT. + LOCATION - TIME. Character names are centered and uppercase. Dialogue sits in a narrower column below the character name.</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <div className="ml-auto" />
       </div>
     </TooltipProvider>
   );
