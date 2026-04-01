@@ -252,22 +252,42 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                 const isDefined = !!charData;
                 return (
                   <div key={i} className="pt-5 pb-0 cursor-text flex items-center gap-3 justify-center">
-                    <button
-                      onClick={() => {
-                        // TODO: open character detail/define panel
-                        alert(isDefined ? `View profile: ${el.text}` : `Define character: ${el.text}`);
-                      }}
-                      className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all",
-                        "hover:scale-110 hover:ring-2 hover:ring-primary/50",
-                        isDefined
-                          ? `bg-gradient-to-br ${charData.color} text-foreground`
-                          : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
-                      )}
-                      title={isDefined ? `View ${el.text}` : `Click to define ${el.text}`}
-                    >
-                      {isDefined ? charData.initials : <UserCircle className="w-4 h-4" />}
-                    </button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all",
+                            "hover:scale-110 hover:ring-2 hover:ring-primary/50",
+                            isDefined
+                              ? `bg-gradient-to-br ${charData.color} text-foreground`
+                              : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
+                          )}
+                        >
+                          {isDefined ? charData.initials : <UserCircle className="w-4 h-4" />}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
+                        {isDefined ? (
+                          <div className="flex items-center gap-3">
+                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br", charData.color, "text-foreground")}>
+                              {charData.initials}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{el.text}</p>
+                              <p className="text-xs text-muted-foreground">Defined character</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-foreground">{el.text}</p>
+                            <p className="text-xs text-muted-foreground">Not yet defined</p>
+                            <button className="w-full text-xs font-medium px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                              Define Character
+                            </button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                     <p className="font-mono font-bold uppercase text-primary">
                       {el.text}
                     </p>
