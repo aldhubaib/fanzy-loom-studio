@@ -931,7 +931,7 @@ export default function ProductionCanvasPage() {
                 >
                   {/* Dashed border */}
                   <div
-                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing", isSelected && "border-opacity-80")}
+                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto", isSelected && "border-opacity-80")}
                     style={{ borderColor: `hsl(${zone.color} / ${isSelected ? 0.6 : 0.25})`, background: `hsl(var(--background))` }}
                     onMouseDown={(e) => {
                       if (e.button !== 0) return;
