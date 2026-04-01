@@ -225,9 +225,9 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <div className="mt-4">
             <Button
               onClick={handleSurpriseMe}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-muted-foreground hover:text-foreground gap-2"
+              className="border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary gap-2"
             >
               <Dices className="w-3.5 h-3.5" />
               Surprise Me
