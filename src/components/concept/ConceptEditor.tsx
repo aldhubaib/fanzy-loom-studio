@@ -91,43 +91,63 @@ interface ConceptEditorProps {
   isNewProject?: boolean;
 }
 
-// Visual card component for genre/tone
+// Visual card for modal grid
 function VisualCard({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "relative group rounded-xl overflow-hidden transition-all duration-200",
-        "w-[100px] h-[72px] sm:w-[120px] sm:h-[80px]",
+        "aspect-[4/3]",
         selected
-          ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
-          : "hover:scale-105 hover:ring-1 hover:ring-border"
+          ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]"
+          : "hover:scale-[1.03] hover:ring-1 hover:ring-border"
       )}
     >
-      <img
-        src={img}
-        alt={label}
-        loading="lazy"
-        className="w-full h-full object-cover"
-      />
-      {/* Gradient overlay */}
-      <div className={cn(
-        "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent",
-        selected && "from-primary/40 via-transparent"
-      )} />
-      {/* Label */}
-      <span className={cn(
-        "absolute bottom-1.5 left-2 text-[11px] font-semibold",
-        selected ? "text-primary" : "text-white/90"
-      )}>
-        {label}
-      </span>
-      {/* Check mark */}
+      <img src={img} alt={label} loading="lazy" className="w-full h-full object-cover" />
+      <div className={cn("absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent", selected && "from-primary/30 via-transparent")} />
       {selected && (
-        <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="hsl(var(--primary-foreground))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="hsl(var(--primary-foreground))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
       )}
+    </button>
+  );
+}
+
+function VisualCardLabel({ label, selected }: { label: string; selected: boolean }) {
+  return (
+    <p className={cn("text-xs font-medium text-center mt-1.5", selected ? "text-primary" : "text-muted-foreground")}>
+      {label}
+    </p>
+  );
+}
+
+// Picker trigger button
+function PickerButton({ label, value, selectedImg, onClick }: { label: string; value: string; selectedImg?: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all",
+        value
+          ? "bg-card border-primary/30 text-foreground"
+          : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+      )}
+    >
+      {selectedImg && (
+        <img src={selectedImg} alt={value} className="w-7 h-7 rounded-md object-cover" />
+      )}
+      {!selectedImg && !value && (
+        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+        </div>
+      )}
+      <div className="text-left">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-0.5">{label}</p>
+        <p className="text-sm font-medium">{value || "Choose..."}</p>
+      </div>
+      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
     </button>
   );
 }
