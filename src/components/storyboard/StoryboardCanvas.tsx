@@ -601,6 +601,7 @@ export function StoryboardCanvas() {
             const orderMap = new Map(sorted.map((f, i) => [f.id, i + 1]));
             return frames.map((frame, idx) => {
               const sceneNumber = orderMap.get(frame.id) ?? idx + 1;
+              return (
             <FrameContextMenu
               key={frame.id}
               frameIndex={idx}
