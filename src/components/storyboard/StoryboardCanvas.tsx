@@ -557,7 +557,7 @@ export function StoryboardCanvas() {
                 x={f.x}
                 y={f.y}
                 width={FRAME_W}
-                height={FRAME_H}
+                height={FRAME_H_BASE}
                 rx={6}
                 fill={selectedFrame === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
                 fillOpacity={selectedFrame === f.id ? 0.6 : 0.2}
