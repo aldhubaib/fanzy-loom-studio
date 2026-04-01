@@ -790,6 +790,40 @@ export default function ProductionCanvasPage() {
                       setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
                     }}
                   />
+                  {/* Zone-level connectors for shots zones */}
+                  {zone.type === "shots" && (() => {
+                    const zoneConnectors = [
+                      { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left" as const,  yFrac: 0.5 },
+                      { key: "location", color: "150 60% 45%",  label: "Locations", side: "right" as const, yFrac: 0.5 },
+                      { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left" as const,  yFrac: 0.2 },
+                    ];
+                    return zoneConnectors.map((port, i) => {
+                      const portColor = `hsl(${port.color})`;
+                      const yPos = b.h * port.yFrac;
+                      const isLeft = port.side === "left";
+                      return (
+                        <TooltipProvider key={port.key} delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="absolute z-30 w-[16px] h-[16px] rounded-full border-[3px] bg-card hover:scale-125 transition-all cursor-crosshair"
+                                style={{
+                                  borderColor: portColor,
+                                  [isLeft ? "left" : "right"]: -8,
+                                  top: yPos - 8,
+                                }}
+                                onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
+                                onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
+                              >
+                                <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: portColor }} />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side={isLeft ? "left" : "right"} className="text-[10px] py-0.5 px-1.5">{port.label}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    });
+                  })()}
                   {/* Label */}
                   <div
                     className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
