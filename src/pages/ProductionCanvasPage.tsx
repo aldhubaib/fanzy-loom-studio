@@ -1014,8 +1014,8 @@ export default function ProductionCanvasPage() {
 
             {/* Connection lines */}
             <svg
-              className="absolute pointer-events-none overflow-visible"
-              style={{ left: -2500, top: -2500, width: 10000, height: 10000 }}
+              className="absolute pointer-events-none overflow-visible z-10"
+              style={{ left: -2500, top: -2500, width: 10000, height: 10000, position: "absolute" }}
               viewBox="-2500 -2500 10000 10000"
             >
               {connectors.map(c => {
