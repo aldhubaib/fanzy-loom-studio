@@ -263,7 +263,7 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                               : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
                           )}
                         >
-                          {isDefined ? charData.initials : <UserCircle className="w-4 h-4" />}
+                          {isDefined ? charData.initials : <UserCircle className="w-3 h-3" />}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
