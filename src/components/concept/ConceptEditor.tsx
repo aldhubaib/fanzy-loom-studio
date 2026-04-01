@@ -321,45 +321,21 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           </div>
         </motion.div>
 
-        {/* Generated Concept */}
+        {/* Continue button */}
         {conceptGenerated && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-10 space-y-6 border-t border-border pt-8"
+            className="mt-10 flex justify-end"
           >
-            {/* Synopsis — collapsible */}
-            <div>
-              <button
-                onClick={() => setSynopsisOpen(!synopsisOpen)}
-                className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2"
-              >
-                Synopsis
-                <ChevronDown className={cn("w-3 h-3 transition-transform", synopsisOpen && "rotate-180")} />
-              </button>
-              {synopsisOpen && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                  <textarea
-                    value={synopsis}
-                    onChange={(e) => setSynopsis(e.target.value)}
-                    rows={6}
-                    className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-sm leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
-                  />
-                </motion.div>
-              )}
-            </div>
-
-            {/* Continue button */}
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={() => navigate(`/project/${projectId}/script`)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 h-12 text-base font-semibold"
-              >
-                Continue to Script
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </div>
+            <Button
+              onClick={() => navigate(`/project/${projectId}/script`)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 h-12 text-base font-semibold"
+            >
+              Continue to Script
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </motion.div>
         )}
       </div>
