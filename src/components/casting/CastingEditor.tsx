@@ -903,7 +903,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.03, y: -4 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => setSelectedCharacterId(char.id)}
+                onClick={(e) => { e.stopPropagation(); setSelectedCharacterId(char.id); }}
                 className={cn(
                   "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
                   selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
