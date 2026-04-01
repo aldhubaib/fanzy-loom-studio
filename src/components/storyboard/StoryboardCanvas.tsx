@@ -405,6 +405,7 @@ export function StoryboardCanvas() {
           tool === "hand" || panning ? "cursor-grab" : "cursor-default",
           panning && "cursor-grabbing",
         )}
+        onContextMenu={(e) => e.preventDefault()}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
