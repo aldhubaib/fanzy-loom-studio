@@ -216,8 +216,21 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             />
           </div>
 
+          {/* Surprise Me */}
+          <div className="mt-4">
+            <Button
+              onClick={handleSurpriseMe}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground gap-2"
+            >
+              <Dices className="w-3.5 h-3.5" />
+              Surprise Me
+            </Button>
+          </div>
+
           {/* Compact picker buttons */}
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} />
             <PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} />
             <PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => setSettingOpen(true)} />
@@ -234,22 +247,14 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <ListPickerDialog open={audienceOpen} onOpenChange={setAudienceOpen} title="Choose Audience" items={audiences} selected={audience} onSelect={setAudience} />
           <ListPickerDialog open={formatOpen} onOpenChange={setFormatOpen} title="Choose Format" items={formats} selected={format} onSelect={setFormat} />
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3 mt-8">
+          {/* Continue button */}
+          <div className="flex items-center mt-8">
             <Button
               onClick={() => navigate(`/project/${projectId}/script`)}
               className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11 text-base font-semibold"
             >
               Continue to Script
               <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={handleSurpriseMe}
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-2 px-6"
-            >
-              <Dices className="w-4 h-4" />
-              Surprise Me
             </Button>
           </div>
         </motion.div>
