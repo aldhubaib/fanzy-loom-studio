@@ -467,6 +467,7 @@ export default function ProductionCanvasPage() {
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
   const [locationNodes, setLocationNodes] = useState<LocationNode[]>(initialLocationNodes);
+  const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(initialScriptNodes);
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
