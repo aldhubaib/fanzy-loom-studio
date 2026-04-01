@@ -643,14 +643,80 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Info */}
-                <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden">
+                <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                   </div>
+
+                  {/* Actors */}
+                  <div className="flex items-center gap-1">
+                    <TooltipProvider delayDuration={200}>
+                      {frame.actors.map(actorId => {
+                        const actor = actorRoster.find(a => a.id === actorId);
+                        if (!actor) return null;
+                        return (
+                          <Tooltip key={actor.id}>
+                            <TooltipTrigger asChild>
+                              <div className="relative group/actor w-6 h-6 rounded-full overflow-hidden border-[1.5px] border-border hover:border-primary transition-colors cursor-pointer">
+                                <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
+                                <button
+                                  className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFrames(prev => prev.map(f =>
+                                      f.id === frame.id ? { ...f, actors: f.actors.filter(a => a !== actorId) } : f
+                                    ));
+                                  }}
+                                >
+                                  <X className="w-2.5 h-2.5 text-destructive" />
+                                </button>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                    </TooltipProvider>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="w-5 h-5 rounded-full border border-dashed border-muted-foreground/40 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:border-foreground/60 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <UserPlus className="w-2.5 h-2.5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-2" side="bottom" align="start" onMouseDown={(e) => e.stopPropagation()}>
+                        <p className="text-[10px] text-muted-foreground font-semibold mb-1.5 px-1">ASSIGN ACTOR</p>
+                        {actorRoster
+                          .filter(a => !frame.actors.includes(a.id))
+                          .map(actor => (
+                            <button
+                              key={actor.id}
+                              className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFrames(prev => prev.map(f =>
+                                  f.id === frame.id ? { ...f, actors: [...f.actors, actor.id] } : f
+                                ));
+                              }}
+                            >
+                              <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
+                              <span>{actor.name}</span>
+                            </button>
+                          ))}
+                        {actorRoster.filter(a => !frame.actors.includes(a.id)).length === 0 && (
+                          <p className="text-[10px] text-muted-foreground px-1 py-1">All actors assigned</p>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
                     {frame.description}
                   </p>
+
                   {/* Incoming connection thumbnails */}
                   {(() => {
                     const incoming = connections.filter(c => c.to === frame.id);
@@ -679,76 +745,6 @@ export function StoryboardCanvas() {
                       </div>
                     );
                   })()}
-                </div>
-
-                {/* Actor strip below card */}
-                <div
-                  className="absolute flex items-center gap-1 pt-1.5"
-                  style={{ top: "100%", left: 0 }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <TooltipProvider delayDuration={200}>
-                    {frame.actors.map(actorId => {
-                      const actor = actorRoster.find(a => a.id === actorId);
-                      if (!actor) return null;
-                      return (
-                        <Tooltip key={actor.id}>
-                          <TooltipTrigger asChild>
-                            <div className="relative group/actor w-7 h-7 rounded-full overflow-hidden border-2 border-border hover:border-primary transition-colors cursor-pointer">
-                              <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
-                              <button
-                                className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setFrames(prev => prev.map(f =>
-                                    f.id === frame.id ? { ...f, actors: f.actors.filter(a => a !== actorId) } : f
-                                  ));
-                                }}
-                              >
-                                <X className="w-3 h-3 text-destructive" />
-                              </button>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </TooltipProvider>
-
-                  {/* Add actor button */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        className="w-6 h-6 rounded-full border border-dashed border-muted-foreground/40 flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:border-foreground/60 transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <UserPlus className="w-3 h-3" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-40 p-2" side="bottom" align="start" onMouseDown={(e) => e.stopPropagation()}>
-                      <p className="text-[10px] text-muted-foreground font-semibold mb-1.5 px-1">ASSIGN ACTOR</p>
-                      {actorRoster
-                        .filter(a => !frame.actors.includes(a.id))
-                        .map(actor => (
-                          <button
-                            key={actor.id}
-                            className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFrames(prev => prev.map(f =>
-                                f.id === frame.id ? { ...f, actors: [...f.actors, actor.id] } : f
-                              ));
-                            }}
-                          >
-                            <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
-                            <span>{actor.name}</span>
-                          </button>
-                        ))}
-                      {actorRoster.filter(a => !frame.actors.includes(a.id)).length === 0 && (
-                        <p className="text-[10px] text-muted-foreground px-1 py-1">All actors assigned</p>
-                      )}
-                    </PopoverContent>
-                  </Popover>
                 </div>
               </div>
             </FrameContextMenu>
