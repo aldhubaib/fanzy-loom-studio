@@ -404,8 +404,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         {/* Location */}
         <PickerButton
           label="Location"
-          value={locationOptions.find(l => l.value === location)?.label || ""}
-          selectedImg={locationOptions.find(l => l.value === location)?.img}
+          value={[...locationOptions, ...customLocations].find(l => l.value === location)?.label || ""}
+          selectedImg={[...locationOptions, ...customLocations].find(l => l.value === location)?.img}
           icon={MapPin}
           onClick={() => setLocationOpen(true)}
         />
