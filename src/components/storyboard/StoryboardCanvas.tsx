@@ -281,7 +281,7 @@ export function StoryboardCanvas() {
       setCastNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
+  }, [panning, panStart, dragging, draggingNode, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
     setCtrlZooming(false);
