@@ -441,6 +441,7 @@ export default function ProductionCanvasPage() {
   const { projectId } = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [actors, setActors] = useState<Actor[]>(actorRoster);
   const [zones, setZones] = useState<Zone[]>(initialZones);
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
