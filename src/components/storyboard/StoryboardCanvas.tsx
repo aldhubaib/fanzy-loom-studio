@@ -478,14 +478,15 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
-    const f = frames.find(fr => fr.id === frameId);
-    if (!f) return { x: 0, y: 0 };
-    return {
-      x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + PORT_Y,
-    };
-  }, [frames]);
+  const getPortPos = useCallback((nodeId: string, side: "left" | "right") => {
+    const f = frames.find(fr => fr.id === nodeId);
+    if (f) return { x: side === "right" ? f.x + FRAME_W : f.x, y: f.y + PORT_Y };
+    const cn = castNodes.find(n => n.id === nodeId);
+    if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
+    const ln = locationNodes.find(n => n.id === nodeId);
+    if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
+    return { x: 0, y: 0 };
+  }, [frames, castNodes, locationNodes]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
