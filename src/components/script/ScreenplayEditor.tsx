@@ -371,12 +371,17 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                                 <UserCircle className="w-3 h-3" />
                               )}
                             </button>
-                            </button>
                           </PopoverTrigger>
                           <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
                             {isDefined ? (
                               <div className="flex items-center gap-3">
-                                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br", charData.color, "text-foreground")}>{charData.initials}</div>
+                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                  {charData.photo ? (
+                                    <img src={charData.photo} alt={el.text} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className={cn("w-full h-full flex items-center justify-center text-sm font-bold bg-gradient-to-br", charData.color, "text-foreground")}>{charData.initials}</div>
+                                  )}
+                                </div>
                                 <div>
                                   <p className="text-sm font-semibold text-foreground">{el.text}</p>
                                   <p className="text-xs text-muted-foreground">Defined character</p>
