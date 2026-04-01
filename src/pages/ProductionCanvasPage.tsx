@@ -352,7 +352,7 @@ function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
               <button key={actor.id} onClick={() => toggleActor(actor.id)}
                 className={cn("flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs transition-all",
                   isIn ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground/60")}>
-                <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
+                <img src={actor.portrait} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
                 <span>{actor.name}</span>
               </button>
             );
@@ -378,7 +378,7 @@ function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl overflow-hidden border border-border bg-secondary">
-        <img src={actor.avatar} alt={actor.name} className="w-full object-cover max-h-[240px]" />
+        <img src={actor.portrait} alt={actor.name} className="w-full object-cover max-h-[240px]" />
       </div>
       <div>
         <h3 className="text-lg font-bold text-foreground">{actor.name}</h3>
@@ -857,7 +857,7 @@ export default function ProductionCanvasPage() {
                         if (!a) return null;
                         return (
                           <Tooltip key={a.id}><TooltipTrigger asChild>
-                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.avatar} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
+                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.portrait} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
                           </TooltipTrigger><TooltipContent side="bottom" className="text-xs">{a.name}</TooltipContent></Tooltip>
                         );
                       })}
@@ -890,7 +890,7 @@ export default function ProductionCanvasPage() {
                     onClick={() => { setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
                     <X className="w-3 h-3" />
                   </button>
-                  <img src={actor.avatar} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
+                  <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
                   <div className="p-2">
                     <p className="text-xs font-bold text-foreground">{actor.name}</p>
                     <p className="text-[10px] text-muted-foreground">{actor.role}</p>
@@ -969,7 +969,7 @@ export default function ProductionCanvasPage() {
                     setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY, zoneId: castPickerPos.zoneId }]);
                     setCastPickerPos(null);
                   }}>
-                  <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
+                  <img src={actor.portrait} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
                   <span>{actor.name}</span>
                 </button>
               ))}
