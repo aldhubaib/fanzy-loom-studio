@@ -7,21 +7,64 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
+// Genre images
+import genreNoir from "@/assets/genres/noir.jpg";
+import genreScifi from "@/assets/genres/scifi.jpg";
+import genreDrama from "@/assets/genres/drama.jpg";
+import genreHorror from "@/assets/genres/horror.jpg";
+import genreComedy from "@/assets/genres/comedy.jpg";
+import genreAction from "@/assets/genres/action.jpg";
+import genreFantasy from "@/assets/genres/fantasy.jpg";
+import genreThriller from "@/assets/genres/thriller.jpg";
+import genreWestern from "@/assets/genres/western.jpg";
+import genreCyberpunk from "@/assets/genres/cyberpunk.jpg";
+import genreDocumentary from "@/assets/genres/documentary.jpg";
+import genreAnimation from "@/assets/genres/animation.jpg";
+
+// Tone images
+import toneDark from "@/assets/tones/dark.jpg";
+import toneLight from "@/assets/tones/light.jpg";
+import toneTense from "@/assets/tones/tense.jpg";
+import toneEmotional from "@/assets/tones/emotional.jpg";
+import toneFunny from "@/assets/tones/funny.jpg";
+import toneEpic from "@/assets/tones/epic.jpg";
+import toneIntimate from "@/assets/tones/intimate.jpg";
+import toneSurreal from "@/assets/tones/surreal.jpg";
+
 const genres = [
-  "Noir", "Sci-Fi", "Drama", "Horror", "Comedy",
-  "Action", "Fantasy", "Thriller", "Western", "Cyberpunk",
-  "Documentary", "Animation",
+  { label: "Noir", img: genreNoir },
+  { label: "Sci-Fi", img: genreScifi },
+  { label: "Drama", img: genreDrama },
+  { label: "Horror", img: genreHorror },
+  { label: "Comedy", img: genreComedy },
+  { label: "Action", img: genreAction },
+  { label: "Fantasy", img: genreFantasy },
+  { label: "Thriller", img: genreThriller },
+  { label: "Western", img: genreWestern },
+  { label: "Cyberpunk", img: genreCyberpunk },
+  { label: "Documentary", img: genreDocumentary },
+  { label: "Animation", img: genreAnimation },
 ];
-const tones = ["Dark", "Light", "Tense", "Emotional", "Funny", "Epic", "Intimate", "Surreal"];
+
+const tones = [
+  { label: "Dark", img: toneDark },
+  { label: "Light", img: toneLight },
+  { label: "Tense", img: toneTense },
+  { label: "Emotional", img: toneEmotional },
+  { label: "Funny", img: toneFunny },
+  { label: "Epic", img: toneEpic },
+  { label: "Intimate", img: toneIntimate },
+  { label: "Surreal", img: toneSurreal },
+];
+
 const durations = [
-  { label: "Short", detail: "~5 min" },
-  { label: "Medium", detail: "~15 min" },
-  { label: "Feature", detail: "~45 min" },
+  { label: "Short", detail: "~5 min", emoji: "⚡" },
+  { label: "Medium", detail: "~15 min", emoji: "🎬" },
+  { label: "Feature", detail: "~45 min", emoji: "🎥" },
 ];
 
 const pipelineSteps = ["Concept", "Script", "Storyboard", "Casting", "Locations", "Generation", "Timeline", "Export"];
 
-// Mock data for The Last Deal
 const mockConcept = {
   title: "The Last Deal",
   idea: "A private detective in a rain-soaked city takes a missing person case from a mysterious woman. The case is not what it seems.",
@@ -45,6 +88,47 @@ interface ConceptEditorProps {
   isNewProject?: boolean;
 }
 
+// Visual card component for genre/tone
+function VisualCard({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "relative group rounded-xl overflow-hidden transition-all duration-200",
+        "w-[100px] h-[72px] sm:w-[120px] sm:h-[80px]",
+        selected
+          ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
+          : "hover:scale-105 hover:ring-1 hover:ring-border"
+      )}
+    >
+      <img
+        src={img}
+        alt={label}
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+      {/* Gradient overlay */}
+      <div className={cn(
+        "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent",
+        selected && "from-primary/40 via-transparent"
+      )} />
+      {/* Label */}
+      <span className={cn(
+        "absolute bottom-1.5 left-2 text-[11px] font-semibold",
+        selected ? "text-primary" : "text-white/90"
+      )}>
+        {label}
+      </span>
+      {/* Check mark */}
+      {selected && (
+        <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="hsl(var(--primary-foreground))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      )}
+    </button>
+  );
+}
+
 export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const navigate = useNavigate();
   const isMockProject = projectId === "1";
@@ -63,7 +147,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [visualStyle, setVisualStyle] = useState(isMockProject ? mockConcept.visualStyle : "");
 
   const handleGenerate = () => {
-    // Mock: fill with sample data
     if (!title) setTitle("Untitled Film");
     setConceptGenerated(true);
     if (!logline) setLogline("A compelling story unfolds in unexpected ways...");
@@ -97,7 +180,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-3xl mx-auto px-8 py-10">
-        {/* Top Section — Film Concept */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,7 +194,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           />
 
           {/* Idea textarea */}
-          <div className="rounded-lg bg-[hsl(240,5%,11%)] border border-border p-1">
+          <div className="rounded-lg bg-card border border-border p-1">
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
@@ -122,66 +204,60 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             />
           </div>
 
-          {/* Pills */}
-          <div className="mt-6 space-y-4">
+          {/* Visual selectors */}
+          <div className="mt-8 space-y-6">
             {/* Genre */}
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Genre</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Genre</label>
+              <div className="flex flex-wrap gap-2.5">
                 {genres.map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setGenre(genre === g ? "" : g)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                      genre === g
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                    )}
-                  >
-                    {g}
-                  </button>
+                  <VisualCard
+                    key={g.label}
+                    label={g.label}
+                    img={g.img}
+                    selected={genre === g.label}
+                    onClick={() => setGenre(genre === g.label ? "" : g.label)}
+                  />
                 ))}
               </div>
             </div>
 
             {/* Tone */}
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Tone</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Tone</label>
+              <div className="flex flex-wrap gap-2.5">
                 {tones.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTone(tone === t ? "" : t)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                      tone === t
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                    )}
-                  >
-                    {t}
-                  </button>
+                  <VisualCard
+                    key={t.label}
+                    label={t.label}
+                    img={t.img}
+                    selected={tone === t.label}
+                    onClick={() => setTone(tone === t.label ? "" : t.label)}
+                  />
                 ))}
               </div>
             </div>
 
-            {/* Duration */}
+            {/* Duration — kept as styled cards without images */}
             <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Duration</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Duration</label>
+              <div className="flex flex-wrap gap-3">
                 {durations.map((d) => (
                   <button
                     key={d.label}
                     onClick={() => setDuration(duration === d.label ? "" : d.label)}
                     className={cn(
-                      "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                      "flex items-center gap-3 px-5 py-3 rounded-xl border transition-all duration-200",
                       duration === d.label
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
                     )}
                   >
-                    {d.label} <span className="opacity-60">({d.detail})</span>
+                    <span className="text-xl">{d.emoji}</span>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold">{d.label}</p>
+                      <p className="text-[11px] opacity-70">{d.detail}</p>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -223,7 +299,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
                 value={logline}
                 onChange={(e) => setLogline(e.target.value)}
                 rows={2}
-                className="w-full bg-[hsl(240,5%,11%)] border border-border rounded-lg p-4 text-foreground text-base leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
+                className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-base leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -234,7 +310,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
                 value={synopsis}
                 onChange={(e) => setSynopsis(e.target.value)}
                 rows={8}
-                className="w-full bg-[hsl(240,5%,11%)] border border-border rounded-lg p-4 text-foreground text-sm leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
+                className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-sm leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -275,7 +351,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
                 value={visualStyle}
                 onChange={(e) => setVisualStyle(e.target.value)}
                 rows={2}
-                className="w-full bg-[hsl(240,5%,11%)] border border-border rounded-lg p-4 text-foreground text-sm leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
+                className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-sm leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -296,9 +372,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
               {pipelineSteps.map((step, i) => (
                 <span key={step} className="flex items-center gap-2">
                   {i > 0 && <span>→</span>}
-                  <span className={cn(
-                    i === 0 ? "text-primary font-semibold" : ""
-                  )}>
+                  <span className={cn(i === 0 ? "text-primary font-semibold" : "")}>
                     {i === 0 ? "Concept ✓" : step}
                   </span>
                 </span>
