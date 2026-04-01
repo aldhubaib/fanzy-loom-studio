@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Sparkles, Dices, ArrowRight, Plus, ChevronDown,
+  Dices, ArrowRight, Plus, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -165,7 +165,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
   const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
   const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
-  const [conceptGenerated, setConceptGenerated] = useState(isMockProject);
+  
 
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
@@ -173,11 +173,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
-
-  const handleGenerate = () => {
-    if (!title) setTitle("Untitled Film");
-    setConceptGenerated(true);
-  };
 
   const handleSurpriseMe = () => {
     setTitle("Echoes of Tomorrow");
@@ -188,7 +183,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
     setSetting("Space");
     setAudience("General");
     setFormat("Film");
-    setConceptGenerated(true);
   };
 
   const selectedAudience = audiences.find(a => a.label === audience);
@@ -242,11 +236,11 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           {/* Action buttons */}
           <div className="flex items-center gap-3 mt-8">
             <Button
-              onClick={handleGenerate}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 px-6"
+              onClick={() => navigate(`/project/${projectId}/script`)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11 text-base font-semibold"
             >
-              <Sparkles className="w-4 h-4" />
-              Generate Concept
+              Continue to Script
+              <ArrowRight className="w-4 h-4" />
             </Button>
             <Button
               onClick={handleSurpriseMe}
@@ -259,23 +253,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           </div>
         </motion.div>
 
-        {/* Continue button */}
-        {conceptGenerated && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-10 flex justify-end"
-          >
-            <Button
-              onClick={() => navigate(`/project/${projectId}/script`)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 h-12 text-base font-semibold"
-            >
-              Continue to Script
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </motion.div>
-        )}
       </div>
     </div>
   );
