@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sparkles, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface NewProjectModalProps {
 }
 
 export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [genre, setGenre] = useState("");
   const [aiMode, setAiMode] = useState(false);
@@ -26,6 +28,8 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
     setGenre("");
     setAiMode(false);
     setAiPrompt("");
+    // Navigate to new project concept page (using a mock new id)
+    navigate("/project/new/concept");
   };
 
   return (

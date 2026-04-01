@@ -1,5 +1,5 @@
 import {
-  FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download,
+  Lightbulb, FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download,
   Search, Settings, FolderOpen, ArrowLeft
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -12,6 +12,7 @@ import {
 import { mockProjects } from "@/data/mockProjects";
 
 const pipelineStages = [
+  { title: "Concept", slug: "concept", icon: Lightbulb },
   { title: "Script", slug: "script", icon: FileText },
   { title: "Storyboard", slug: "storyboard", icon: LayoutGrid },
   { title: "Casting", slug: "casting", icon: Users },
@@ -85,7 +86,7 @@ export function FanzySidebar() {
                 {recentProjects.map((project) => (
                   <SidebarMenuItem key={project.name}>
                     <SidebarMenuButton asChild className="hover:bg-sidebar-accent/50 cursor-pointer">
-                      <Link to={`/project/${project.id}/script`}>
+                      <Link to={`/project/${project.id}/concept`}>
                         <div className={`w-5 h-5 rounded bg-gradient-to-br ${project.color} flex-shrink-0`} />
                         <span className="text-sm truncate">{project.name}</span>
                       </Link>
