@@ -940,6 +940,46 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
           />
         )}
       </AnimatePresence>
+
+      {/* Cast gallery lightbox */}
+      {castLightbox && (() => {
+        const char = characters.find(c => c.id === castLightbox.charId);
+        if (!char || char.generatedPortraits.length === 0) return null;
+        const portraits = char.generatedPortraits;
+        const current = portraits[castLightbox.index];
+        const currentIdx = castLightbox.index;
+        return (
+          <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center" onClick={() => setCastLightbox(null)}>
+            <button className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={() => setCastLightbox(null)}>
+              <X className="w-5 h-5 text-white" />
+            </button>
+            {currentIdx > 0 && (
+              <button className="absolute left-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setCastLightbox({ ...castLightbox, index: currentIdx - 1 }); }}>
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+            )}
+            <div className="max-w-2xl max-h-[80vh]" onClick={e => e.stopPropagation()}>
+              <img src={current.src} alt={current.description} className="max-w-full max-h-[80vh] object-contain rounded-lg" />
+              <div className="flex items-center justify-between mt-4 px-2">
+                <p className="text-sm text-white/70">{current.description}</p>
+                <Button size="sm" onClick={() => {
+                  setCharacters(prev => prev.map(c =>
+                    c.id === char.id ? { ...c, portrait: current.src, selectedPortraitId: current.id } : c
+                  ));
+                  setCastLightbox(null);
+                }} className="gap-1.5">
+                  <Check className="w-3.5 h-3.5" /> Use This
+                </Button>
+              </div>
+            </div>
+            {currentIdx < portraits.length - 1 && (
+              <button className="absolute right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setCastLightbox({ ...castLightbox, index: currentIdx + 1 }); }}>
+                <ChevronRight className="w-5 h-5 text-white" />
+              </button>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
