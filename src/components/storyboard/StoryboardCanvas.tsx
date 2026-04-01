@@ -258,16 +258,50 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Connector lines between frames
-  const connectors = CONNECTOR_PAIRS.map(([a, b]) => {
-    if (!frames[a] || !frames[b]) return null;
-    const fa = frames[a], fb = frames[b];
-    const x1 = fa.x + FRAME_W;
-    const y1 = fa.y + FRAME_H / 2;
-    const x2 = fb.x;
-    const y2 = fb.y + FRAME_H / 2;
-    return { x1, y1, x2, y2, id: `${a}-${b}` };
-  }).filter(Boolean);
+  // Helper to get port positions
+  const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
+    const f = frames.find(fr => fr.id === frameId);
+    if (!f) return { x: 0, y: 0 };
+    return {
+      x: side === "right" ? f.x + FRAME_W : f.x,
+      y: f.y + FRAME_H / 2,
+    };
+  }, [frames]);
+
+  // Connector lines from connections state
+  const connectors = connections.map(c => {
+    const p1 = getPortPos(c.from, "right");
+    const p2 = getPortPos(c.to, "left");
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, id: `${c.from}-${c.to}`, from: c.from, to: c.to };
+  });
+
+  // Start connecting from a port
+  const startConnect = useCallback((e: React.MouseEvent, frameId: string) => {
+    e.stopPropagation();
+    setConnectingFrom(frameId);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setConnectingMouse({
+      x: (e.clientX - rect.left - pan.x) / zoom,
+      y: (e.clientY - rect.top - pan.y) / zoom,
+    });
+  }, [pan, zoom]);
+
+  const endConnect = useCallback((frameId: string) => {
+    if (connectingFrom && connectingFrom !== frameId) {
+      // Don't duplicate
+      const exists = connections.some(c => c.from === connectingFrom && c.to === frameId);
+      if (!exists) {
+        setConnections(prev => [...prev, { from: connectingFrom, to: frameId }]);
+      }
+    }
+    setConnectingFrom(null);
+  }, [connectingFrom, connections]);
+
+  // Delete a connection
+  const deleteConnection = useCallback((from: string, to: string) => {
+    setConnections(prev => prev.filter(c => !(c.from === from && c.to === to)));
+  }, []);
 
   return (
     <div className="h-full w-full relative bg-background overflow-hidden">
