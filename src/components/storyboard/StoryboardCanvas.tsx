@@ -591,7 +591,16 @@ export function StoryboardCanvas() {
           </svg>
 
           {/* Frames */}
-          {frames.map((frame, idx) => (
+          {(() => {
+            // Compute position-based scene numbers (left-to-right, top-to-bottom)
+            const sorted = [...frames].sort((a, b) => {
+              const rowA = Math.round(a.y / 200);
+              const rowB = Math.round(b.y / 200);
+              return rowA !== rowB ? rowA - rowB : a.x - b.x;
+            });
+            const orderMap = new Map(sorted.map((f, i) => [f.id, i + 1]));
+            return frames.map((frame, idx) => {
+            const sceneNumber = orderMap.get(frame.id) ?? idx + 1;
             <FrameContextMenu
               key={frame.id}
               frameIndex={idx}
