@@ -204,7 +204,7 @@ const sharedOptions: Partial<Record<AttributeKey, VisualOption[]>> = {
   gender: [
     { label: "Male", image: genderMale },
     { label: "Female", image: genderFemale },
-    { label: "Non-binary", image: genderNonbinary },
+    
   ],
   ethnicity: [
     { label: "Caucasian", image: ethCaucasian },
