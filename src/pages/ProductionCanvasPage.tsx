@@ -488,9 +488,9 @@ export default function ProductionCanvasPage() {
   // Compute zone bounds
   const zoneBounds = useMemo(() => {
     const map: Record<string, { x: number; y: number; w: number; h: number }> = {};
-    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes); });
+    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes); });
     return map;
-  }, [zones, frames, castNodes, locationNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes]);
 
   // Get actors connected to a shots zone via zone connections
   const getConnectedActors = useCallback((shotsZoneId: string): Actor[] => {
