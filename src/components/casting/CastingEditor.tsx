@@ -810,6 +810,19 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
     setSelectedCharacterId(null);
   }, []);
 
+  const swapCharacters = useCallback((fromId: string, toId: string) => {
+    setCharacters(prev => {
+      const fromChar = prev.find(c => c.id === fromId);
+      const toChar = prev.find(c => c.id === toId);
+      if (!fromChar || !toChar) return prev;
+      return prev.map(c => {
+        if (c.id === fromId) return { ...toChar, id: fromId };
+        if (c.id === toId) return { ...fromChar, id: toId };
+        return c;
+      });
+    });
+  }, []);
+
   return (
     <div className="h-full overflow-auto pt-16">
       <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")}>
