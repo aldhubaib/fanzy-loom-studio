@@ -456,7 +456,7 @@ export function StoryboardCanvas() {
             {connectingFrom && (() => {
               const p = getPortPos(connectingFrom, "right");
               const dx = Math.abs(connectingMouse.x - p.x);
-              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
+              const curvature = Math.min(140, Math.max(18, dx * 0.35));
               return (
                 <path
                   d={`M ${p.x} ${p.y} C ${p.x + curvature} ${p.y}, ${connectingMouse.x - curvature} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
