@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -989,8 +990,16 @@ export default function ProductionCanvasPage() {
       </div>
 
       {/* Context-sensitive drawer */}
+      <AnimatePresence>
       {showDrawer && (
-        <div className="h-full border-l border-border bg-card flex flex-col animate-in slide-in-from-right duration-200 z-50 relative shrink-0" style={{ width: DRAWER_W }}>
+        <motion.div
+          initial={{ x: DRAWER_W, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: DRAWER_W, opacity: 0 }}
+          transition={{ type: "spring", damping: 26, stiffness: 300 }}
+          className="h-full border-l border-border bg-card flex flex-col z-50 relative shrink-0"
+          style={{ width: DRAWER_W }}
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
             <div className="flex items-center gap-2">
               {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
@@ -1029,8 +1038,9 @@ export default function ProductionCanvasPage() {
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }
