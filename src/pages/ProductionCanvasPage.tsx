@@ -483,7 +483,9 @@ export default function ProductionCanvasPage() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [tool, setTool] = useState<Tool>("select");
   const [dragging, setDragging] = useState<string | null>(null);
+  const [draggingZone, setDraggingZone] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [zoneDragStart, setZoneDragStart] = useState<{ x: number; y: number } | null>(null);
   const [panning, setPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [selected, setSelected] = useState<SelectedItem>(null);
