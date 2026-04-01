@@ -224,18 +224,6 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                     </button>
                   </div>
                 )}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                        showAI
-                          ? "bg-accent/15 text-accent"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                      )}
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      AI Assistant
-                    </button>
-                  </div>
-                )}
                 {focusMode && <div />}
               </div>
 
