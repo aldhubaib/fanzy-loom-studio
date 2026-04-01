@@ -536,98 +536,147 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
           />
 
 
-          <Separator />
-
-          {/* Attribute rows */}
-          <div className="space-y-2">
-            {attributeCategories.map(cat => (
-              <AttributeRow
-                key={cat.key}
-                label={cat.label}
-                value={character[cat.key] as string}
-                options={attrOptions[cat.key]}
-                onClick={() => setPickerOpen(cat.key)}
-              />
+          {/* Tabs: Build a Look / Custom */}
+          <div className="flex gap-2">
+            {(["build", "custom"] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setLookTab(tab)}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-xs font-medium border transition-all",
+                  lookTab === tab
+                    ? "border-primary text-primary bg-primary/10"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
+                )}
+              >
+                {tab === "build" ? "Build a Look" : "Custom"}
+              </button>
             ))}
           </div>
 
           <Separator />
 
-          {/* Portraits */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Portraits</h3>
-                <p className="text-[11px] text-muted-foreground">Generate & pick a portrait</p>
+          {lookTab === "build" ? (
+            <>
+              {/* Attribute rows */}
+              <div className="space-y-2">
+                {attributeCategories.map(cat => (
+                  <AttributeRow
+                    key={cat.key}
+                    label={cat.label}
+                    value={character[cat.key] as string}
+                    options={attrOptions[cat.key]}
+                    onClick={() => setPickerOpen(cat.key)}
+                  />
+                ))}
               </div>
-              <Button size="sm" className="gap-1.5 h-8">
-                <Sparkles className="w-3.5 h-3.5" />
-                Generate
-              </Button>
-            </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {character.generatedPortraits.map((p, idx) => {
-                const isActive = character.selectedPortraitId === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    className={cn(
-                      "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
-                      isActive
-                        ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
-                        : "hover:scale-[1.02] ring-1 ring-border"
-                    )}
-                    onClick={() => selectPortrait(p)}
-                  >
-                    <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
-                    {isActive && (
+              <Separator />
+
+              {/* Portraits */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Portraits</h3>
+                    <p className="text-[11px] text-muted-foreground">Generate & pick a portrait</p>
+                  </div>
+                  <Button size="sm" className="gap-1.5 h-8">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Generate
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {character.generatedPortraits.map((p, idx) => {
+                    const isActive = character.selectedPortraitId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        className={cn(
+                          "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
+                          isActive
+                            ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                            : "hover:scale-[1.02] ring-1 ring-border"
+                        )}
+                        onClick={() => selectPortrait(p)}
+                      >
+                        <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                        {isActive && (
+                          <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          </div>
+                        )}
+                        <button
+                          className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                        >
+                          <Expand className="w-2.5 h-2.5 text-white" />
+                        </button>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Custom tab — upload photos */
+            <div>
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold text-foreground">Custom Reference</h3>
+                <p className="text-[11px] text-muted-foreground">Upload your own photo references</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {customPortraits.map((src, idx) => (
+                  <div key={idx} className="relative rounded-lg overflow-hidden aspect-[3/4] group">
+                    <img src={src} alt={`Custom ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => {
+                        onChange({ ...character, portrait: src });
+                      }}
+                      className={cn(
+                        "absolute inset-0 bg-transparent transition-all",
+                        character.portrait === src && "ring-2 ring-primary ring-inset"
+                      )}
+                    />
+                    {character.portrait === src && (
                       <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                         <Check className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
                     <button
-                      className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                      onClick={() => setCustomPortraits(prev => prev.filter((_, i) => i !== idx))}
+                      className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Expand className="w-2.5 h-2.5 text-white" />
+                      <X className="w-3 h-3 text-white" />
                     </button>
-                  </button>
-                );
-              })}
-              {/* Upload custom reference */}
-              <label className="rounded-lg aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
-                <Upload className="w-5 h-5 text-muted-foreground mb-1" />
-                <span className="text-[9px] text-muted-foreground">Upload</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      const src = ev.target?.result as string;
-                      const newPortrait: GeneratedPortrait = {
-                        id: `custom-${Date.now()}`,
-                        src,
-                        description: "Custom upload",
-                      };
-                      onChange({
-                        ...character,
-                        generatedPortraits: [...character.generatedPortraits, newPortrait],
-                        portrait: src,
-                        selectedPortraitId: newPortrait.id,
+                  </div>
+                ))}
+                <label className="rounded-lg aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                  <Upload className="w-5 h-5 text-muted-foreground mb-1" />
+                  <span className="text-[9px] text-muted-foreground">Upload</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const src = ev.target?.result as string;
+                          setCustomPortraits(prev => [...prev, src]);
+                          onChange({ ...character, portrait: src });
+                        };
+                        reader.readAsDataURL(file);
                       });
-                    };
-                    reader.readAsDataURL(file);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
-          </div>
+          )}
 
           <Separator />
 
