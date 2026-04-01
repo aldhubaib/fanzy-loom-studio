@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
   Settings, Sparkles, Images, ChevronDown, ChevronUp, Check,
+  ChevronLeft, ChevronRight, Expand,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { FrameSettingsPanel } from "./FrameSettingsPanel";
@@ -138,6 +139,7 @@ export function StoryboardCanvas() {
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
   const [settingsFrame, setSettingsFrame] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ frameId: string; index: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -643,8 +645,6 @@ export function StoryboardCanvas() {
                   </Popover>
                 </div>
 
-
-
                 <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px] relative">
                   {frame.image ? (
                     <img
@@ -679,49 +679,47 @@ export function StoryboardCanvas() {
                 {/* Expandable gallery — horizontal scroll strip */}
                 {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
                   <div
-                    className="bg-secondary/80 px-2 py-2 flex gap-1.5 overflow-x-auto"
+                    className="bg-secondary/80 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto"
                     onMouseDown={(e) => e.stopPropagation()}
                     style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "thin" }}
                   >
+                    {/* Open gallery lightbox button */}
+                    <button
+                      className="flex-shrink-0 w-7 h-12 rounded bg-background/60 hover:bg-background/90 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const activeIdx = frame.generatedImages.findIndex(img => img.id === frame.selectedImageId);
+                        setLightbox({ frameId: frame.id, index: activeIdx >= 0 ? activeIdx : 0 });
+                      }}
+                      title="Open gallery"
+                    >
+                      <Expand className="w-3.5 h-3.5" />
+                    </button>
+
                     {frame.generatedImages.map(img => {
                       const isActive = frame.selectedImageId === img.id;
                       return (
-                        <div key={img.id} className="relative flex-shrink-0 w-16 h-12">
-                          <button
-                            className={`absolute inset-0 rounded overflow-hidden border-2 transition-all bg-card/40 ${
-                              isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFrames(prev => prev.map(f =>
-                                f.id === frame.id
-                                  ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
-                                  : f
-                              ));
-                            }}
-                          >
-                            <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
-                          </button>
-
-                          <button
-                            className="absolute top-0.5 left-0.5 z-10 w-4 h-4 rounded bg-background/85 text-foreground/80 hover:text-foreground hover:bg-background flex items-center justify-center"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(img.src, "_blank", "noopener,noreferrer");
-                            }}
-                            aria-label="Open image"
-                            title="Open full image"
-                          >
-                            <Maximize className="w-2.5 h-2.5" />
-                          </button>
-
+                        <button
+                          key={img.id}
+                          className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-16 h-12 bg-card/40 ${
+                            isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFrames(prev => prev.map(f =>
+                              f.id === frame.id
+                                ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
+                                : f
+                            ));
+                          }}
+                        >
+                          <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
                           {isActive && (
                             <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
                               <Check className="w-2 h-2 text-primary-foreground" />
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -893,6 +891,57 @@ export function StoryboardCanvas() {
             }}
             onClose={() => setSettingsFrame(null)}
           />
+        );
+      })()}
+
+      {/* Lightbox Gallery */}
+      {lightbox && (() => {
+        const frame = frames.find(f => f.id === lightbox.frameId);
+        if (!frame || frame.generatedImages.length === 0) return null;
+        const images = frame.generatedImages;
+        const current = images[lightbox.index];
+        const currentIdx = lightbox.index;
+        return (
+          <div className="fixed inset-0 z-[100] bg-black/90 flex" onClick={() => setLightbox(null)}>
+            <div className="flex-1 flex items-center justify-center relative" onClick={(e) => e.stopPropagation()}>
+              <button className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-background/20 hover:bg-background/40 text-foreground flex items-center justify-center transition-colors" onClick={() => setLightbox(null)}>
+                <X className="w-5 h-5" />
+              </button>
+              <div className="absolute top-4 left-4 bg-background/20 text-foreground text-sm font-bold px-3 py-1 rounded-lg">
+                {currentIdx + 1} / {images.length}
+              </div>
+              {currentIdx > 0 && (
+                <button className="absolute left-4 w-10 h-10 rounded-full bg-background/20 hover:bg-background/40 text-foreground flex items-center justify-center transition-colors" onClick={() => setLightbox({ ...lightbox, index: currentIdx - 1 })}>
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
+              <img src={current.src} alt={current.description} className="max-w-[80%] max-h-[85vh] object-contain rounded-lg" />
+              {currentIdx < images.length - 1 && (
+                <button className="absolute right-4 w-10 h-10 rounded-full bg-background/20 hover:bg-background/40 text-foreground flex items-center justify-center transition-colors" onClick={() => setLightbox({ ...lightbox, index: currentIdx + 1 })}>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/30 backdrop-blur-sm text-foreground text-xs px-4 py-2 rounded-lg max-w-md text-center">
+                {current.description}
+              </div>
+            </div>
+            <div className="w-[180px] bg-card/50 backdrop-blur-sm border-l border-border overflow-y-auto p-2 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+              {images.map((img, idx) => {
+                const isActive = idx === currentIdx;
+                const isSelected = frame.selectedImageId === img.id;
+                return (
+                  <button key={img.id} className={`relative rounded-lg overflow-hidden border-2 transition-all ${isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"}`} onClick={() => setLightbox({ ...lightbox, index: idx })}>
+                    <img src={img.src} alt={img.description} className="w-full aspect-video object-contain bg-secondary" />
+                    {isSelected && (
+                      <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         );
       })()}
 
