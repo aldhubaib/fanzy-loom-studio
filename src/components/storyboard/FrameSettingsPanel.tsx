@@ -114,7 +114,7 @@ function VisualOption({ label, img, selected, onClick }: { label: string; img: s
   );
 }
 
-export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: FrameSettingsPanelProps) {
+export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, onClose }: FrameSettingsPanelProps) {
   const [prompt, setPrompt] = useState(frame.description);
   const [scene, setScene] = useState(frame.scene);
   const [shot, setShot] = useState(frame.shot);
