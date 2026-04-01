@@ -353,59 +353,70 @@ export function StoryboardCanvas() {
 
           {/* Frames */}
           {frames.map((frame, idx) => (
-            <div
+            <FrameContextMenu
               key={frame.id}
-              className={cn(
-                "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
-                selectedFrame === frame.id
-                  ? "border-primary shadow-lg shadow-primary/20"
-                  : "border-border hover:border-muted-foreground/40",
-                dragging === frame.id && "opacity-90",
-              )}
-              style={{
-                left: frame.x,
-                top: frame.y,
-                width: FRAME_W,
-              }}
-              onMouseDown={(e) => startFrameDrag(e, frame)}
+              frameIndex={idx}
+              totalFrames={frames.length}
+              onMoveLeft={() => moveFrame(idx, idx - 1)}
+              onMoveRight={() => moveFrame(idx, idx + 1)}
+              onMoveToStart={() => moveFrame(idx, 0)}
+              onMoveToEnd={() => moveFrame(idx, frames.length - 1)}
+              onDuplicate={() => duplicateFrame(idx)}
+              onDelete={() => deleteFrame(idx)}
             >
-              {/* Frame number badge */}
-              <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                {idx + 1}
-              </div>
-              {/* Shot type badge */}
-              <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                {frame.shot}
-              </div>
-
-              {/* Image */}
-              <div className="w-full h-[150px] bg-secondary overflow-hidden">
-                {frame.image ? (
-                  <img
-                    src={frame.image}
-                    alt={frame.description}
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                    <Plus className="w-8 h-8" />
-                  </div>
+              <div
+                className={cn(
+                  "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
+                  selectedFrame === frame.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                  dragging === frame.id && "opacity-90",
                 )}
-              </div>
-
-              {/* Info */}
-              <div className="bg-card p-2.5 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
-                  <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
+                style={{
+                  left: frame.x,
+                  top: frame.y,
+                  width: FRAME_W,
+                }}
+                onMouseDown={(e) => startFrameDrag(e, frame)}
+              >
+                {/* Frame number badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {idx + 1}
                 </div>
-                <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
-                  {frame.description}
-                </p>
+                {/* Shot type badge */}
+                <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {frame.shot}
+                </div>
+
+                {/* Image */}
+                <div className="w-full h-[150px] bg-secondary overflow-hidden">
+                  {frame.image ? (
+                    <img
+                      src={frame.image}
+                      alt={frame.description}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                      <Plus className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="bg-card p-2.5 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
+                    <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
+                  </div>
+                  <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
+                    {frame.description}
+                  </p>
+                </div>
               </div>
-            </div>
+            </FrameContextMenu>
           ))}
         </div>
 
