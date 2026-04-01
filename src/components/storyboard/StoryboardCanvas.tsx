@@ -64,6 +64,7 @@ export function StoryboardCanvas() {
   const [ctrlZoomStartZoom, setCtrlZoomStartZoom] = useState(1);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
