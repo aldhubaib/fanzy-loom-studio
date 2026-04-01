@@ -1,7 +1,20 @@
 import React from "react";
 import { FormattingToolbar } from "./FormattingToolbar";
-import { List, Sparkles } from "lucide-react";
+import { List, Sparkles, ChevronDown, Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+const elementTypes = [
+  { id: "scene-heading", label: "Scene Heading", icon: Hash },
+  { id: "action", label: "Action", icon: AlignLeft },
+  { id: "character", label: "Character", icon: User },
+  { id: "dialogue", label: "Dialogue", icon: MessageSquare },
+  { id: "parenthetical", label: "Parenthetical", icon: Parentheses },
+  { id: "transition", label: "Transition", icon: ArrowRight },
+  { id: "note", label: "Note", icon: StickyNote },
+] as const;
 
 interface ScriptElement {
   type: "scene-heading" | "action" | "character" | "dialogue" | "parenthetical";
