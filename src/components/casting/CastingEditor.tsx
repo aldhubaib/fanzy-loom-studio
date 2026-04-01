@@ -647,140 +647,33 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               return (
                 <div className="space-y-2">
                   {appearances.map(app => {
-                    const isExpanded = expandedScene === app.frameId;
                     const currentWardrobe = sceneWardrobe[app.frameId] || character.clothing || "";
                     const wardrobeOpt = wardrobeOptions?.find(o => o.label === currentWardrobe);
                     return (
-                      <div key={app.frameId} className="rounded-xl border border-border bg-card overflow-hidden">
-                        <button
-                          onClick={() => setExpandedScene(isExpanded ? null : app.frameId)}
-                          className="flex items-center gap-3 w-full p-2 hover:bg-secondary/30 transition-colors text-left"
-                        >
-                          <img
-                            src={app.thumbnail}
-                            alt={app.scene}
-                            className="w-14 h-10 rounded-lg object-cover shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                      <button
+                        key={app.frameId}
+                        onClick={() => setExpandedScene(app.frameId)}
+                        className="flex items-center gap-3 w-full p-2 rounded-xl border border-border bg-card hover:border-muted-foreground/40 transition-all text-left"
+                      >
+                        <img
+                          src={app.thumbnail}
+                          alt={app.scene}
+                          className="w-14 h-10 rounded-lg object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {wardrobeOpt && (
-                              <img src={wardrobeOpt.image} alt={currentWardrobe} className="w-6 h-6 rounded object-cover" />
-                            )}
-                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
-                          </div>
-                        </button>
-
-                        {/* Expanded wardrobe picker */}
-                        {isExpanded && (
-                          <div className="px-2 pb-2 pt-1 border-t border-border bg-secondary/20">
-                            {/* Tabs */}
-                            <div className="flex gap-1.5 mb-2">
-                              {(["presets", "custom"] as const).map(tab => {
-                                const active = (wardrobeTab[app.frameId] || "presets") === tab;
-                                return (
-                                  <button
-                                    key={tab}
-                                    onClick={() => setWardrobeTab(prev => ({ ...prev, [app.frameId]: tab }))}
-                                    className={cn(
-                                      "px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider border transition-all",
-                                      active
-                                        ? "border-primary text-primary bg-primary/10"
-                                        : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
-                                    )}
-                                  >
-                                    {tab === "presets" ? "Presets" : "Custom"}
-                                  </button>
-                                );
-                              })}
-                            </div>
-
-                            {(wardrobeTab[app.frameId] || "presets") === "presets" ? (
-                              <>
-                                <div className="grid grid-cols-4 gap-1.5">
-                                  {wardrobeOptions?.map(opt => {
-                                    const isSelected = currentWardrobe === opt.label;
-                                    return (
-                                      <button
-                                        key={opt.label}
-                                        onClick={() => setSceneWardrobe(prev => ({ ...prev, [app.frameId]: opt.label }))}
-                                        className={cn(
-                                          "relative rounded-lg overflow-hidden aspect-[3/4] transition-all",
-                                          isSelected
-                                            ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
-                                            : "hover:ring-1 hover:ring-border"
-                                        )}
-                                      >
-                                        <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" draggable={false} />
-                                        <div className={cn("absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent", isSelected && "from-primary/30")} />
-                                        {isSelected && (
-                                          <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
-                                            <Check className="w-2 h-2 text-primary-foreground" />
-                                          </div>
-                                        )}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                                <p className={cn("text-[10px] text-center mt-1.5", currentWardrobe ? "text-primary font-medium" : "text-muted-foreground")}>
-                                  {currentWardrobe || "Choose wardrobe"}
-                                </p>
-                              </>
-                            ) : (
-                              <div>
-                                <div className="grid grid-cols-4 gap-1.5">
-                                  {(customWardrobeImages[app.frameId] || []).map((src, idx) => (
-                                    <div key={idx} className="relative rounded-lg overflow-hidden aspect-[3/4] group">
-                                      <img src={src} alt={`Custom ${idx + 1}`} className="w-full h-full object-cover" />
-                                      <button
-                                        onClick={() => setCustomWardrobeImages(prev => ({
-                                          ...prev,
-                                          [app.frameId]: (prev[app.frameId] || []).filter((_, i) => i !== idx)
-                                        }))}
-                                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        <X className="w-2.5 h-2.5 text-white" />
-                                      </button>
-                                    </div>
-                                  ))}
-                                  <label className="relative rounded-lg overflow-hidden aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
-                                    <Upload className="w-4 h-4 text-muted-foreground mb-1" />
-                                    <span className="text-[9px] text-muted-foreground">Upload</span>
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      multiple
-                                      className="hidden"
-                                      onChange={(e) => {
-                                        const files = Array.from(e.target.files || []);
-                                        files.forEach(file => {
-                                          const reader = new FileReader();
-                                          reader.onload = (ev) => {
-                                            setCustomWardrobeImages(prev => ({
-                                              ...prev,
-                                              [app.frameId]: [...(prev[app.frameId] || []), ev.target?.result as string]
-                                            }));
-                                          };
-                                          reader.readAsDataURL(file);
-                                        });
-                                        e.target.value = "";
-                                      }}
-                                    />
-                                  </label>
-                                </div>
-                                {(customWardrobeImages[app.frameId] || []).length === 0 && (
-                                  <p className="text-[10px] text-center mt-1.5 text-muted-foreground">Upload reference images</p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {wardrobeOpt && (
+                            <img src={wardrobeOpt.image} alt={currentWardrobe} className="w-6 h-6 rounded object-cover" />
+                          )}
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                      </button>
                     );
                   })}
                 </div>
