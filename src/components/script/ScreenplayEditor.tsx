@@ -97,106 +97,132 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
   const active = elementTypes.find((e) => e.id === activeElement) ?? elementTypes[0];
   const ActiveIcon = active.icon;
 
+  // Smart sticky header: hide on scroll down, show on scroll up
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const lastScrollY = React.useRef(0);
+  const [headerVisible, setHeaderVisible] = React.useState(true);
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const y = el.scrollTop;
+      if (y < 80) {
+        setHeaderVisible(true);
+      } else if (y < lastScrollY.current) {
+        setHeaderVisible(true);
+      } else if (y > lastScrollY.current + 4) {
+        setHeaderVisible(false);
+      }
+      lastScrollY.current = y;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
   let currentScene = 0;
 
   return (
     <div className="flex-1 min-w-0 flex flex-col h-full bg-background">
-      {/* Title area with panel toggles */}
-      <div className="px-16 pt-16 pb-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            {/* Panel toggle buttons */}
-            {!focusMode && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onToggleScenes}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    showScenes
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  )}
-                >
-                  <List className="w-3.5 h-3.5" />
-                  Scenes
-                </button>
-
-                {/* Element type dropdown — same style */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+      {/* Single scrollable area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        {/* Sticky header — hides on scroll down, shows on scroll up */}
+        <div
+          className={cn(
+            "sticky top-0 z-20 bg-background/95 backdrop-blur-sm transition-transform duration-300 border-b border-transparent",
+            !headerVisible && "-translate-y-full"
+          )}
+        >
+          <div className="px-8 sm:px-16 pt-6 pb-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                {!focusMode && (
+                  <div className="flex items-center gap-2">
                     <button
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      onClick={onToggleScenes}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        showScenes
+                          ? "bg-primary/15 text-primary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      )}
                     >
-                      <ActiveIcon className="w-3.5 h-3.5" />
-                      {active.label}
-                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                      <List className="w-3.5 h-3.5" />
+                      Scenes
                     </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56 bg-popover border-border">
-                    {elementTypes.map((el) => {
-                      const Icon = el.icon;
-                      const isActive = el.id === activeElement;
-                      return (
-                        <DropdownMenuItem
-                          key={el.id}
-                          onClick={() => setActiveElement(el.id as any)}
-                          className={cn(
-                            "flex items-center gap-2.5 px-3 py-2 cursor-pointer",
-                            isActive && "bg-primary/10"
-                          )}
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                         >
-                          <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
-                          <span className={cn("text-xs font-medium", isActive ? "text-primary" : "text-foreground")}>
-                            {el.label}
-                          </span>
-                          {isActive && <Check className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                          <ActiveIcon className="w-3.5 h-3.5" />
+                          {active.label}
+                          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56 bg-popover border-border">
+                        {elementTypes.map((el) => {
+                          const Icon = el.icon;
+                          const isActive = el.id === activeElement;
+                          return (
+                            <DropdownMenuItem
+                              key={el.id}
+                              onClick={() => setActiveElement(el.id as any)}
+                              className={cn(
+                                "flex items-center gap-2.5 px-3 py-2 cursor-pointer",
+                                isActive && "bg-primary/10"
+                              )}
+                            >
+                              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                              <span className={cn("text-xs font-medium", isActive ? "text-primary" : "text-foreground")}>
+                                {el.label}
+                              </span>
+                              {isActive && <Check className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
-                <button
-                  onClick={onToggleAI}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    showAI
-                      ? "bg-accent/15 text-accent"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  )}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  AI Assistant
-                </button>
+                    <button
+                      onClick={onToggleAI}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        showAI
+                          ? "bg-accent/15 text-accent"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      )}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      AI Assistant
+                    </button>
+                  </div>
+                )}
+                {focusMode && <div />}
               </div>
-            )}
-            {focusMode && <div />}
+
+              <h1
+                className="text-2xl font-bold font-mono text-foreground tracking-wide cursor-text"
+                contentEditable
+                suppressContentEditableWarning
+              >
+                THE LAST DEAL
+              </h1>
+              <p className="text-xs text-muted-foreground mt-1 font-sans">
+                Noir · Written by Jane Director · ~12 min estimated runtime
+              </p>
+            </div>
           </div>
-
-          <h1
-            className="text-3xl font-bold font-mono text-foreground tracking-wide cursor-text"
-            contentEditable
-            suppressContentEditableWarning
-          >
-            THE LAST DEAL
-          </h1>
-          <p className="text-xs text-muted-foreground mt-2 font-sans">
-            Noir · Written by Jane Director · ~12 min estimated runtime
-          </p>
         </div>
-      </div>
 
-      {/* Formatting Toolbar — only visible on text selection */}
-      <div className="px-16">
-        <div className="max-w-2xl mx-auto">
-          <FormattingToolbar />
-        </div>
-      </div>
+        {/* Formatting Toolbar — floating, not in header */}
+        <FormattingToolbar />
 
-      {/* Script body */}
-      <div className="flex-1 overflow-y-auto px-8 sm:px-16 py-8">
-        <div className="max-w-3xl mx-auto bg-card/60 border border-border/50 rounded-xl px-10 sm:px-16 py-10 shadow-lg shadow-black/20">
-        <div className="space-y-1" style={{ fontSize: `${fontSize}px` }}>
+        {/* Script body */}
+        <div className="px-8 sm:px-16 py-8">
+          <div className="max-w-3xl mx-auto bg-card/60 border border-border/50 rounded-xl px-10 sm:px-16 py-10 shadow-lg shadow-black/20">
+          <div className="space-y-1" style={{ fontSize: `${fontSize}px` }}>
           {scriptElements.map((el, i) => {
             const isNewScene = el.sceneId !== undefined;
             const showDivider = isNewScene && currentScene > 0;
