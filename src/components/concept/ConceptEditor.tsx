@@ -257,6 +257,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <ListPickerDialog open={durationOpen} onOpenChange={setDurationOpen} title="Choose Duration" items={durations} selected={duration} onSelect={setDuration} />
           <ListPickerDialog open={audienceOpen} onOpenChange={setAudienceOpen} title="Choose Audience" items={audiences} selected={audience} onSelect={setAudience} />
           <ListPickerDialog open={formatOpen} onOpenChange={setFormatOpen} title="Choose Format" items={formats} selected={format} onSelect={setFormat} />
+          <ListPickerDialog open={aspectRatioOpen} onOpenChange={setAspectRatioOpen} title="Choose Aspect Ratio" items={aspectRatios} selected={aspectRatio} onSelect={setAspectRatio} />
 
           {/* Continue button */}
           <div className="flex items-center mt-8">
