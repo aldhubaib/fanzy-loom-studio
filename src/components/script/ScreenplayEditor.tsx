@@ -1,10 +1,32 @@
 import React from "react";
 import { FormattingToolbar } from "./FormattingToolbar";
-import { List, Sparkles, ChevronDown, Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote, Check } from "lucide-react";
+import { List, Sparkles, ChevronDown, Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote, Check, MapPin, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+
+// Character thumbnail data
+const characterThumbnails: Record<string, { initials: string; color: string }> = {
+  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60" },
+  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60" },
+  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60" },
+  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60" },
+};
+
+// Location thumbnail data
+const locationThumbnails: Record<string, { icon: string; color: string }> = {
+  "MARLOWE'S OFFICE": { icon: "🏢", color: "from-amber-900/60 to-yellow-900/40" },
+  "RAIN-SLICKED ALLEY": { icon: "🌧️", color: "from-slate-800/80 to-blue-900/40" },
+  "THE BLUE NOTE JAZZ CLUB": { icon: "🎷", color: "from-indigo-900/60 to-blue-800/40" },
+};
+
+function getLocationKey(heading: string): string | null {
+  for (const key of Object.keys(locationThumbnails)) {
+    if (heading.includes(key)) return key;
+  }
+  return null;
+}
 
 const elementTypes = [
   { id: "scene-heading", label: "Scene Heading", icon: Hash },
@@ -193,9 +215,23 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                       </div>
                     )}
                     <div {...refProps} className="pt-8 first:pt-0 pb-2 cursor-text rounded-lg px-4 -mx-4 bg-card/50">
-                      <p className="font-mono font-bold uppercase text-primary tracking-wider leading-relaxed">
-                        {el.text}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const locKey = getLocationKey(el.text);
+                          const loc = locKey ? locationThumbnails[locKey] : null;
+                          return (
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0",
+                              loc ? `bg-gradient-to-br ${loc.color}` : "bg-secondary"
+                            )}>
+                              {loc ? loc.icon : <MapPin className="w-3.5 h-3.5 text-muted-foreground" />}
+                            </div>
+                          );
+                        })()}
+                        <p className="font-mono font-bold uppercase text-primary tracking-wider leading-relaxed">
+                          {el.text}
+                        </p>
+                      </div>
                     </div>
                   </React.Fragment>
                 );
@@ -207,14 +243,22 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                     </p>
                   </div>
                 );
-              case "character":
+              case "character": {
+                const charData = characterThumbnails[el.text];
                 return (
-                  <div key={i} className="pt-5 pb-0 cursor-text">
+                  <div key={i} className="pt-5 pb-0 cursor-text flex flex-col items-center gap-1.5">
+                    <div className={cn(
+                      "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0",
+                      charData ? `bg-gradient-to-br ${charData.color} text-foreground` : "bg-secondary text-muted-foreground"
+                    )}>
+                      {charData ? charData.initials : <UserCircle className="w-4 h-4" />}
+                    </div>
                     <p className="font-mono font-bold uppercase text-primary text-center">
                       {el.text}
                     </p>
                   </div>
                 );
+              }
               case "dialogue":
                 return (
                   <div key={i} className="mx-auto w-[65%] pb-1 cursor-text">
