@@ -104,7 +104,19 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H_BASE = 230; // fallback until measured
+// Aspect ratio map: ratio string → height for the image area given FRAME_W
+const ASPECT_RATIOS: Record<string, number> = {
+  "16:9": Math.round(FRAME_W * 9 / 16),    // 158
+  "2.39:1": Math.round(FRAME_W / 2.39),     // 117
+  "1.85:1": Math.round(FRAME_W / 1.85),     // 151
+  "4:3": Math.round(FRAME_W * 3 / 4),       // 210
+  "9:16": Math.round(FRAME_W * 16 / 9),     // 498
+  "1:1": FRAME_W,                            // 280
+};
+const DEFAULT_ASPECT = "16:9";
+const [aspectRatio] = [DEFAULT_ASPECT]; // TODO: pull from project concept
+const IMAGE_H = ASPECT_RATIOS[aspectRatio] ?? 158;
+const FRAME_H_BASE = IMAGE_H + 80; // image + info section
 const PORT_Y = FRAME_H_BASE / 2;
 
 const initialConnections: Connection[] = [
