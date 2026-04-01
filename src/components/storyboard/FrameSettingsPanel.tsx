@@ -85,6 +85,7 @@ const moodOptions = [
 
 interface FrameSettingsPanelProps {
   frame: FrameData;
+  sceneNumber: number;
   actorRoster: Actor[];
   onUpdate: (updated: FrameData) => void;
   onClose: () => void;
