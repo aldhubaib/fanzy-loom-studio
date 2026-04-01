@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
-  X, Sparkles, Camera, Palette, Clock, Check, Images,
+  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -91,26 +94,93 @@ interface FrameSettingsPanelProps {
   onClose: () => void;
 }
 
-function VisualOption({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
+// Visual card for dialog grid (same pattern as ConceptEditor)
+function VisualCard({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "relative rounded-lg overflow-hidden transition-all duration-150 aspect-[4/3]",
+        "relative group rounded-xl overflow-hidden transition-all duration-200 aspect-[4/3]",
         selected
-          ? "ring-2 ring-primary ring-offset-1 ring-offset-background scale-[1.03]"
-          : "hover:scale-[1.03] hover:ring-1 hover:ring-border opacity-75 hover:opacity-100"
+          ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]"
+          : "hover:scale-[1.03] hover:ring-1 hover:ring-border"
       )}
     >
       <img src={img} alt={label} loading="lazy" className="w-full h-full object-cover" />
-      <div className={cn("absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent", selected && "from-primary/30")} />
-      <span className="absolute bottom-1 left-1.5 text-[9px] font-bold text-white drop-shadow-md">{label}</span>
+      <div className={cn("absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent", selected && "from-primary/30 via-transparent")} />
       {selected && (
-        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-          <Check className="w-2.5 h-2.5 text-primary-foreground" />
+        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+          <Check className="w-3 h-3 text-primary-foreground" />
         </div>
       )}
     </button>
+  );
+}
+
+function VisualCardLabel({ label, selected }: { label: string; selected: boolean }) {
+  return (
+    <p className={cn("text-xs font-medium text-center mt-1.5", selected ? "text-primary" : "text-muted-foreground")}>
+      {label}
+    </p>
+  );
+}
+
+// Picker trigger button
+function PickerButton({ label, value, selectedImg, icon: Icon, onClick }: {
+  label: string; value: string; selectedImg?: string; icon: React.ElementType; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border transition-all",
+        value
+          ? "bg-card border-primary/30 text-foreground"
+          : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+      )}
+    >
+      {selectedImg ? (
+        <img src={selectedImg} alt={value} className="w-7 h-7 rounded-md object-cover" />
+      ) : (
+        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+        </div>
+      )}
+      <div className="text-left flex-1">
+        <p className="text-[10px] uppercase tracking-wider leading-none mb-0.5 text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium">{value || "Choose..."}</p>
+      </div>
+      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+    </button>
+  );
+}
+
+// Image grid picker dialog
+function ImagePickerDialog({
+  open, onOpenChange, title: dialogTitle, items, selected, onSelect,
+}: {
+  open: boolean; onOpenChange: (v: boolean) => void; title: string;
+  items: { value: string; label: string; img: string }[]; selected: string; onSelect: (v: string) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl bg-card border-border">
+        <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
+          {items.map((item) => (
+            <div key={item.value}>
+              <VisualCard
+                label={item.label}
+                img={item.img}
+                selected={selected === item.value}
+                onClick={() => { onSelect(selected === item.value ? "" : item.value); onOpenChange(false); }}
+              />
+              <VisualCardLabel label={item.label} selected={selected === item.value} />
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -122,6 +192,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [mood, setMood] = useState("Noir");
   const [imageCount, setImageCount] = useState(4);
+  const [shotOpen, setShotOpen] = useState(false);
+  const [moodOpen, setMoodOpen] = useState(false);
 
   useEffect(() => {
     setPrompt(frame.description);
@@ -260,43 +332,25 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
 
         <Separator />
 
-        {/* Camera / Shot Type — Visual Grid */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <Camera className="w-3 h-3" /> Camera / Shot Type
-          </Label>
-          <div className="grid grid-cols-5 gap-1.5">
-            {shotTypes.map(s => (
-              <VisualOption
-                key={s.value}
-                label={s.label}
-                img={s.img}
-                selected={shot === s.value}
-                onClick={() => setShot(s.value)}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Camera / Shot Type — Picker Button */}
+        <PickerButton
+          label="Camera / Shot Type"
+          value={shotTypes.find(s => s.value === shot)?.label || ""}
+          selectedImg={shotTypes.find(s => s.value === shot)?.img}
+          icon={Camera}
+          onClick={() => setShotOpen(true)}
+        />
 
         <Separator />
 
-        {/* Mood / Lighting — Visual Grid */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <Palette className="w-3 h-3" /> Mood / Lighting
-          </Label>
-          <div className="grid grid-cols-4 gap-1.5">
-            {moodOptions.map(m => (
-              <VisualOption
-                key={m.value}
-                label={m.label}
-                img={m.img}
-                selected={mood === m.value}
-                onClick={() => setMood(m.value)}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Mood / Lighting — Picker Button */}
+        <PickerButton
+          label="Mood / Lighting"
+          value={moodOptions.find(m => m.value === mood)?.label || ""}
+          selectedImg={moodOptions.find(m => m.value === mood)?.img}
+          icon={Palette}
+          onClick={() => setMoodOpen(true)}
+        />
 
         <Separator />
 
@@ -348,6 +402,24 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
           Generate {imageCount}
         </Button>
       </div>
+
+      {/* Dialogs */}
+      <ImagePickerDialog
+        open={shotOpen}
+        onOpenChange={setShotOpen}
+        title="Camera / Shot Type"
+        items={shotTypes}
+        selected={shot}
+        onSelect={setShot}
+      />
+      <ImagePickerDialog
+        open={moodOpen}
+        onOpenChange={setMoodOpen}
+        title="Mood / Lighting"
+        items={moodOptions}
+        selected={mood}
+        onSelect={setMood}
+      />
     </div>
   );
 }
