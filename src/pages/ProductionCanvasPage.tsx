@@ -655,7 +655,7 @@ export default function ProductionCanvasPage() {
   const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
   const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
   const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
-  const selectedActor = selectedCast ? actorRoster.find(a => a.id === selectedCast.actorId) : null;
+  const selectedActor = selectedCast ? actors.find(a => a.id === selectedCast.actorId) : null;
 
   const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
 
