@@ -926,7 +926,7 @@ export default function ProductionCanvasPage() {
               return (
                 <div
                   key={zone.id}
-                  className="absolute"
+                  className="absolute pointer-events-none"
                   style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
                 >
                   {/* Dashed border */}
