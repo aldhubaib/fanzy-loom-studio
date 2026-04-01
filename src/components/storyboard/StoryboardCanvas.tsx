@@ -50,7 +50,7 @@ const actorRoster: Actor[] = [
 const initialFrames: FrameData[] = [
   {
     id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE",
-    description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"],
+    description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office",
     generatedImages: [
       { id: "g1a", src: frame1, description: "Marlowe at desk — wide establishing", actors: ["a1"] },
       { id: "g1b", src: frame4, description: "Marlowe at desk — close-up on face", actors: ["a1"] },
