@@ -10,6 +10,11 @@ import {
 import { FrameContextMenu } from "./FrameContextMenu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 import actorMarlowe from "@/assets/actors/marlowe.png";
 import actorVivian from "@/assets/actors/vivian.png";
