@@ -402,6 +402,24 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
           Generate {imageCount}
         </Button>
       </div>
+
+      {/* Dialogs */}
+      <ImagePickerDialog
+        open={shotOpen}
+        onOpenChange={setShotOpen}
+        title="Camera / Shot Type"
+        items={shotTypes}
+        selected={shot}
+        onSelect={setShot}
+      />
+      <ImagePickerDialog
+        open={moodOpen}
+        onOpenChange={setMoodOpen}
+        title="Mood / Lighting"
+        items={moodOptions}
+        selected={mood}
+        onSelect={setMood}
+      />
     </div>
   );
 }
