@@ -223,35 +223,12 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
 
           {/* Compact picker buttons */}
           <div className="mt-6 flex flex-wrap gap-3">
-            {/* Genre */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} /></div>
-            </DialogTrigger>
-
-            {/* Tone */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} /></div>
-            </DialogTrigger>
-
-            {/* Setting */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => setSettingOpen(true)} /></div>
-            </DialogTrigger>
-
-            {/* Duration */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} /></div>
-            </DialogTrigger>
-
-            {/* Audience */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => setAudienceOpen(true)} /></div>
-            </DialogTrigger>
-
-            {/* Format */}
-            <DialogTrigger asChild>
-              <div><PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => setFormatOpen(true)} /></div>
-            </DialogTrigger>
+            <PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} />
+            <PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} />
+            <PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => setSettingOpen(true)} />
+            <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} />
+            <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => setAudienceOpen(true)} />
+            <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => setFormatOpen(true)} />
           </div>
 
           {/* Dialogs */}
