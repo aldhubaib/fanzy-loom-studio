@@ -161,13 +161,10 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
         </div>
       </div>
 
-      {/* Formatting Toolbar */}
+      {/* Formatting Toolbar — only visible on text selection */}
       <div className="px-16">
         <div className="max-w-2xl mx-auto">
-          <FormattingToolbar
-            activeElement={activeElement}
-            onElementChange={setActiveElement}
-          />
+          <FormattingToolbar />
         </div>
       </div>
 
