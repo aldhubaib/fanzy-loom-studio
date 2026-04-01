@@ -533,23 +533,6 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
             placeholder="Character Name"
           />
 
-          {/* Role pills */}
-          <div className="flex gap-1.5">
-            {roleOptions.map(r => (
-              <button
-                key={r}
-                onClick={() => onChange({ ...character, role: r })}
-                className={cn(
-                  "text-[11px] px-2.5 py-1 rounded-full border transition-colors",
-                  character.role === r
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
 
           <Separator />
 
@@ -568,7 +551,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
 
           <Separator />
 
-          {/* Generated Portraits */}
+          {/* Portraits */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -581,43 +564,67 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               </Button>
             </div>
 
-            {character.generatedPortraits.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                {character.generatedPortraits.map((p, idx) => {
-                  const isActive = character.selectedPortraitId === p.id;
-                  return (
+            <div className="grid grid-cols-3 gap-2">
+              {character.generatedPortraits.map((p, idx) => {
+                const isActive = character.selectedPortraitId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    className={cn(
+                      "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
+                      isActive
+                        ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                        : "hover:scale-[1.02] ring-1 ring-border"
+                    )}
+                    onClick={() => selectPortrait(p)}
+                  >
+                    <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                    {isActive && (
+                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    )}
                     <button
-                      key={p.id}
-                      className={cn(
-                        "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
-                        isActive
-                          ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
-                          : "hover:scale-[1.02] ring-1 ring-border"
-                      )}
-                      onClick={() => selectPortrait(p)}
+                      className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
                     >
-                      <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
-                      {isActive && (
-                        <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                          <Check className="w-3 h-3 text-primary-foreground" />
-                        </div>
-                      )}
-                      <button
-                        className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
-                      >
-                        <Expand className="w-2.5 h-2.5 text-white" />
-                      </button>
+                      <Expand className="w-2.5 h-2.5 text-white" />
                     </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-6 flex flex-col items-center gap-2">
-                <Sparkles className="w-6 h-6 text-muted-foreground/30" />
-                <p className="text-xs text-muted-foreground text-center">Generate portrait options</p>
-              </div>
-            )}
+                  </button>
+                );
+              })}
+              {/* Upload custom reference */}
+              <label className="rounded-lg aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                <Upload className="w-5 h-5 text-muted-foreground mb-1" />
+                <span className="text-[9px] text-muted-foreground">Upload</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const src = ev.target?.result as string;
+                      const newPortrait: GeneratedPortrait = {
+                        id: `custom-${Date.now()}`,
+                        src,
+                        description: "Custom upload",
+                      };
+                      onChange({
+                        ...character,
+                        generatedPortraits: [...character.generatedPortraits, newPortrait],
+                        portrait: src,
+                        selectedPortraitId: newPortrait.id,
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
           </div>
 
           <Separator />
