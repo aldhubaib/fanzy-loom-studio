@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { CharacterDetailsPanel, type CharacterData } from "@/components/casting/CharacterDetailsPanel";
 
 // Shot frame images
 import frame1 from "@/assets/storyboard/frame-1.jpg";
@@ -55,13 +56,8 @@ import locDetailRestaurant from "@/assets/locations/interior-restaurant.jpg";
 import locDetailCar from "@/assets/locations/interior-car.jpg";
 
 // ─── Types ──────────────────────────────────────────────────
-interface Actor {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-  description: string;
-}
+// Actor type aliases CharacterData from the shared panel
+type Actor = CharacterData;
 
 interface FrameData {
   id: string;
@@ -165,9 +161,9 @@ const shotTypes = [
 ];
 
 const actorRoster: Actor[] = [
-  { id: "a1", name: "Jack Marlowe", avatar: actorMarlowe, role: "Protagonist", description: "A world-weary private detective." },
-  { id: "a2", name: "Vivian Lake", avatar: actorVivian, role: "Supporting", description: "A mysterious woman with a missing person case." },
-  { id: "a3", name: "Eddie", avatar: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant." },
+  { id: "a1", name: "Jack Marlowe", portrait: actorMarlowe, role: "Protagonist", description: "A world-weary private detective.", gender: "Male", ageRange: "Middle Age (31-55)", ethnicity: "Caucasian", bodyType: "Average", height: "Tall", hairColor: "Dark Brown", hairStyle: "Short", eyeColor: "Brown", skinTone: "Light", clothing: "Formal", distinguishingFeatures: "Facial Scar", generatedPortraits: [{ id: "g1a", src: actorMarlowe, description: "Detective — classic noir" }], selectedPortraitId: "g1a" },
+  { id: "a2", name: "Vivian Lake", portrait: actorVivian, role: "Supporting", description: "A mysterious woman with a missing person case.", gender: "Female", ageRange: "Young Adult (18-30)", ethnicity: "Caucasian", bodyType: "Slim", height: "Average", hairColor: "Dark Brown", hairStyle: "Long", eyeColor: "Green", skinTone: "Very Light", clothing: "High Fashion", distinguishingFeatures: "None", generatedPortraits: [{ id: "g2a", src: actorVivian, description: "Vivian — classic look" }], selectedPortraitId: "g2a" },
+  { id: "a3", name: "Eddie", portrait: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant.", gender: "Male", ageRange: "Young Adult (18-30)", ethnicity: "African", bodyType: "Average", height: "Average", hairColor: "Black", hairStyle: "Short", eyeColor: "Brown", skinTone: "Dark", clothing: "Streetwear", distinguishingFeatures: "None", generatedPortraits: [{ id: "g3a", src: actorEddie, description: "Eddie — street look" }], selectedPortraitId: "g3a" },
 ];
 
 // ─── Initial Data ───────────────────────────────────────────
@@ -356,7 +352,7 @@ function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
               <button key={actor.id} onClick={() => toggleActor(actor.id)}
                 className={cn("flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs transition-all",
                   isIn ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground/60")}>
-                <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
+                <img src={actor.portrait} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
                 <span>{actor.name}</span>
               </button>
             );
@@ -377,36 +373,7 @@ function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
   );
 }
 
-function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
-  const appearances = frames.filter(f => f.actors.includes(actor.id));
-  return (
-    <div className="space-y-4">
-      <div className="rounded-xl overflow-hidden border border-border bg-secondary">
-        <img src={actor.avatar} alt={actor.name} className="w-full object-cover max-h-[240px]" />
-      </div>
-      <div>
-        <h3 className="text-lg font-bold text-foreground">{actor.name}</h3>
-        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">{actor.role}</span>
-      </div>
-      <p className="text-sm text-muted-foreground leading-relaxed">{actor.description}</p>
-      <Separator />
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Appears in {appearances.length} shot{appearances.length !== 1 ? "s" : ""}</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {appearances.map(f => (
-            <div key={f.id} className="rounded-lg overflow-hidden border border-border bg-secondary">
-              {f.image && <img src={f.image} alt={f.description} className="w-full aspect-video object-cover" />}
-              <div className="p-2">
-                <p className="text-[10px] font-bold text-primary">{f.scene}</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">{f.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// CastDrawer is now replaced by CharacterDetailsPanel (imported)
 
 function LocationDrawer({ locationName, frames }: { locationName: string; frames: FrameData[] }) {
   const img = locationImages[locationName];
@@ -474,6 +441,7 @@ export default function ProductionCanvasPage() {
   const { projectId } = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [actors, setActors] = useState<Actor[]>(actorRoster);
   const [zones, setZones] = useState<Zone[]>(initialZones);
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
@@ -510,7 +478,7 @@ export default function ProductionCanvasPage() {
     const actorIds = castNodes
       .filter(n => castingZoneIds.includes(n.zoneId))
       .map(n => n.actorId);
-    return actorRoster.filter(a => actorIds.includes(a.id));
+    return actors.filter(a => actorIds.includes(a.id));
   }, [connections, zones, castNodes]);
 
   // Find which zone a world coordinate falls in
@@ -687,7 +655,7 @@ export default function ProductionCanvasPage() {
   const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
   const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
   const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
-  const selectedActor = selectedCast ? actorRoster.find(a => a.id === selectedCast.actorId) : null;
+  const selectedActor = selectedCast ? actors.find(a => a.id === selectedCast.actorId) : null;
 
   const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
 
@@ -857,11 +825,11 @@ export default function ProductionCanvasPage() {
                   <div className="flex items-center gap-1">
                     <TooltipProvider delayDuration={200}>
                       {frame.actors.map(aid => {
-                        const a = actorRoster.find(ac => ac.id === aid);
+                        const a = actors.find(ac => ac.id === aid);
                         if (!a) return null;
                         return (
                           <Tooltip key={a.id}><TooltipTrigger asChild>
-                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.avatar} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
+                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.portrait} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
                           </TooltipTrigger><TooltipContent side="bottom" className="text-xs">{a.name}</TooltipContent></Tooltip>
                         );
                       })}
@@ -879,7 +847,7 @@ export default function ProductionCanvasPage() {
 
             {/* Cast nodes */}
             {castNodes.map(node => {
-              const actor = actorRoster.find(a => a.id === node.actorId);
+              const actor = actors.find(a => a.id === node.actorId);
               if (!actor) return null;
               const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
               return (
@@ -894,7 +862,7 @@ export default function ProductionCanvasPage() {
                     onClick={() => { setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
                     <X className="w-3 h-3" />
                   </button>
-                  <img src={actor.avatar} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
+                  <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
                   <div className="p-2">
                     <p className="text-xs font-bold text-foreground">{actor.name}</p>
                     <p className="text-[10px] text-muted-foreground">{actor.role}</p>
@@ -967,13 +935,13 @@ export default function ProductionCanvasPage() {
           {castPickerPos && (
             <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: castPickerPos.x, top: castPickerPos.y }} onMouseDown={e => e.stopPropagation()}>
               <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
-              {actorRoster.map(actor => (
+              {actors.map(actor => (
                 <button key={actor.id} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
                   onClick={() => {
                     setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY, zoneId: castPickerPos.zoneId }]);
                     setCastPickerPos(null);
                   }}>
-                  <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
+                  <img src={actor.portrait} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
                   <span>{actor.name}</span>
                 </button>
               ))}
@@ -1042,11 +1010,23 @@ export default function ProductionCanvasPage() {
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {selectedFrame && (
-              <ShotDrawer frame={selectedFrame} actors={actorRoster} connectedActors={connectedActorsForFrame}
+              <ShotDrawer frame={selectedFrame} actors={actors} connectedActors={connectedActorsForFrame}
                 onUpdate={(updated) => setFrames(prev => prev.map(f => f.id === updated.id ? updated : f))}
                 onDelete={() => { setFrames(prev => prev.filter(f => f.id !== selectedFrame.id)); setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id)); setSelected(null); }} />
             )}
-            {selectedActor && <CastDrawer actor={selectedActor} frames={frames} />}
+            {selectedActor && (
+              <CharacterDetailsPanel
+                character={selectedActor}
+                onChange={(updated) => setActors(prev => prev.map(a => a.id === updated.id ? updated : a))}
+                onDelete={() => {
+                  setCastNodes(prev => prev.filter(n => n.actorId !== selectedActor.id));
+                  setSelected(null);
+                }}
+                appearances={frames.filter(f => f.actors.includes(selectedActor.id)).map(f => ({
+                  id: f.id, scene: f.scene, shot: f.shot, description: f.description, image: f.image,
+                }))}
+              />
+            )}
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
