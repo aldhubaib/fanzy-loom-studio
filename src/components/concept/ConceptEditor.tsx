@@ -165,7 +165,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
   const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
   const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
-  const [conceptGenerated, setConceptGenerated] = useState(isMockProject);
+  
 
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
