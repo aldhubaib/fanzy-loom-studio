@@ -4,6 +4,20 @@ import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+const shotDescriptions: Record<string, string> = {
+  "WIDE": "Wide Shot (WS) — Shows the full scene and environment, establishing location and context.",
+  "MED": "Medium Shot (MS) — Frames the subject from the waist up, balancing character and environment.",
+  "CU": "Close-Up (CU) — Tightly frames the subject's face or a detail, emphasizing emotion or importance.",
+  "ECU": "Extreme Close-Up (ECU) — Focuses on a very small detail like eyes or an object.",
+  "OTS": "Over-the-Shoulder (OTS) — Shot from behind one character looking at another, common in dialogue.",
+  "POV": "Point of View (POV) — Shows the scene from a character's perspective.",
+  "DYNAMIC": "Dynamic Shot — A moving camera shot (tracking, dolly, crane) adding energy and motion.",
+  "LOW": "Low Angle — Camera looks up at the subject, conveying power or dominance.",
+  "HIGH": "High Angle — Camera looks down at the subject, conveying vulnerability.",
+  "AERIAL": "Aerial Shot — Captured from above, often via drone, showing a bird's-eye view.",
+};
 
 import frame1 from "@/assets/storyboard/frame-1.jpg";
 import frame2 from "@/assets/storyboard/frame-2.jpg";
