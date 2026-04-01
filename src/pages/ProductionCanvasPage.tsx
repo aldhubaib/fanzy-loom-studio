@@ -1010,7 +1010,7 @@ export default function ProductionCanvasPage() {
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {selectedFrame && (
-              <ShotDrawer frame={selectedFrame} actors={actorRoster} connectedActors={connectedActorsForFrame}
+              <ShotDrawer frame={selectedFrame} actors={actors} connectedActors={connectedActorsForFrame}
                 onUpdate={(updated) => setFrames(prev => prev.map(f => f.id === updated.id ? updated : f))}
                 onDelete={() => { setFrames(prev => prev.filter(f => f.id !== selectedFrame.id)); setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id)); setSelected(null); }} />
             )}
