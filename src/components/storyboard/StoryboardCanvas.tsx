@@ -240,70 +240,61 @@ export function StoryboardCanvas() {
   }).filter(Boolean);
 
   return (
-    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-card/80 backdrop-blur-sm z-10 pt-14">
-        <div className="flex items-center gap-1 rounded-lg bg-secondary/60 p-0.5">
-          <button
-            onClick={() => setTool("select")}
-            className={cn(
-              "p-1.5 rounded-md transition-colors",
-              tool === "select" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-            title="Select (V)"
-          >
-            <MousePointer className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setTool("hand")}
-            className={cn(
-              "p-1.5 rounded-md transition-colors",
-              tool === "hand" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-            title="Pan (Space)"
-          >
-            <Hand className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="w-px h-5 bg-border mx-2" />
-
-        <div className="flex items-center gap-1">
-          <button onClick={() => setZoom(z => Math.max(0.2, z - 0.15))} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <span className="text-xs text-muted-foreground w-12 text-center font-mono">{Math.round(zoom * 100)}%</span>
-          <button onClick={() => setZoom(z => Math.min(3, z + 0.15))} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-            <ZoomIn className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="w-px h-5 bg-border mx-2" />
-
-        <button onClick={fitToScreen} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
-          <Maximize className="w-4 h-4" />
+    <div className="h-full w-full relative bg-background overflow-hidden">
+      {/* Floating vertical toolbar */}
+      <div className="absolute top-16 left-4 z-20 flex flex-col items-center gap-1 p-1.5 rounded-2xl bg-card/90 backdrop-blur-md border border-border shadow-2xl">
+        <button onClick={addFrame} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Add Frame">
+          <Plus className="w-4 h-4" />
         </button>
-        <button onClick={autoLayout} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Auto layout">
+
+        <div className="w-6 h-px bg-border my-0.5" />
+
+        <button
+          onClick={() => setTool("select")}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+            tool === "select" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+          )}
+          title="Select (V)"
+        >
+          <MousePointer className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => setTool("hand")}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+            tool === "hand" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+          )}
+          title="Pan (Space)"
+        >
+          <Hand className="w-4 h-4" />
+        </button>
+
+        <div className="w-6 h-px bg-border my-0.5" />
+
+        <button onClick={autoLayout} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Auto layout">
           <Grid3X3 className="w-4 h-4" />
         </button>
-
-        <div className="w-px h-5 bg-border mx-2" />
-
-        <button onClick={addFrame} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
-          <Plus className="w-3.5 h-3.5" />
-          Add Frame
+        <button onClick={fitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
+          <Maximize className="w-4 h-4" />
         </button>
 
-        <div className="ml-auto text-xs text-muted-foreground">
-          {frames.length} frames
-        </div>
+        <div className="w-6 h-px bg-border my-0.5" />
+
+        <button onClick={() => setZoom(z => Math.max(0.2, z - 0.15))} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Zoom out">
+          <ZoomOut className="w-4 h-4" />
+        </button>
+        <span className="text-[10px] text-muted-foreground font-mono">{Math.round(zoom * 100)}%</span>
+        <button onClick={() => setZoom(z => Math.min(3, z + 0.15))} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Zoom in">
+          <ZoomIn className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Canvas */}
       <div
         ref={containerRef}
         className={cn(
-          "flex-1 relative overflow-hidden",
+          "absolute inset-0",
           tool === "hand" || panning ? "cursor-grab" : "cursor-default",
           panning && "cursor-grabbing",
         )}
