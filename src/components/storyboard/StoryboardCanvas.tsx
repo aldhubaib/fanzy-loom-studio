@@ -597,7 +597,7 @@ export function StoryboardCanvas() {
           setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY });
         }}
         onWheel={handleWheel}
-        onMouseDown={(e) => { setCanvasMenu(null); handleMouseDown(e); }}
+        onMouseDown={(e) => { setCanvasMenu(null); setCastPickerPos(null); setLocationPickerPos(null); handleMouseDown(e); }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
