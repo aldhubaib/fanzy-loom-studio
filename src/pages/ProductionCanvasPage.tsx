@@ -207,12 +207,18 @@ const initialLocationNodes: LocationNode[] = [
   { id: "ln4", locationName: "Street", x: 1460, y: 260, zoneId: "z-locations" },
 ];
 
+const initialScriptNodes: ScriptNode[] = [
+  { id: "sn1", heading: "INT. MARLOWE'S OFFICE - NIGHT", body: "Marlowe sits at his desk, the room thick with cigarette smoke. A knock at the door.", x: 80, y: -460, zoneId: "z-script" },
+  { id: "sn2", heading: "EXT. RAIN-SLICKED ALLEY - NIGHT", body: "Vivian emerges from the shadows, heels clicking on wet pavement.", x: 400, y: -460, zoneId: "z-script" },
+  { id: "sn3", heading: "INT. THE BLUE NOTE JAZZ CLUB - NIGHT", body: "A saxophone wails. Eddie leans against the bar, watching the door.", x: 720, y: -460, zoneId: "z-script" },
+];
+
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" }, { from: "f2", to: "f3" },
   { from: "f3", to: "f4" }, { from: "f4", to: "f5" }, { from: "f5", to: "f6" },
-  // Zone-level connections: casting → shots, locations → shots
   { from: "z-casting", to: "z-shots" },
   { from: "z-locations", to: "z-shots" },
+  { from: "z-script", to: "z-shots" },
 ];
 
 // ─── Zone Bounds Helper ─────────────────────────────────────
