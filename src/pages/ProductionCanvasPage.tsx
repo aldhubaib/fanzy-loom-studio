@@ -774,8 +774,16 @@ export default function ProductionCanvasPage() {
                   />
                   {/* Label */}
                   <div
-                    className="absolute -top-1 left-4 px-3 py-1 cursor-pointer select-none"
-                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "zone", id: zone.id }); }}
+                    className="absolute -top-1 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+                    onMouseDown={(e) => {
+                      if (e.button !== 0) return;
+                      e.stopPropagation();
+                      setSelected({ type: "zone", id: zone.id });
+                      setDraggingZone(zone.id);
+                      const rect = containerRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
+                    }}
                   >
                     <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
                   </div>
