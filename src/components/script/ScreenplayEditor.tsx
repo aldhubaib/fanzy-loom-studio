@@ -243,14 +243,22 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                     </p>
                   </div>
                 );
-              case "character":
+              case "character": {
+                const charData = characterThumbnails[el.text];
                 return (
-                  <div key={i} className="pt-5 pb-0 cursor-text">
+                  <div key={i} className="pt-5 pb-0 cursor-text flex flex-col items-center gap-1.5">
+                    <div className={cn(
+                      "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0",
+                      charData ? `bg-gradient-to-br ${charData.color} text-foreground` : "bg-secondary text-muted-foreground"
+                    )}>
+                      {charData ? charData.initials : <UserCircle className="w-4 h-4" />}
+                    </div>
                     <p className="font-mono font-bold uppercase text-primary text-center">
                       {el.text}
                     </p>
                   </div>
                 );
+              }
               case "dialogue":
                 return (
                   <div key={i} className="mx-auto w-[65%] pb-1 cursor-text">
