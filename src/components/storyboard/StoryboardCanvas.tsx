@@ -722,32 +722,30 @@ export function StoryboardCanvas() {
 
                     {/* Drag-to-scroll thumbnails */}
                     <div
-                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 overflow-x-hidden cursor-grab active:cursor-grabbing"
-                      style={{ scrollbarWidth: "none", msOverflowStyle: "none", overflow: "hidden" }}
-                      ref={(el) => {
-                        if (!el) return;
-                        let isDown = false;
-                        let startX = 0;
-                        let scrollLeft = 0;
-                        const onDown = (e: MouseEvent) => {
-                          isDown = true;
-                          el.style.cursor = "grabbing";
-                          startX = e.pageX - el.offsetLeft;
-                          scrollLeft = el.scrollLeft;
+                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 cursor-grab active:cursor-grabbing select-none"
+                      style={{ scrollbarWidth: "none", msOverflowStyle: "none", overflowX: "auto" }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        const el = e.currentTarget;
+                        const startX = e.pageX;
+                        const startScroll = el.scrollLeft;
+                        let moved = false;
+                        const onMove = (ev: MouseEvent) => {
+                          const dx = ev.pageX - startX;
+                          if (Math.abs(dx) > 3) moved = true;
+                          el.scrollLeft = startScroll - dx;
                         };
-                        const onUp = () => { isDown = false; el.style.cursor = "grab"; };
-                        const onMove = (e: MouseEvent) => {
-                          if (!isDown) return;
-                          e.preventDefault();
-                          const x = e.pageX - el.offsetLeft;
-                          el.scrollLeft = scrollLeft - (x - startX);
+                        const onUp = () => {
+                          document.removeEventListener("mousemove", onMove);
+                          document.removeEventListener("mouseup", onUp);
+                          if (moved) {
+                            // Block the next click so selecting doesn't fire after drag
+                            const blocker = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); };
+                            el.addEventListener("click", blocker, { capture: true, once: true });
+                          }
                         };
-                        el.onmousedown = onDown;
-                        el.onmouseleave = onUp;
-                        el.onmouseup = onUp;
-                        el.onmousemove = onMove;
-                        // Allow overflow for scrollLeft to work
-                        el.style.overflowX = "auto";
+                        document.addEventListener("mousemove", onMove);
+                        document.addEventListener("mouseup", onUp);
                       }}
                     >
                       {frame.generatedImages.map(img => {
