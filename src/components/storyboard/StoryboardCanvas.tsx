@@ -284,7 +284,7 @@ export function StoryboardCanvas() {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
     return {
-      x: side === "right" ? f.x + FRAME_W + 9 : f.x - 9,
+      x: side === "right" ? f.x + FRAME_W : f.x,
       y: f.y + FRAME_H / 2,
     };
   }, [frames]);
