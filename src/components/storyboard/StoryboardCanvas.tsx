@@ -294,7 +294,7 @@ export function StoryboardCanvas() {
       <div
         ref={containerRef}
         className={cn(
-          "flex-1 relative overflow-hidden",
+          "absolute inset-0",
           tool === "hand" || panning ? "cursor-grab" : "cursor-default",
           panning && "cursor-grabbing",
         )}
