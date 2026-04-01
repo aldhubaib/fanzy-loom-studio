@@ -80,7 +80,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU",
-    description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"],
+    description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office",
     generatedImages: [
       { id: "g4a", src: frame4, description: "Marlowe with photo — close-up", actors: ["a1"] },
       { id: "g4b", src: frame1, description: "Marlowe with photo — wide shot", actors: ["a1"] },
