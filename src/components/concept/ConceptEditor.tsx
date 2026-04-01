@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 import {
   Dices, ArrowRight, Plus, ChevronDown,
 } from "lucide-react";
