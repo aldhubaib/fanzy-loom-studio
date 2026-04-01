@@ -240,7 +240,7 @@ export function StoryboardCanvas() {
   }).filter(Boolean);
 
   return (
-    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
+    <div className="h-full w-full relative bg-background overflow-hidden">
       {/* Floating vertical toolbar */}
       <div className="absolute top-16 left-4 z-20 flex flex-col items-center gap-1 p-1.5 rounded-2xl bg-card/90 backdrop-blur-md border border-border shadow-2xl">
         <button onClick={addFrame} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Add Frame">
