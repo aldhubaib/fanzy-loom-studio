@@ -175,6 +175,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const handleSurpriseMe = () => {
     setTitle("Echoes of Tomorrow");
