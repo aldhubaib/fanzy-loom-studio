@@ -256,14 +256,14 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                       <PopoverTrigger asChild>
                         <button
                           className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all",
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 transition-all",
                             "hover:scale-110 hover:ring-2 hover:ring-primary/50",
                             isDefined
                               ? `bg-gradient-to-br ${charData.color} text-foreground`
                               : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
                           )}
                         >
-                          {isDefined ? charData.initials : <UserCircle className="w-4 h-4" />}
+                          {isDefined ? charData.initials : <UserCircle className="w-3 h-3" />}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
