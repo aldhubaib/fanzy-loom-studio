@@ -86,7 +86,7 @@ export function FanzySidebar() {
                 {recentProjects.map((project) => (
                   <SidebarMenuItem key={project.name}>
                     <SidebarMenuButton asChild className="hover:bg-sidebar-accent/50 cursor-pointer">
-                      <Link to={`/project/${project.id}/script`}>
+                      <Link to={`/project/${project.id}/concept`}>
                         <div className={`w-5 h-5 rounded bg-gradient-to-br ${project.color} flex-shrink-0`} />
                         <span className="text-sm truncate">{project.name}</span>
                       </Link>

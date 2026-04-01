@@ -1,13 +1,15 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { FanzySidebar } from "@/components/FanzySidebar";
 import { mockProjects } from "@/data/mockProjects";
 import { ScriptEditor } from "@/components/script/ScriptEditor";
+import { ConceptEditor } from "@/components/concept/ConceptEditor";
 import {
-  FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download, ArrowLeft
+  Lightbulb, FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download, ArrowLeft
 } from "lucide-react";
 
 const stageConfig: Record<string, { title: string; icon: React.ElementType; description: string }> = {
+  concept: { title: "Concept", icon: Lightbulb, description: "Define your film's core idea, genre, tone, and visual style before diving into the script." },
   script: { title: "Script", icon: FileText, description: "Write and structure your screenplay. AI can help generate dialogue, scene descriptions, and plot points." },
   storyboard: { title: "Storyboard", icon: LayoutGrid, description: "Visualize each scene with AI-generated storyboard frames. Arrange and annotate your shots." },
   casting: { title: "Casting", icon: Users, description: "Define your characters' appearances, voices, and personalities. AI generates consistent character models." },
@@ -20,7 +22,7 @@ const stageConfig: Record<string, { title: string; icon: React.ElementType; desc
 export default function ProjectPage() {
   const { projectId, stage } = useParams();
   const project = mockProjects.find(p => p.id === projectId);
-  const currentStage = stageConfig[stage || "script"];
+  const currentStage = stageConfig[stage || "concept"];
 
   if (!project) {
     return (
@@ -35,7 +37,7 @@ export default function ProjectPage() {
     );
   }
 
-  const StageIcon = currentStage?.icon || FileText;
+  const StageIcon = currentStage?.icon || Lightbulb;
 
   return (
     <SidebarProvider>
@@ -70,7 +72,9 @@ export default function ProjectPage() {
 
           {/* Stage content */}
           <main className="flex-1 overflow-hidden">
-            {stage === "script" ? (
+            {stage === "concept" ? (
+              <ConceptEditor projectId={projectId} />
+            ) : stage === "script" ? (
               <ScriptEditor />
             ) : (
               <div className="p-8 h-full overflow-auto">
