@@ -56,13 +56,8 @@ import locDetailRestaurant from "@/assets/locations/interior-restaurant.jpg";
 import locDetailCar from "@/assets/locations/interior-car.jpg";
 
 // ─── Types ──────────────────────────────────────────────────
-interface Actor {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-  description: string;
-}
+// Actor type aliases CharacterData from the shared panel
+type Actor = CharacterData;
 
 interface FrameData {
   id: string;
