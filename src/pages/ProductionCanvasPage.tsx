@@ -742,7 +742,7 @@ export default function ProductionCanvasPage() {
                   />
                   {/* Label */}
                   <div
-                    className="absolute -top-1 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
                     onMouseDown={(e) => {
                       if (e.button !== 0) return;
                       e.stopPropagation();
