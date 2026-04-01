@@ -106,6 +106,7 @@ export function StoryboardCanvas() {
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
+  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -454,9 +455,19 @@ export function StoryboardCanvas() {
           tool === "hand" || panning ? "cursor-grab" : "cursor-default",
           panning && "cursor-grabbing",
         )}
-        onContextMenu={(e) => e.preventDefault()}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          // Only show canvas menu if right-clicking on empty canvas (not on a frame)
+          const target = e.target as HTMLElement;
+          if (target.closest('[data-frame]')) return;
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          const worldX = (e.clientX - rect.left - pan.x) / zoom;
+          const worldY = (e.clientY - rect.top - pan.y) / zoom;
+          setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY });
+        }}
         onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
+        onMouseDown={(e) => { setCanvasMenu(null); handleMouseDown(e); }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -535,6 +546,7 @@ export function StoryboardCanvas() {
               onDelete={() => deleteFrame(idx)}
             >
               <div
+                data-frame
                 ref={(el) => { frameRefs.current[frame.id] = el; }}
                 className={cn(
                   "absolute rounded-xl border-2 bg-card transition-shadow duration-150 select-none group",
@@ -750,6 +762,55 @@ export function StoryboardCanvas() {
             </FrameContextMenu>
           ))}
         </div>
+
+        {/* Canvas context menu */}
+        {canvasMenu && (
+          <div
+            className="absolute z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: canvasMenu.x, top: canvasMenu.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                const newId = `f${Date.now()}`;
+                setFrames(prev => [...prev, {
+                  id: newId, x: canvasMenu.worldX, y: canvasMenu.worldY,
+                  image: "", scene: `SC ${Math.ceil((frames.length + 1) / 2)}`, shot: "WIDE",
+                  description: "New frame — click to edit", duration: "3s", actors: [],
+                }]);
+                setSelectedFrame(newId);
+                setCanvasMenu(null);
+              }}
+            >
+              <Plus className="w-4 h-4" /> Add New Frame
+            </button>
+            <div className="h-px bg-border my-1" />
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => { autoLayout(); setCanvasMenu(null); }}
+            >
+              <Grid3X3 className="w-4 h-4" /> Auto Layout
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => { fitToScreen(); setCanvasMenu(null); }}
+            >
+              <Maximize className="w-4 h-4" /> Fit to Screen
+            </button>
+            <div className="h-px bg-border my-1" />
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setFrames(prev => prev.map(f => ({ ...f })));
+                setSelectedFrame(null);
+                setCanvasMenu(null);
+              }}
+            >
+              <MousePointer className="w-4 h-4" /> Select All
+            </button>
+          </div>
+        )}
 
         {/* Minimap */}
         <div className="absolute bottom-4 right-4 w-[160px] h-[100px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
