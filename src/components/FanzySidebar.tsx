@@ -1,5 +1,5 @@
 import {
-  FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download,
+  Lightbulb, FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download,
   Search, Settings, FolderOpen, ArrowLeft
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
