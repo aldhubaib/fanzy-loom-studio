@@ -395,24 +395,50 @@ export function StoryboardCanvas() {
           }}
         >
           {/* Connectors SVG */}
-          <svg className="absolute inset-0 w-[4000px] h-[4000px] pointer-events-none">
+          <svg className="absolute inset-0 w-[4000px] h-[4000px]" style={{ pointerEvents: "none" }}>
             <defs>
               <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--muted-foreground))" opacity="0.4" />
+                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.6" />
+              </marker>
+              <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.9" />
               </marker>
             </defs>
-            {connectors.map(c => c && (
-              <g key={c.id}>
+            {connectors.map(c => (
+              <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
+                {/* Invisible fat hit area */}
                 <path
-                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 40} ${c.y1}, ${c.x2 - 40} ${c.y2}, ${c.x2} ${c.y2}`}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeOpacity="0.25"
+                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
+                  stroke="transparent"
+                  strokeWidth="14"
+                  fill="none"
+                />
+                <path
+                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity="0.35"
                   strokeWidth="2"
                   fill="none"
                   markerEnd="url(#arrowhead)"
+                  className="hover:stroke-[hsl(var(--destructive))] transition-colors"
                 />
               </g>
             ))}
+            {/* Active connecting wire */}
+            {connectingFrom && (() => {
+              const p = getPortPos(connectingFrom, "right");
+              return (
+                <path
+                  d={`M ${p.x} ${p.y} C ${p.x + 60} ${p.y}, ${connectingMouse.x - 60} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity="0.7"
+                  strokeWidth="2"
+                  strokeDasharray="6 4"
+                  fill="none"
+                  markerEnd="url(#arrowhead-active)"
+                />
+              );
+            })()}
           </svg>
 
           {/* Frames */}
