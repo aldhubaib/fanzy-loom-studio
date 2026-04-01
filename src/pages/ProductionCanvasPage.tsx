@@ -784,10 +784,9 @@ export default function ProductionCanvasPage() {
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="transparent" strokeWidth="16" fill="none" />
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`}
                       stroke={c.isZoneConn ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"}
-                      strokeOpacity={c.isZoneConn ? 0.25 : 0.4}
+                      strokeOpacity={c.isZoneConn ? 0.4 : 0.4}
                       strokeWidth={c.isZoneConn ? 3 : 2.5}
                       strokeLinecap="round"
-                      strokeDasharray={c.isZoneConn ? "12 8" : "none"}
                       fill="none" />
                   </g>
                 );
