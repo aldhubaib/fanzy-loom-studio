@@ -665,8 +665,18 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
             })()}
           </div>
 
-          {/* Delete */}
-          <div className="pt-2">
+          {/* Swap & Delete */}
+          <div className="pt-2 space-y-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1.5"
+              onClick={() => setSwapOpen(true)}
+              disabled={allCharacters.length < 2}
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              Swap with another actor
+            </Button>
             <Button
               variant="outline"
               size="sm"
