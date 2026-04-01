@@ -45,30 +45,26 @@ const actorRoster: Actor[] = [
   { id: "a3", name: "Eddie", avatar: actorEddie },
 ];
 
-interface FrameData {
-  id: string;
-  x: number;
-  y: number;
-  image: string;
-  scene: string;
-  shot: string;
-  description: string;
-  duration: string;
-  actors: string[]; // actor ids
-}
+import { FrameData, GeneratedImage, Actor } from "./FrameSettingsPanel";
 
 interface Connection {
   from: string;
   to: string;
 }
 
+const actorRoster: Actor[] = [
+  { id: "a1", name: "Marlowe", avatar: actorMarlowe },
+  { id: "a2", name: "Vivian", avatar: actorVivian },
+  { id: "a3", name: "Eddie", avatar: actorEddie },
+];
+
 const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"] },
-  { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"] },
-  { id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"] },
-  { id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"] },
-  { id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"] },
-  { id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"] },
+  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], generatedImages: [], selectedImageId: null },
+  { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], generatedImages: [], selectedImageId: null },
+  { id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], generatedImages: [], selectedImageId: null },
+  { id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], generatedImages: [], selectedImageId: null },
+  { id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], generatedImages: [], selectedImageId: null },
+  { id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], generatedImages: [], selectedImageId: null },
 ];
 
 const FRAME_W = 280;
