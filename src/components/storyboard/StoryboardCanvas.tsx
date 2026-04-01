@@ -2,13 +2,18 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
-  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace,
+  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace, UserPlus, UserMinus,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+
+import actorMarlowe from "@/assets/actors/marlowe.png";
+import actorVivian from "@/assets/actors/vivian.png";
+import actorEddie from "@/assets/actors/eddie.png";
 
 const shotDescriptions: Record<string, string> = {
   "WIDE": "Wide Shot (WS) — Shows the full scene and environment, establishing location and context.",
