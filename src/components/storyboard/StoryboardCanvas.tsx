@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
-  Settings, Sparkles,
+  Settings, Sparkles, Images, ChevronDown, ChevronUp, Check,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { FrameSettingsPanel } from "./FrameSettingsPanel";
