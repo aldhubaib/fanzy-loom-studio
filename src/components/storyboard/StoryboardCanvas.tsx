@@ -38,7 +38,8 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H = 280;
+const FRAME_H_BASE = 230; // image(150) + info(~80)
+const FRAME_H_WITH_THUMB = 268; // + thumbnail row (~38)
 const PORT_RADIUS = 6;
 
 const initialConnections: Connection[] = [
@@ -147,13 +148,13 @@ export function StoryboardCanvas() {
       const draggedFrame = frames[draggedIdx];
       if (draggedFrame) {
         const dragCenterX = draggedFrame.x + FRAME_W / 2;
-        const dragCenterY = draggedFrame.y + FRAME_H / 2;
+        const dragCenterY = draggedFrame.y + FRAME_H_BASE / 2;
         let closestIdx = -1;
         let closestDist = Infinity;
         frames.forEach((f, i) => {
           if (i === draggedIdx) return;
           const cx = f.x + FRAME_W / 2;
-          const cy = f.y + FRAME_H / 2;
+          const cy = f.y + FRAME_H_BASE / 2;
           const dist = Math.hypot(dragCenterX - cx, dragCenterY - cy);
           if (dist < FRAME_W * 0.6 && dist < closestDist) {
             closestDist = dist;
@@ -197,7 +198,7 @@ export function StoryboardCanvas() {
     const minX = Math.min(...frames.map(f => f.x));
     const minY = Math.min(...frames.map(f => f.y));
     const maxX = Math.max(...frames.map(f => f.x + FRAME_W));
-    const maxY = Math.max(...frames.map(f => f.y + FRAME_H));
+    const maxY = Math.max(...frames.map(f => f.y + FRAME_H_WITH_THUMB));
     const contentW = maxX - minX + 100;
     const contentH = maxY - minY + 100;
     const newZoom = Math.min(rect.width / contentW, rect.height / contentH, 1.5);
@@ -279,15 +280,21 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Helper to get port center positions (matching the CSS -left-[7px] / -right-[7px] + w-3.5 = 14px, center at 7px out)
+  // Get dynamic frame height based on incoming connections
+  const getFrameH = useCallback((frameId: string) => {
+    const hasIncoming = connections.some(c => c.to === frameId);
+    return hasIncoming ? FRAME_H_WITH_THUMB : FRAME_H_BASE;
+  }, [connections]);
+
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
+    const h = getFrameH(frameId);
     return {
       x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + FRAME_H / 2,
+      y: f.y + h / 2,
     };
-  }, [frames]);
+  }, [frames, getFrameH]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
@@ -466,7 +473,7 @@ export function StoryboardCanvas() {
                   left: frame.x,
                   top: frame.y,
                   width: FRAME_W,
-                  height: FRAME_H,
+                  
                 }}
                 onMouseDown={(e) => startFrameDrag(e, frame)}
               >
@@ -550,7 +557,7 @@ export function StoryboardCanvas() {
                 x={f.x}
                 y={f.y}
                 width={FRAME_W}
-                height={FRAME_H}
+                height={FRAME_H_BASE}
                 rx={6}
                 fill={selectedFrame === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
                 fillOpacity={selectedFrame === f.id ? 0.6 : 0.2}
