@@ -247,15 +247,21 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <ListPickerDialog open={formatOpen} onOpenChange={setFormatOpen} title="Choose Format" items={formats} selected={format} onSelect={setFormat} />
 
           {/* Continue button */}
-          <div className="flex items-center mt-8">
-            <Button
-              onClick={() => navigate(`/project/${projectId}/script`)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11 text-base font-semibold"
-            >
-              Continue to Script
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
+          {(() => {
+            const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format);
+            return (
+              <div className="flex items-center mt-8">
+                <Button
+                  onClick={() => navigate(`/project/${projectId}/script`)}
+                  disabled={!isReady}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11 text-base font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Continue to Script
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            );
+          })()}
         </motion.div>
 
       </div>
