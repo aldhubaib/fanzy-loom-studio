@@ -776,55 +776,83 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-          {characters.map(char => (
-            <motion.button
-              key={char.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.03, y: -4 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setSelectedCharacterId(char.id)}
-              className={cn(
-                "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
-                selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
-              )}
-            >
-              <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
-                {char.portrait ? (
-                  <img src={char.portrait} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" draggable={false} />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                    <User className="w-12 h-12 text-muted-foreground/20" />
-                  </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+          {characters.map(char => {
+            const selectedPortrait = char.generatedPortraits.find(p => p.id === char.selectedPortraitId);
+            const displayImage = selectedPortrait?.src || char.portrait;
+            return (
+              <motion.button
+                key={char.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.03, y: -4 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setSelectedCharacterId(char.id)}
+                className={cn(
+                  "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
+                  selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
                 )}
-                <div className="absolute top-2 left-2">
-                  <span className={cn(
-                    "text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md",
-                    char.role === "Protagonist" && "bg-amber-500/20 text-amber-300",
-                    char.role === "Antagonist" && "bg-red-500/20 text-red-300",
-                    char.role === "Supporting" && "bg-blue-500/20 text-blue-300",
-                    char.role === "Extra" && "bg-slate-500/20 text-slate-300",
-                  )}>
-                    {char.role}
-                  </span>
-                </div>
-                {char.generatedPortraits.length > 0 && (
-                  <div className="absolute top-2 right-2">
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-black/50 text-white/80 backdrop-blur-sm">
-                      {char.generatedPortraits.length} variants
+              >
+                <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
+                  {displayImage ? (
+                    <img src={displayImage} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" draggable={false} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                      <User className="w-12 h-12 text-muted-foreground/20" />
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2">
+                    <span className={cn(
+                      "text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md",
+                      char.role === "Protagonist" && "bg-amber-500/20 text-amber-300",
+                      char.role === "Antagonist" && "bg-red-500/20 text-red-300",
+                      char.role === "Supporting" && "bg-blue-500/20 text-blue-300",
+                      char.role === "Extra" && "bg-slate-500/20 text-slate-300",
+                    )}>
+                      {char.role}
                     </span>
                   </div>
+                </div>
+
+                {/* Portrait variants strip */}
+                {char.generatedPortraits.length > 1 && (
+                  <div className="flex gap-1 px-2 py-1.5 bg-card border-t border-border overflow-hidden">
+                    {char.generatedPortraits.slice(0, 4).map(p => {
+                      const isActive = char.selectedPortraitId === p.id;
+                      return (
+                        <div
+                          key={p.id}
+                          className={cn(
+                            "relative w-10 h-8 rounded-md overflow-hidden shrink-0 border",
+                            isActive ? "border-primary ring-1 ring-primary" : "border-border"
+                          )}
+                        >
+                          <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                          {isActive && (
+                            <div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+                              <Check className="w-2 h-2 text-primary-foreground" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {char.generatedPortraits.length > 4 && (
+                      <div className="w-10 h-8 rounded-md bg-secondary flex items-center justify-center shrink-0 border border-border">
+                        <span className="text-[9px] text-muted-foreground">+{char.generatedPortraits.length - 4}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
-              </div>
-              <div className="p-3">
-                <h3 className="text-sm font-semibold text-foreground truncate">{char.name}</h3>
-                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                  {char.description || "Click to define"}
-                </p>
-              </div>
-            </motion.button>
-          ))}
+
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold text-foreground truncate">{char.name}</h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                    {char.description || "Click to define"}
+                  </p>
+                </div>
+              </motion.button>
+            );
+          })}
 
           <motion.button
             whileHover={{ scale: 1.03, y: -4 }}
