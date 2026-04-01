@@ -9,12 +9,18 @@ import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
 
+// Character photo imports
+import charMarlowe from "@/assets/characters/marlowe.jpg";
+import charVivian from "@/assets/characters/vivian.jpg";
+import charEddie from "@/assets/characters/eddie.jpg";
+import charBartender from "@/assets/characters/bartender.jpg";
+
 // Character thumbnail data
-const characterThumbnails: Record<string, { initials: string; color: string }> = {
-  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60" },
-  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60" },
-  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60" },
-  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60" },
+const characterThumbnails: Record<string, { initials: string; color: string; photo?: string }> = {
+  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60", photo: charMarlowe },
+  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60", photo: charVivian },
+  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60", photo: charEddie },
+  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60", photo: charBartender },
 };
 
 // Location thumbnail data
