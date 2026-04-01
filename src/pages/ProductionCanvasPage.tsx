@@ -1068,9 +1068,11 @@ export default function ProductionCanvasPage() {
               {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
               {selectedActor && <User className="w-4 h-4 text-cyan-500" />}
               {selectedLocation && <MapPin className="w-4 h-4 text-emerald-500" />}
+              {selectedScript && <FileText className="w-4 h-4 text-purple-400" />}
               {selectedZone && (
                 selectedZone.type === "casting" ? <Users className="w-4 h-4 text-cyan-500" /> :
                 selectedZone.type === "shots" ? <Camera className="w-4 h-4 text-primary" /> :
+                selectedZone.type === "script" ? <FileText className="w-4 h-4 text-purple-400" /> :
                 <MapPin className="w-4 h-4 text-emerald-500" />
               )}
               <h2 className="text-sm font-bold text-foreground">{drawerTitle}</h2>
