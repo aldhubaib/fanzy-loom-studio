@@ -486,6 +486,7 @@ export function StoryboardCanvas() {
               onDelete={() => deleteFrame(idx)}
             >
               <div
+                ref={(el) => { frameRefs.current[frame.id] = el; }}
                 className={cn(
                   "absolute rounded-xl border-2 bg-card transition-shadow duration-150 select-none group",
                   selectedFrame === frame.id
