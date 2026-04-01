@@ -675,6 +675,10 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                   />
                 </label>
               </div>
+              <Button size="sm" className="w-full gap-1.5 h-9 mt-3">
+                <Sparkles className="w-3.5 h-3.5" />
+                Generate
+              </Button>
             </div>
           )}
 
