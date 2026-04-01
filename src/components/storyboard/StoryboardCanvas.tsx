@@ -33,18 +33,6 @@ import frame4 from "@/assets/storyboard/frame-4.jpg";
 import frame5 from "@/assets/storyboard/frame-5.jpg";
 import frame6 from "@/assets/storyboard/frame-6.jpg";
 
-interface Actor {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
-const actorRoster: Actor[] = [
-  { id: "a1", name: "Marlowe", avatar: actorMarlowe },
-  { id: "a2", name: "Vivian", avatar: actorVivian },
-  { id: "a3", name: "Eddie", avatar: actorEddie },
-];
-
 import { FrameData, GeneratedImage, Actor } from "./FrameSettingsPanel";
 
 interface Connection {
