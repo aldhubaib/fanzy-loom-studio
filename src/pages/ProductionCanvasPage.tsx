@@ -161,9 +161,9 @@ const shotTypes = [
 ];
 
 const actorRoster: Actor[] = [
-  { id: "a1", name: "Jack Marlowe", avatar: actorMarlowe, role: "Protagonist", description: "A world-weary private detective." },
-  { id: "a2", name: "Vivian Lake", avatar: actorVivian, role: "Supporting", description: "A mysterious woman with a missing person case." },
-  { id: "a3", name: "Eddie", avatar: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant." },
+  { id: "a1", name: "Jack Marlowe", portrait: actorMarlowe, role: "Protagonist", description: "A world-weary private detective.", gender: "Male", ageRange: "Middle Age (31-55)", ethnicity: "Caucasian", bodyType: "Average", height: "Tall", hairColor: "Dark Brown", hairStyle: "Short", eyeColor: "Brown", skinTone: "Light", clothing: "Formal", distinguishingFeatures: "Facial Scar", generatedPortraits: [{ id: "g1a", src: actorMarlowe, description: "Detective — classic noir" }], selectedPortraitId: "g1a" },
+  { id: "a2", name: "Vivian Lake", portrait: actorVivian, role: "Supporting", description: "A mysterious woman with a missing person case.", gender: "Female", ageRange: "Young Adult (18-30)", ethnicity: "Caucasian", bodyType: "Slim", height: "Average", hairColor: "Dark Brown", hairStyle: "Long", eyeColor: "Green", skinTone: "Very Light", clothing: "High Fashion", distinguishingFeatures: "None", generatedPortraits: [{ id: "g2a", src: actorVivian, description: "Vivian — classic look" }], selectedPortraitId: "g2a" },
+  { id: "a3", name: "Eddie", portrait: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant.", gender: "Male", ageRange: "Young Adult (18-30)", ethnicity: "African", bodyType: "Average", height: "Average", hairColor: "Black", hairStyle: "Short", eyeColor: "Brown", skinTone: "Dark", clothing: "Streetwear", distinguishingFeatures: "None", generatedPortraits: [{ id: "g3a", src: actorEddie, description: "Eddie — street look" }], selectedPortraitId: "g3a" },
 ];
 
 // ─── Initial Data ───────────────────────────────────────────
