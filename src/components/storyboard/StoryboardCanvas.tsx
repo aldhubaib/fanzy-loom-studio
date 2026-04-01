@@ -2,11 +2,8 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
-  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace, UserPlus, UserMinus,
+  Settings, Sparkles,
 } from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { FrameSettingsPanel } from "./FrameSettingsPanel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
