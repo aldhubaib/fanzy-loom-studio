@@ -2,13 +2,18 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
-  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace,
+  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace, UserPlus, UserMinus,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+
+import actorMarlowe from "@/assets/actors/marlowe.png";
+import actorVivian from "@/assets/actors/vivian.png";
+import actorEddie from "@/assets/actors/eddie.png";
 
 const shotDescriptions: Record<string, string> = {
   "WIDE": "Wide Shot (WS) — Shows the full scene and environment, establishing location and context.",
@@ -30,6 +35,18 @@ import frame4 from "@/assets/storyboard/frame-4.jpg";
 import frame5 from "@/assets/storyboard/frame-5.jpg";
 import frame6 from "@/assets/storyboard/frame-6.jpg";
 
+interface Actor {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+const actorRoster: Actor[] = [
+  { id: "a1", name: "Marlowe", avatar: actorMarlowe },
+  { id: "a2", name: "Vivian", avatar: actorVivian },
+  { id: "a3", name: "Eddie", avatar: actorEddie },
+];
+
 interface FrameData {
   id: string;
   x: number;
@@ -39,20 +56,21 @@ interface FrameData {
   shot: string;
   description: string;
   duration: string;
+  actors: string[]; // actor ids
 }
 
 interface Connection {
-  from: string; // frame id
-  to: string;   // frame id
+  from: string;
+  to: string;
 }
 
 const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s" },
-  { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s" },
-  { id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s" },
-  { id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s" },
-  { id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s" },
-  { id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s" },
+  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"] },
+  { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"] },
+  { id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"] },
+  { id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"] },
+  { id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"] },
+  { id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"] },
 ];
 
 const FRAME_W = 280;
@@ -255,6 +273,7 @@ export function StoryboardCanvas() {
       shot: "WIDE",
       description: "New frame — click to edit",
       duration: "3s",
+      actors: [],
     }]);
     setSelectedFrame(newId);
   }, [frames]);
@@ -646,6 +665,76 @@ export function StoryboardCanvas() {
                       </div>
                     );
                   })()}
+                </div>
+
+                {/* Actor strip below card */}
+                <div
+                  className="absolute flex items-center gap-1 pt-1.5"
+                  style={{ top: "100%", left: 0 }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <TooltipProvider delayDuration={200}>
+                    {frame.actors.map(actorId => {
+                      const actor = actorRoster.find(a => a.id === actorId);
+                      if (!actor) return null;
+                      return (
+                        <Tooltip key={actor.id}>
+                          <TooltipTrigger asChild>
+                            <div className="relative group/actor w-7 h-7 rounded-full overflow-hidden border-2 border-border hover:border-primary transition-colors cursor-pointer">
+                              <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
+                              <button
+                                className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFrames(prev => prev.map(f =>
+                                    f.id === frame.id ? { ...f, actors: f.actors.filter(a => a !== actorId) } : f
+                                  ));
+                                }}
+                              >
+                                <X className="w-3 h-3 text-destructive" />
+                              </button>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </TooltipProvider>
+
+                  {/* Add actor button */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="w-6 h-6 rounded-full border border-dashed border-muted-foreground/40 flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:border-foreground/60 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <UserPlus className="w-3 h-3" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40 p-2" side="bottom" align="start" onMouseDown={(e) => e.stopPropagation()}>
+                      <p className="text-[10px] text-muted-foreground font-semibold mb-1.5 px-1">ASSIGN ACTOR</p>
+                      {actorRoster
+                        .filter(a => !frame.actors.includes(a.id))
+                        .map(actor => (
+                          <button
+                            key={actor.id}
+                            className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFrames(prev => prev.map(f =>
+                                f.id === frame.id ? { ...f, actors: [...f.actors, actor.id] } : f
+                              ));
+                            }}
+                          >
+                            <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
+                            <span>{actor.name}</span>
+                          </button>
+                        ))}
+                      {actorRoster.filter(a => !frame.actors.includes(a.id)).length === 0 && (
+                        <p className="text-[10px] text-muted-foreground px-1 py-1">All actors assigned</p>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </FrameContextMenu>
