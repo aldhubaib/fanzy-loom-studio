@@ -38,7 +38,8 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H = 280;
+const FRAME_H_BASE = 230; // image(150) + info(~80)
+const FRAME_H_WITH_THUMB = 268; // + thumbnail row (~38)
 const PORT_RADIUS = 6;
 
 const initialConnections: Connection[] = [
