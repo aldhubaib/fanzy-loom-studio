@@ -38,9 +38,8 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H_BASE = 230; // image(150) + info(~80)
-const FRAME_H_WITH_THUMB = 268; // + thumbnail row (~38)
-const PORT_RADIUS = 6;
+const FRAME_H_BASE = 230; // fallback until measured
+const PORT_Y = FRAME_H_BASE / 2;
 
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" },
@@ -54,6 +53,7 @@ type Tool = "select" | "hand";
 
 export function StoryboardCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const frameRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -69,6 +69,11 @@ export function StoryboardCanvas() {
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
+  const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
+
+  const getFrameHeight = useCallback((frameId: string) => {
+    return frameHeights[frameId] ?? FRAME_H_BASE;
+  }, [frameHeights]);
 
   // Zoom with scroll wheel — zoom towards mouse position
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -198,7 +203,7 @@ export function StoryboardCanvas() {
     const minX = Math.min(...frames.map(f => f.x));
     const minY = Math.min(...frames.map(f => f.y));
     const maxX = Math.max(...frames.map(f => f.x + FRAME_W));
-    const maxY = Math.max(...frames.map(f => f.y + FRAME_H_WITH_THUMB));
+    const maxY = Math.max(...frames.map(f => f.y + getFrameHeight(f.id)));
     const contentW = maxX - minX + 100;
     const contentH = maxY - minY + 100;
     const newZoom = Math.min(rect.width / contentW, rect.height / contentH, 1.5);
@@ -271,6 +276,32 @@ export function StoryboardCanvas() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const observers: ResizeObserver[] = [];
+    const nextHeights: Record<string, number> = {};
+
+    frames.forEach(frame => {
+      const el = frameRefs.current[frame.id];
+      if (!el) return;
+      nextHeights[frame.id] = el.offsetHeight;
+
+      const ro = new ResizeObserver(entries => {
+        const entry = entries[0];
+        if (!entry) return;
+        const h = entry.contentRect.height;
+        setFrameHeights(prev => (prev[frame.id] === h ? prev : { ...prev, [frame.id]: h }));
+      });
+      ro.observe(el);
+      observers.push(ro);
+    });
+
+    setFrameHeights(prev => ({ ...prev, ...nextHeights }));
+
+    return () => {
+      observers.forEach(o => o.disconnect());
+    };
+  }, [frames, connections]);
+
   // Space bar for hand tool
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.code === "Space" && !e.repeat) { setTool("hand"); e.preventDefault(); }};
@@ -280,21 +311,14 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Get dynamic frame height based on incoming connections
-  const getFrameH = useCallback((frameId: string) => {
-    const hasIncoming = connections.some(c => c.to === frameId);
-    return hasIncoming ? FRAME_H_WITH_THUMB : FRAME_H_BASE;
-  }, [connections]);
-
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
-    const h = getFrameH(frameId);
     return {
       x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + h / 2,
+      y: f.y + PORT_Y,
     };
-  }, [frames, getFrameH]);
+  }, [frames]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
@@ -408,8 +432,7 @@ export function StoryboardCanvas() {
           <svg className="absolute inset-0 w-[4000px] h-[4000px]" style={{ pointerEvents: "none" }}>
             {connectors.map(c => {
               const dx = Math.abs(c.x2 - c.x1);
-              const dy = Math.abs(c.y2 - c.y1);
-              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
+              const curvature = Math.min(140, Math.max(18, dx * 0.35));
               return (
                 <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
                   <path
@@ -433,7 +456,7 @@ export function StoryboardCanvas() {
             {connectingFrom && (() => {
               const p = getPortPos(connectingFrom, "right");
               const dx = Math.abs(connectingMouse.x - p.x);
-              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
+              const curvature = Math.min(140, Math.max(18, dx * 0.35));
               return (
                 <path
                   d={`M ${p.x} ${p.y} C ${p.x + curvature} ${p.y}, ${connectingMouse.x - curvature} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
@@ -462,6 +485,7 @@ export function StoryboardCanvas() {
               onDelete={() => deleteFrame(idx)}
             >
               <div
+                ref={(el) => { frameRefs.current[frame.id] = el; }}
                 className={cn(
                   "absolute rounded-xl border-2 bg-card transition-shadow duration-150 select-none group",
                   selectedFrame === frame.id
@@ -479,13 +503,15 @@ export function StoryboardCanvas() {
               >
                 {/* Left port (input) */}
                 <div
-                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  className="absolute -left-[9px] -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  style={{ top: PORT_Y }}
                   onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
                 {/* Right port (output) */}
                 <div
-                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  className="absolute -right-[9px] -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  style={{ top: PORT_Y }}
                   onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
                 />
 
