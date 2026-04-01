@@ -122,9 +122,7 @@ export function FormattingToolbar({
               </span>
             </div>
           </>
-        ) : (
-          <span className="text-[10px] text-muted-foreground hidden lg:inline ml-1">⌘1-7 to switch type</span>
-        )}
+        ) : null}
 
         <div className="ml-auto" />
       </div>
