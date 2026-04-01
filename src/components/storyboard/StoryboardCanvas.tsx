@@ -111,12 +111,6 @@ export function StoryboardCanvas() {
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
   const [settingsFrame, setSettingsFrame] = useState<string | null>(null);
-  const [actorChangePrompt, setActorChangePrompt] = useState<{
-    frameId: string;
-    actorId: string;
-    action: "add" | "remove";
-    actorName: string;
-  } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
