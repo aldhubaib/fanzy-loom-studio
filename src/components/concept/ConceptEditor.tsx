@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Sparkles, Dices, ArrowRight, X, Plus,
+  Sparkles, Dices, ArrowRight, X, Plus, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Genre images
 import genreNoir from "@/assets/genres/noir.jpg";
