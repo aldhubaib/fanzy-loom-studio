@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
-import { Plus, User, ArrowLeft, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
+import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 import detectiveImg from "@/assets/casting/detective.jpg";
 import femmeFataleImg from "@/assets/casting/femme-fatale.jpg";
@@ -51,7 +52,6 @@ interface Character {
   selectedPortraitId: string | null;
 }
 
-// ─── Attribute option with image ────────────────────────────
 interface VisualOption {
   label: string;
   image?: string;
@@ -59,8 +59,9 @@ interface VisualOption {
   gradient?: string;
 }
 
-// ─── Attribute categories ───────────────────────────────────
-const attributeCategories = [
+type AttributeKey = "gender" | "ageRange" | "ethnicity" | "bodyType" | "height" | "hairStyle" | "hairColor" | "eyeColor" | "skinTone" | "clothing" | "distinguishingFeatures";
+
+const attributeCategories: { key: AttributeKey; label: string }[] = [
   { key: "gender", label: "Gender" },
   { key: "ageRange", label: "Age Range" },
   { key: "ethnicity", label: "Ethnicity" },
@@ -72,11 +73,8 @@ const attributeCategories = [
   { key: "skinTone", label: "Skin Tone" },
   { key: "clothing", label: "Outfit Style" },
   { key: "distinguishingFeatures", label: "Details" },
-] as const;
+];
 
-type AttributeKey = (typeof attributeCategories)[number]["key"];
-
-// ─── Option data with images ────────────────────────────────
 const attributeOptions: Record<AttributeKey, VisualOption[]> = {
   gender: [
     { label: "Male", gradient: "from-blue-900/60 to-blue-700/20" },
@@ -204,113 +202,161 @@ const initialCharacters: Character[] = [
   },
 ];
 
-// ─── Visual Option Card (image-based) ───────────────────────
-function ImageOptionCard({ option, selected, onSelect }: {
-  option: VisualOption;
-  selected: boolean;
-  onSelect: () => void;
+// ─── Attribute Picker Dialog ────────────────────────────────
+function AttributePickerDialog({
+  open, onOpenChange, category, options, selected, onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  category: string;
+  options: VisualOption[];
+  selected: string;
+  onSelect: (v: string) => void;
 }) {
-  const isColor = !!option.color && !option.image;
-  const isImage = !!option.image;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl bg-card border-border">
+        <DialogHeader><DialogTitle>{category}</DialogTitle></DialogHeader>
+        <div className={cn(
+          "grid gap-3 mt-4",
+          options.some(o => o.image) ? "grid-cols-3 sm:grid-cols-4" : options.some(o => o.color) ? "grid-cols-4 sm:grid-cols-6" : "grid-cols-2 sm:grid-cols-3"
+        )}>
+          {options.map(opt => {
+            const isSelected = selected === opt.label;
+            const isImage = !!opt.image;
+            const isColor = !!opt.color && !opt.image;
 
+            return (
+              <div key={opt.label}>
+                <button
+                  onClick={() => { onSelect(opt.label); onOpenChange(false); }}
+                  className={cn(
+                    "relative w-full overflow-hidden transition-all duration-200",
+                    isImage && "rounded-xl aspect-[3/4]",
+                    isColor && "rounded-full aspect-square mx-auto w-16",
+                    !isImage && !isColor && "rounded-xl aspect-[4/3] bg-gradient-to-br",
+                    !isImage && !isColor && (opt.gradient || "from-muted to-muted/50"),
+                    isSelected
+                      ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]"
+                      : "hover:scale-[1.03] hover:ring-1 hover:ring-border"
+                  )}
+                  style={isColor ? { backgroundColor: opt.color } : undefined}
+                >
+                  {isImage && (
+                    <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" draggable={false} />
+                  )}
+                  {!isImage && !isColor && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-2xl font-bold text-foreground/20">{opt.label.charAt(0)}</span>
+                    </div>
+                  )}
+                  {isSelected && (
+                    <div className={cn("absolute flex items-center justify-center bg-primary", isColor ? "top-0 right-0 w-4 h-4 rounded-full" : "top-2 right-2 w-5 h-5 rounded-full")}>
+                      <Check className={cn("text-primary-foreground", isColor ? "w-2.5 h-2.5" : "w-3 h-3")} />
+                    </div>
+                  )}
+                </button>
+                <p className={cn("text-xs font-medium text-center mt-1.5", isSelected ? "text-primary" : "text-muted-foreground")}>
+                  {opt.label}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Picker Row (in drawer) ─────────────────────────────────
+function AttributeRow({ label, value, options, onClick }: {
+  label: string;
+  value: string;
+  options: VisualOption[];
+  onClick: () => void;
+}) {
+  const opt = options.find(o => o.label === value);
   return (
     <button
-      onClick={onSelect}
-      className={cn(
-        "group relative flex flex-col items-center gap-2 transition-all duration-200",
-      )}
+      onClick={onClick}
+      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-border bg-card hover:border-muted-foreground/40 transition-all text-left"
     >
-      <div className={cn(
-        "relative overflow-hidden rounded-xl transition-all duration-200",
-        isImage ? "w-28 h-36" : isColor ? "w-20 h-20 rounded-full" : "w-28 h-36",
-        selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]" : "hover:scale-[1.02]",
-        !isImage && !isColor && "bg-gradient-to-br",
-        !isImage && !isColor && (option.gradient || "from-muted to-muted/50"),
+      {opt?.image ? (
+        <img src={opt.image} alt={value} className="w-8 h-8 rounded-lg object-cover" />
+      ) : opt?.color ? (
+        <div className="w-8 h-8 rounded-full border border-border/50" style={{ backgroundColor: opt.color }} />
+      ) : (
+        <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center", opt?.gradient || "from-muted to-muted/50")}>
+          <span className="text-xs font-bold text-foreground/30">{(value || "?").charAt(0)}</span>
+        </div>
       )}
-        style={isColor ? { backgroundColor: option.color } : undefined}
-      >
-        {isImage && (
-          <img
-            src={option.image}
-            alt={option.label}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-        )}
-        {!isImage && !isColor && (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-3xl font-bold text-foreground/20">{option.label.charAt(0)}</span>
-          </div>
-        )}
-        {selected && (
-          <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-            <Check className="w-3 h-3 text-primary-foreground" />
-          </div>
-        )}
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-0.5">{label}</p>
+        <p className="text-sm font-medium text-foreground truncate">{value || "Choose..."}</p>
       </div>
-      <span className={cn(
-        "text-xs font-medium transition-colors",
-        selected ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-      )}>
-        {option.label}
-      </span>
+      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
     </button>
   );
 }
 
-// ─── Character Detail Editor ────────────────────────────────
-function CharacterDetailEditor({ character, onChange, onBack, onDelete }: {
+// ─── Slide Drawer Panel ─────────────────────────────────────
+function CharacterDrawer({ character, onChange, onClose, onDelete }: {
   character: Character;
   onChange: (c: Character) => void;
-  onBack: () => void;
+  onClose: () => void;
   onDelete: () => void;
 }) {
-  const [activeCategory, setActiveCategory] = useState<AttributeKey>("gender");
+  const [pickerOpen, setPickerOpen] = useState<AttributeKey | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const currentOptions = attributeOptions[activeCategory];
-  const currentValue = character[activeCategory] as string;
-
-  const handleSelect = (label: string) => {
-    onChange({ ...character, [activeCategory]: label });
-  };
-
-  const selectPortrait = (portrait: GeneratedPortrait) => {
-    onChange({ ...character, portrait: portrait.src, selectedPortraitId: portrait.id });
+  const selectPortrait = (p: GeneratedPortrait) => {
+    onChange({ ...character, portrait: p.src, selectedPortraitId: p.id });
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-card/50 shrink-0">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-secondary transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </button>
-        <div className="w-14 h-18 rounded-lg overflow-hidden border border-border shrink-0">
-          {character.portrait ? (
-            <img src={character.portrait} alt={character.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-secondary">
-              <User className="w-5 h-5 text-muted-foreground/30" />
-            </div>
-          )}
+    <>
+      <div className="fixed top-0 right-0 h-full w-[400px] z-50 bg-card border-l border-border shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+          <h2 className="text-sm font-bold text-foreground">Character Details</h2>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <div className="flex-1 min-w-0">
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+          {/* Portrait preview */}
+          <div className="w-full rounded-xl overflow-hidden border border-border bg-secondary">
+            {character.portrait ? (
+              <img src={character.portrait} alt={character.name} className="w-full object-cover max-h-[220px]" />
+            ) : (
+              <div className="w-full h-[160px] flex items-center justify-center">
+                <User className="w-10 h-10 text-muted-foreground/20" />
+              </div>
+            )}
+          </div>
+
+          {/* Name */}
           <input
             value={character.name}
             onChange={e => onChange({ ...character, name: e.target.value })}
-            className="text-lg font-bold bg-transparent border-none outline-none text-foreground w-full"
+            className="w-full text-lg font-bold bg-transparent border-none outline-none text-foreground"
             placeholder="Character Name"
           />
-          <div className="flex items-center gap-2 mt-0.5">
+
+          {/* Role pills */}
+          <div className="flex gap-1.5">
             {roleOptions.map(r => (
               <button
                 key={r}
                 onClick={() => onChange({ ...character, role: r })}
                 className={cn(
-                  "text-[11px] px-2 py-0.5 rounded-full border transition-colors",
+                  "text-[11px] px-2.5 py-1 rounded-full border transition-colors",
                   character.role === r
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border text-muted-foreground hover:text-foreground"
@@ -320,144 +366,112 @@ function CharacterDetailEditor({ character, onChange, onBack, onDelete }: {
               </button>
             ))}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-destructive border-destructive/30 hover:bg-destructive/10"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="w-3.5 h-3.5 mr-1" />
-            Delete
-          </Button>
-        </div>
-      </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: attribute categories */}
-        <div className="w-48 border-r border-border bg-card/30 overflow-y-auto shrink-0">
-          {attributeCategories.map(cat => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              className={cn(
-                "w-full text-left px-4 py-3 text-sm transition-colors border-l-2",
-                activeCategory === cat.key
-                  ? "bg-primary/10 text-primary border-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-transparent"
-              )}
-            >
-              {cat.label}
-              {character[cat.key] && (
-                <span className="block text-[10px] text-muted-foreground/70 mt-0.5 truncate">
-                  {character[cat.key] as string}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+          {/* Description */}
+          <textarea
+            value={character.description}
+            onChange={e => onChange({ ...character, description: e.target.value })}
+            placeholder="Character description..."
+            className="w-full min-h-[60px] rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+          />
 
-        {/* Right: visual options grid */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            <h3 className="text-sm font-semibold text-foreground mb-1">
-              {attributeCategories.find(c => c.key === activeCategory)?.label}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-5">
-              Select an option for your character's {attributeCategories.find(c => c.key === activeCategory)?.label.toLowerCase()}
-            </p>
+          <Separator />
 
-            <div className="flex flex-wrap gap-4">
-              {currentOptions.map(opt => (
-                <ImageOptionCard
-                  key={opt.label}
-                  option={opt}
-                  selected={currentValue === opt.label}
-                  onSelect={() => handleSelect(opt.label)}
-                />
-              ))}
-            </div>
-
-            {/* Description */}
-            <div className="mt-8">
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Character Description
-              </label>
-              <textarea
-                value={character.description}
-                onChange={e => onChange({ ...character, description: e.target.value })}
-                placeholder="Describe this character's personality, backstory, and role in the story..."
-                className="w-full min-h-[80px] rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+          {/* Attribute rows */}
+          <div className="space-y-2">
+            {attributeCategories.map(cat => (
+              <AttributeRow
+                key={cat.key}
+                label={cat.label}
+                value={character[cat.key] as string}
+                options={attributeOptions[cat.key]}
+                onClick={() => setPickerOpen(cat.key)}
               />
-            </div>
+            ))}
+          </div>
 
-            {/* Generate portraits section */}
-            <div className="mt-8 border-t border-border pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">Generated Portraits</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Generate character portraits based on your selections, then pick the one you like
-                  </p>
-                </div>
-                <Button size="sm" className="gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Generate
-                </Button>
+          <Separator />
+
+          {/* Generated Portraits */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Portraits</h3>
+                <p className="text-[11px] text-muted-foreground">Generate & pick a portrait</p>
               </div>
-
-              {character.generatedPortraits.length > 0 ? (
-                <div className="flex flex-wrap gap-3">
-                  {character.generatedPortraits.map((p, idx) => {
-                    const isActive = character.selectedPortraitId === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        className={cn(
-                          "relative rounded-xl overflow-hidden transition-all duration-200 group",
-                          "w-32 h-40",
-                          isActive
-                            ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                            : "hover:scale-[1.02] ring-1 ring-border"
-                        )}
-                        onClick={() => selectPortrait(p)}
-                      >
-                        <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
-                        {isActive && (
-                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                          <span className="text-[10px] text-white leading-tight">{p.description}</span>
-                        </div>
-                        {/* Expand button */}
-                        <button
-                          className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setLightboxIndex(idx);
-                          }}
-                        >
-                          <Expand className="w-3 h-3 text-white" />
-                        </button>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="rounded-xl border-2 border-dashed border-border bg-card/30 p-8 flex flex-col items-center gap-3">
-                  <Sparkles className="w-8 h-8 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground text-center">
-                    Click Generate to create portrait options based on your attribute selections
-                  </p>
-                </div>
-              )}
+              <Button size="sm" className="gap-1.5 h-8">
+                <Sparkles className="w-3.5 h-3.5" />
+                Generate
+              </Button>
             </div>
+
+            {character.generatedPortraits.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {character.generatedPortraits.map((p, idx) => {
+                  const isActive = character.selectedPortraitId === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      className={cn(
+                        "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
+                        isActive
+                          ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                          : "hover:scale-[1.02] ring-1 ring-border"
+                      )}
+                      onClick={() => selectPortrait(p)}
+                    >
+                      <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                      {isActive && (
+                        <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-3 h-3 text-primary-foreground" />
+                        </div>
+                      )}
+                      <button
+                        className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                      >
+                        <Expand className="w-2.5 h-2.5 text-white" />
+                      </button>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-6 flex flex-col items-center gap-2">
+                <Sparkles className="w-6 h-6 text-muted-foreground/30" />
+                <p className="text-xs text-muted-foreground text-center">
+                  Generate portrait options
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Delete */}
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Delete Character
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Attribute picker dialogs */}
+      {pickerOpen && (
+        <AttributePickerDialog
+          open={!!pickerOpen}
+          onOpenChange={(v) => { if (!v) setPickerOpen(null); }}
+          category={attributeCategories.find(c => c.key === pickerOpen)?.label || ""}
+          options={attributeOptions[pickerOpen]}
+          selected={character[pickerOpen] as string}
+          onSelect={(v) => onChange({ ...character, [pickerOpen]: v })}
+        />
+      )}
 
       {/* Lightbox */}
       {lightboxIndex !== null && character.generatedPortraits.length > 0 && (
@@ -471,41 +485,27 @@ function CharacterDetailEditor({ character, onChange, onBack, onDelete }: {
           >
             <X className="w-5 h-5 text-white" />
           </button>
-
           {lightboxIndex > 0 && (
             <button
-              className="absolute left-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="absolute left-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
               onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
             >
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
           )}
-
           <div className="max-w-2xl max-h-[80vh]" onClick={e => e.stopPropagation()}>
-            <img
-              src={character.generatedPortraits[lightboxIndex].src}
-              alt=""
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-            />
+            <img src={character.generatedPortraits[lightboxIndex].src} alt="" className="max-w-full max-h-[80vh] object-contain rounded-lg" />
             <div className="flex items-center justify-between mt-4 px-2">
               <p className="text-sm text-white/70">{character.generatedPortraits[lightboxIndex].description}</p>
-              <Button
-                size="sm"
-                onClick={() => {
-                  selectPortrait(character.generatedPortraits[lightboxIndex!]);
-                  setLightboxIndex(null);
-                }}
-                className="gap-1.5"
-              >
+              <Button size="sm" onClick={() => { selectPortrait(character.generatedPortraits[lightboxIndex!]); setLightboxIndex(null); }} className="gap-1.5">
                 <Check className="w-3.5 h-3.5" />
-                Use This Portrait
+                Use This
               </Button>
             </div>
           </div>
-
           {lightboxIndex < character.generatedPortraits.length - 1 && (
             <button
-              className="absolute right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="absolute right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
               onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
             >
               <ChevronRight className="w-5 h-5 text-white" />
@@ -517,21 +517,17 @@ function CharacterDetailEditor({ character, onChange, onBack, onDelete }: {
       {/* Delete dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete Character</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Delete Character</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete <span className="font-semibold text-foreground">{character.name}</span>? This cannot be undone.
+            Are you sure you want to delete <span className="font-semibold text-foreground">{character.name}</span>?
           </p>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" size="sm" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button variant="destructive" size="sm" onClick={() => { onDelete(); setDeleteOpen(false); }}>
-              Delete
-            </Button>
+            <Button variant="destructive" size="sm" onClick={() => { onDelete(); setDeleteOpen(false); }}>Delete</Button>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
@@ -576,123 +572,104 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
     setSelectedCharacterId(null);
   }, []);
 
-  // ── Grid view (all characters) ──
-  if (!selectedCharacter) {
-    return (
-      <div className="h-full overflow-auto pt-16">
-        <div className="max-w-6xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Cast</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {characters.length} character{characters.length !== 1 ? "s" : ""} — Click a character to define their appearance
-              </p>
-            </div>
-            <Button onClick={addCharacter} className="gap-1.5">
-              <Plus className="w-4 h-4" />
-              Add Character
-            </Button>
+  return (
+    <div className="h-full overflow-auto pt-16">
+      <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")}>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Cast</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {characters.length} character{characters.length !== 1 ? "s" : ""} — Click a character to define their appearance
+            </p>
           </div>
+          <Button onClick={addCharacter} className="gap-1.5">
+            <Plus className="w-4 h-4" />
+            Add Character
+          </Button>
+        </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-            {characters.map(char => (
-              <motion.button
-                key={char.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.03, y: -4 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setSelectedCharacterId(char.id)}
-                className="group relative flex flex-col rounded-xl overflow-hidden border border-border bg-card hover:border-primary/50 transition-colors text-left"
-              >
-                {/* Portrait */}
-                <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
-                  {char.portrait ? (
-                    <img
-                      src={char.portrait}
-                      alt={char.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                      <User className="w-12 h-12 text-muted-foreground/20" />
-                    </div>
-                  )}
-                  {/* Role badge */}
-                  <div className="absolute top-2 left-2">
-                    <span className={cn(
-                      "text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md",
-                      char.role === "Protagonist" && "bg-amber-500/20 text-amber-300",
-                      char.role === "Antagonist" && "bg-red-500/20 text-red-300",
-                      char.role === "Supporting" && "bg-blue-500/20 text-blue-300",
-                      char.role === "Extra" && "bg-slate-500/20 text-slate-300",
-                    )}>
-                      {char.role}
-                    </span>
-                  </div>
-                  {/* Generated count */}
-                  {char.generatedPortraits.length > 0 && (
-                    <div className="absolute top-2 right-2">
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-black/50 text-white/80 backdrop-blur-sm">
-                        {char.generatedPortraits.length} variants
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="p-3">
-                  <h3 className="text-sm font-semibold text-foreground truncate">{char.name}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                    {char.description || "Click to define this character"}
-                  </p>
-                  {/* Attribute summary pills */}
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {char.gender && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.gender}</span>
-                    )}
-                    {char.ageRange && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.ageRange.split(" ")[0]}</span>
-                    )}
-                    {char.bodyType && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.bodyType}</span>
-                    )}
-                  </div>
-                </div>
-              </motion.button>
-            ))}
-
-            {/* Add character card */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+          {characters.map(char => (
             <motion.button
+              key={char.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.03, y: -4 }}
               transition={{ duration: 0.2 }}
-              onClick={addCharacter}
-              className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-card/30 hover:bg-card/50 transition-all aspect-[3/4] min-h-[200px]"
+              onClick={() => setSelectedCharacterId(char.id)}
+              className={cn(
+                "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
+                selectedCharacterId === char.id
+                  ? "border-primary ring-1 ring-primary"
+                  : "border-border hover:border-primary/50"
+              )}
             >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                <Plus className="w-5 h-5 text-primary" />
+              <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
+                {char.portrait ? (
+                  <img src={char.portrait} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" draggable={false} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                    <User className="w-12 h-12 text-muted-foreground/20" />
+                  </div>
+                )}
+                <div className="absolute top-2 left-2">
+                  <span className={cn(
+                    "text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md",
+                    char.role === "Protagonist" && "bg-amber-500/20 text-amber-300",
+                    char.role === "Antagonist" && "bg-red-500/20 text-red-300",
+                    char.role === "Supporting" && "bg-blue-500/20 text-blue-300",
+                    char.role === "Extra" && "bg-slate-500/20 text-slate-300",
+                  )}>
+                    {char.role}
+                  </span>
+                </div>
+                {char.generatedPortraits.length > 0 && (
+                  <div className="absolute top-2 right-2">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-black/50 text-white/80 backdrop-blur-sm">
+                      {char.generatedPortraits.length} variants
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Add Character</span>
+              <div className="p-3">
+                <h3 className="text-sm font-semibold text-foreground truncate">{char.name}</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                  {char.description || "Click to define"}
+                </p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {char.gender && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.gender}</span>}
+                  {char.ageRange && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.ageRange.split(" ")[0]}</span>}
+                  {char.bodyType && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.bodyType}</span>}
+                </div>
+              </div>
             </motion.button>
-          </div>
+          ))}
+
+          <motion.button
+            whileHover={{ scale: 1.03, y: -4 }}
+            transition={{ duration: 0.2 }}
+            onClick={addCharacter}
+            className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-card/30 hover:bg-card/50 transition-all aspect-[3/4] min-h-[200px]"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Plus className="w-5 h-5 text-primary" />
+            </div>
+            <span className="text-sm font-medium text-muted-foreground">Add Character</span>
+          </motion.button>
         </div>
       </div>
-    );
-  }
 
-  // ── Detail view (single character) ──
-  return (
-    <div className="h-full pt-14">
-      <AnimatePresence mode="wait">
-        <CharacterDetailEditor
-          key={selectedCharacter.id}
-          character={selectedCharacter}
-          onChange={updateCharacter}
-          onBack={() => setSelectedCharacterId(null)}
-          onDelete={() => deleteCharacter(selectedCharacter.id)}
-        />
+      {/* Slide drawer */}
+      <AnimatePresence>
+        {selectedCharacter && (
+          <CharacterDrawer
+            key={selectedCharacter.id}
+            character={selectedCharacter}
+            onChange={updateCharacter}
+            onClose={() => setSelectedCharacterId(null)}
+            onDelete={() => deleteCharacter(selectedCharacter.id)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
