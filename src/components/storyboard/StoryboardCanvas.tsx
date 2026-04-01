@@ -327,6 +327,7 @@ export function StoryboardCanvas() {
 
   const startNodeDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
     if (tool !== "select") return;
+    if (e.button !== 0) return;
     e.stopPropagation();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
