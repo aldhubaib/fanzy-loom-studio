@@ -48,10 +48,29 @@ import frame6 from "@/assets/storyboard/frame-6.jpg";
 
 import { FrameData, GeneratedImage, Actor } from "./FrameSettingsPanel";
 
+interface CastNode {
+  id: string;
+  actorId: string;
+  x: number;
+  y: number;
+}
+
+interface LocationNode {
+  id: string;
+  locationName: string;
+  x: number;
+  y: number;
+}
+
 interface Connection {
   from: string;
   to: string;
 }
+
+const CAST_W = 180;
+const CAST_H = 240;
+const LOC_W = 200;
+const LOC_H = 160;
 
 const actorRoster: Actor[] = [
   { id: "a1", name: "Marlowe", avatar: actorMarlowe },
