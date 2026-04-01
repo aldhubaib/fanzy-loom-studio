@@ -227,6 +227,7 @@ function computeZoneBounds(
   frames: FrameData[],
   castNodes: CastNode[],
   locationNodes: LocationNode[],
+  scriptNodes: ScriptNode[] = [],
 ) {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -236,6 +237,8 @@ function computeZoneBounds(
     castNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: CAST_W, h: CAST_H }));
   } else if (zone.type === "locations") {
     locationNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: LOC_W, h: LOC_H }));
+  } else if (zone.type === "script") {
+    scriptNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: SCRIPT_W, h: SCRIPT_H }));
   }
 
   if (children.length === 0) {
