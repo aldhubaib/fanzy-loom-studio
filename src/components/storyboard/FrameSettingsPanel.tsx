@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
-  X, Sparkles, Camera, Palette, Clock, Check, Images,
+  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
