@@ -227,64 +227,73 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             />
           </div>
 
-          {/* Visual selectors */}
-          <div className="mt-8 space-y-6">
-            {/* Genre */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Genre</label>
-              <div className="flex flex-wrap gap-2.5">
-                {genres.map((g) => (
-                  <VisualCard
-                    key={g.label}
-                    label={g.label}
-                    img={g.img}
-                    selected={genre === g.label}
-                    onClick={() => setGenre(genre === g.label ? "" : g.label)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Tone */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Tone</label>
-              <div className="flex flex-wrap gap-2.5">
-                {tones.map((t) => (
-                  <VisualCard
-                    key={t.label}
-                    label={t.label}
-                    img={t.img}
-                    selected={tone === t.label}
-                    onClick={() => setTone(tone === t.label ? "" : t.label)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Duration — kept as styled cards without images */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Duration</label>
-              <div className="flex flex-wrap gap-3">
-                {durations.map((d) => (
-                  <button
-                    key={d.label}
-                    onClick={() => setDuration(duration === d.label ? "" : d.label)}
-                    className={cn(
-                      "flex items-center gap-3 px-5 py-3 rounded-xl border transition-all duration-200",
-                      duration === d.label
-                        ? "bg-primary/10 border-primary text-primary"
-                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
-                    )}
-                  >
-                    <span className="text-xl">{d.emoji}</span>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold">{d.label}</p>
-                      <p className="text-[11px] opacity-70">{d.detail}</p>
+          {/* Compact picker buttons */}
+          <div className="mt-6 flex flex-wrap gap-3">
+            {/* Genre picker */}
+            <Dialog open={genreOpen} onOpenChange={setGenreOpen}>
+              <DialogTrigger asChild>
+                <div><PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} /></div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl bg-card border-border">
+                <DialogHeader><DialogTitle>Choose a Genre</DialogTitle></DialogHeader>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mt-4">
+                  {genres.map((g) => (
+                    <div key={g.label}>
+                      <VisualCard label={g.label} img={g.img} selected={genre === g.label} onClick={() => { setGenre(genre === g.label ? "" : g.label); setGenreOpen(false); }} />
+                      <VisualCardLabel label={g.label} selected={genre === g.label} />
                     </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Tone picker */}
+            <Dialog open={toneOpen} onOpenChange={setToneOpen}>
+              <DialogTrigger asChild>
+                <div><PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} /></div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl bg-card border-border">
+                <DialogHeader><DialogTitle>Choose a Tone</DialogTitle></DialogHeader>
+                <div className="grid grid-cols-4 sm:grid-cols-4 gap-3 mt-4">
+                  {tones.map((t) => (
+                    <div key={t.label}>
+                      <VisualCard label={t.label} img={t.img} selected={tone === t.label} onClick={() => { setTone(tone === t.label ? "" : t.label); setToneOpen(false); }} />
+                      <VisualCardLabel label={t.label} selected={tone === t.label} />
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Duration picker */}
+            <Dialog open={durationOpen} onOpenChange={setDurationOpen}>
+              <DialogTrigger asChild>
+                <div><PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} /></div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-card border-border">
+                <DialogHeader><DialogTitle>Choose Duration</DialogTitle></DialogHeader>
+                <div className="flex flex-col gap-3 mt-4">
+                  {durations.map((d) => (
+                    <button
+                      key={d.label}
+                      onClick={() => { setDuration(duration === d.label ? "" : d.label); setDurationOpen(false); }}
+                      className={cn(
+                        "flex items-center gap-4 px-5 py-4 rounded-xl border transition-all duration-200",
+                        duration === d.label
+                          ? "bg-primary/10 border-primary text-primary"
+                          : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
+                      )}
+                    >
+                      <span className="text-2xl">{d.emoji}</span>
+                      <div className="text-left">
+                        <p className="text-base font-semibold">{d.label}</p>
+                        <p className="text-xs opacity-70">{d.detail}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Action buttons */}
