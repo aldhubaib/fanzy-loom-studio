@@ -184,6 +184,35 @@ export function StoryboardCanvas() {
     setSelectedFrame(newId);
   }, [frames]);
 
+  const moveFrame = useCallback((fromIdx: number, toIdx: number) => {
+    setFrames(prev => {
+      const arr = [...prev];
+      const [removed] = arr.splice(fromIdx, 1);
+      arr.splice(toIdx, 0, removed);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+  }, []);
+
+  const duplicateFrame = useCallback((idx: number) => {
+    setFrames(prev => {
+      const dup = { ...prev[idx], id: `f${Date.now()}` };
+      const arr = [...prev];
+      arr.splice(idx + 1, 0, dup);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+  }, []);
+
+  const deleteFrame = useCallback((idx: number) => {
+    setFrames(prev => {
+      const arr = prev.filter((_, i) => i !== idx);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+    setSelectedFrame(null);
+  }, []);
+
   // Fit on mount
   useEffect(() => {
     const t = setTimeout(fitToScreen, 100);
