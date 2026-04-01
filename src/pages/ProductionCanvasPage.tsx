@@ -626,11 +626,25 @@ export default function ProductionCanvasPage() {
     return { x: 0, y: 0 };
   }, [frames, castNodes, locationNodes, scriptNodes, zoneBounds]);
 
+  const getZoneColor = useCallback((nodeId: string): string => {
+    const zone = zones.find(z => z.id === nodeId);
+    if (zone) return zone.color;
+    // Check if node belongs to a zone
+    const castNode = castNodes.find(n => n.id === nodeId);
+    if (castNode) { const z = zones.find(zz => zz.id === castNode.zoneId); if (z) return z.color; }
+    const locNode = locationNodes.find(n => n.id === nodeId);
+    if (locNode) { const z = zones.find(zz => zz.id === locNode.zoneId); if (z) return z.color; }
+    const scrNode = scriptNodes.find(n => n.id === nodeId);
+    if (scrNode) { const z = zones.find(zz => zz.id === scrNode.zoneId); if (z) return z.color; }
+    return "var(--primary)";
+  }, [zones, castNodes, locationNodes, scriptNodes]);
+
   const connectors = connections.map(c => {
     const p1 = getPortPos(c.from, "right");
     const p2 = getPortPos(c.to, "left");
     const isZoneConn = zones.some(z => z.id === c.from) || zones.some(z => z.id === c.to);
-    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn };
+    const color = getZoneColor(c.from);
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
   });
 
   const fitToScreen = useCallback(() => {
