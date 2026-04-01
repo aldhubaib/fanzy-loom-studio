@@ -102,12 +102,10 @@ interface ScriptNode {
 interface Zone {
   id: string;
   label: string;
-  type: "casting" | "shots" | "locations";
-  // Zone position is the anchor — children are positioned relative to world coords
-  // but zone bounds are computed from children
+  type: "casting" | "shots" | "locations" | "script";
   x: number;
   y: number;
-  color: string; // tailwind-friendly hsl
+  color: string;
 }
 
 interface Connection {
