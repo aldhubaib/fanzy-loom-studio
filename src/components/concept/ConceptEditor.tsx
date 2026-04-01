@@ -328,17 +328,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-10 space-y-6 border-t border-border pt-8"
           >
-            {/* Logline */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Logline</label>
-              <textarea
-                value={logline}
-                onChange={(e) => setLogline(e.target.value)}
-                rows={2}
-                className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-base leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
             {/* Synopsis — collapsible */}
             <div>
               <button
