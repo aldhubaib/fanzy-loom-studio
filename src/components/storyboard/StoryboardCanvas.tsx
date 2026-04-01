@@ -148,7 +148,7 @@ export function StoryboardCanvas() {
       const draggedFrame = frames[draggedIdx];
       if (draggedFrame) {
         const dragCenterX = draggedFrame.x + FRAME_W / 2;
-        const dragCenterY = draggedFrame.y + FRAME_H / 2;
+        const dragCenterY = draggedFrame.y + FRAME_H_BASE / 2;
         let closestIdx = -1;
         let closestDist = Infinity;
         frames.forEach((f, i) => {
