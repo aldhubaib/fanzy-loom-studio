@@ -279,12 +279,12 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Helper to get port positions
+  // Helper to get port center positions (matching the CSS -left-[7px] / -right-[7px] + w-3.5 = 14px, center at 7px out)
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
     return {
-      x: side === "right" ? f.x + FRAME_W : f.x,
+      x: side === "right" ? f.x + FRAME_W + 7 : f.x - 7,
       y: f.y + FRAME_H / 2,
     };
   }, [frames]);
