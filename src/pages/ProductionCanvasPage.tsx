@@ -1026,14 +1026,18 @@ export default function ProductionCanvasPage() {
                       return (
                         <button key={type} className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
                           onClick={() => {
-                            setZones(prev => [...prev, {
-                              id: `z-${type}-${Date.now()}`,
-                              label: labels[type],
-                              type: type as Zone["type"],
-                              x: canvasMenu.worldX,
-                              y: canvasMenu.worldY,
-                              color: colors[type],
-                            }]);
+                            setZones(prev => {
+                              const count = prev.filter(z => z.type === type).length;
+                              const label = count > 0 ? `${labels[type]} #${count + 1}` : labels[type];
+                              return [...prev, {
+                                id: `z-${type}-${Date.now()}`,
+                                label,
+                                type: type as Zone["type"],
+                                x: canvasMenu.worldX,
+                                y: canvasMenu.worldY,
+                                color: colors[type],
+                              }];
+                            });
                             setCanvasMenu(null);
                           }}>{icons[type]} {labels[type]} Zone</button>
                       );
