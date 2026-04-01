@@ -676,15 +676,19 @@ export function StoryboardCanvas() {
                   )}
                 </div>
 
-                {/* Expandable gallery */}
+                {/* Expandable gallery — horizontal scroll strip */}
                 {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
-                  <div className="bg-secondary/80 px-2 py-2 grid grid-cols-3 gap-1.5" onMouseDown={(e) => e.stopPropagation()}>
+                  <div
+                    className="bg-secondary/80 px-2 py-2 flex gap-1.5 overflow-x-auto"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "thin" }}
+                  >
                     {frame.generatedImages.map(img => {
                       const isActive = frame.selectedImageId === img.id;
                       return (
                         <button
                           key={img.id}
-                          className={`relative rounded overflow-hidden border-2 transition-all aspect-video ${
+                          className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-16 h-12 ${
                             isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
                           }`}
                           onClick={(e) => {
@@ -698,8 +702,8 @@ export function StoryboardCanvas() {
                         >
                           <img src={img.src} alt={img.description} className="w-full h-full object-cover" draggable={false} />
                           {isActive && (
-                            <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                              <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                            <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
+                              <Check className="w-2 h-2 text-primary-foreground" />
                             </div>
                           )}
                         </button>
