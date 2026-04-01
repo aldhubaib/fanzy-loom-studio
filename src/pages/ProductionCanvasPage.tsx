@@ -620,8 +620,10 @@ export default function ProductionCanvasPage() {
     if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
     const ln = locationNodes.find(n => n.id === nodeId);
     if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
+    const sn = scriptNodes.find(n => n.id === nodeId);
+    if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
     return { x: 0, y: 0 };
-  }, [frames, castNodes, locationNodes, zoneBounds]);
+  }, [frames, castNodes, locationNodes, scriptNodes, zoneBounds]);
 
   const connectors = connections.map(c => {
     const p1 = getPortPos(c.from, "right");
