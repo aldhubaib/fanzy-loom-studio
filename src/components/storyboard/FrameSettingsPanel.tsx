@@ -6,10 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+// Shot type images
+import shotWide from "@/assets/shots/wide.jpg";
+import shotMedium from "@/assets/shots/medium.jpg";
+import shotCloseup from "@/assets/shots/closeup.jpg";
+import shotECU from "@/assets/shots/extreme-closeup.jpg";
+import shotOTS from "@/assets/shots/ots.jpg";
+import shotPOV from "@/assets/shots/pov.jpg";
+import shotDynamic from "@/assets/shots/dynamic.jpg";
+import shotLow from "@/assets/shots/low-angle.jpg";
+import shotHigh from "@/assets/shots/high-angle.jpg";
+import shotAerial from "@/assets/shots/aerial.jpg";
+
+// Mood images
+import moodDramatic from "@/assets/moods/dramatic.jpg";
+import moodNoir from "@/assets/moods/noir.jpg";
+import moodWarm from "@/assets/moods/warm.jpg";
+import moodCold from "@/assets/moods/cold.jpg";
+import moodTense from "@/assets/moods/tense.jpg";
+import moodRomantic from "@/assets/moods/romantic.jpg";
+import moodMysterious from "@/assets/moods/mysterious.jpg";
+import moodAction from "@/assets/moods/action.jpg";
 
 export interface Actor {
   id: string;
@@ -39,20 +60,27 @@ export interface FrameData {
 }
 
 const shotTypes = [
-  { value: "WIDE", label: "Wide Shot (WS)" },
-  { value: "MED", label: "Medium Shot (MS)" },
-  { value: "CU", label: "Close-Up (CU)" },
-  { value: "ECU", label: "Extreme Close-Up (ECU)" },
-  { value: "OTS", label: "Over-the-Shoulder (OTS)" },
-  { value: "POV", label: "Point of View (POV)" },
-  { value: "DYNAMIC", label: "Dynamic Shot" },
-  { value: "LOW", label: "Low Angle" },
-  { value: "HIGH", label: "High Angle" },
-  { value: "AERIAL", label: "Aerial Shot" },
+  { value: "WIDE", label: "Wide", img: shotWide },
+  { value: "MED", label: "Medium", img: shotMedium },
+  { value: "CU", label: "Close-Up", img: shotCloseup },
+  { value: "ECU", label: "Extreme CU", img: shotECU },
+  { value: "OTS", label: "Over Shoulder", img: shotOTS },
+  { value: "POV", label: "POV", img: shotPOV },
+  { value: "DYNAMIC", label: "Dynamic", img: shotDynamic },
+  { value: "LOW", label: "Low Angle", img: shotLow },
+  { value: "HIGH", label: "High Angle", img: shotHigh },
+  { value: "AERIAL", label: "Aerial", img: shotAerial },
 ];
 
 const moodOptions = [
-  "Dramatic", "Noir", "Warm", "Cold", "Tense", "Romantic", "Mysterious", "Action",
+  { value: "Dramatic", label: "Dramatic", img: moodDramatic },
+  { value: "Noir", label: "Noir", img: moodNoir },
+  { value: "Warm", label: "Warm", img: moodWarm },
+  { value: "Cold", label: "Cold", img: moodCold },
+  { value: "Tense", label: "Tense", img: moodTense },
+  { value: "Romantic", label: "Romantic", img: moodRomantic },
+  { value: "Mysterious", label: "Mysterious", img: moodMysterious },
+  { value: "Action", label: "Action", img: moodAction },
 ];
 
 interface FrameSettingsPanelProps {
@@ -60,6 +88,29 @@ interface FrameSettingsPanelProps {
   actorRoster: Actor[];
   onUpdate: (updated: FrameData) => void;
   onClose: () => void;
+}
+
+function VisualOption({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "relative rounded-lg overflow-hidden transition-all duration-150 aspect-[4/3]",
+        selected
+          ? "ring-2 ring-primary ring-offset-1 ring-offset-background scale-[1.03]"
+          : "hover:scale-[1.03] hover:ring-1 hover:ring-border opacity-75 hover:opacity-100"
+      )}
+    >
+      <img src={img} alt={label} loading="lazy" className="w-full h-full object-cover" />
+      <div className={cn("absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent", selected && "from-primary/30")} />
+      <span className="absolute bottom-1 left-1.5 text-[9px] font-bold text-white drop-shadow-md">{label}</span>
+      {selected && (
+        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+          <Check className="w-2.5 h-2.5 text-primary-foreground" />
+        </div>
+      )}
+    </button>
+  );
 }
 
 export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: FrameSettingsPanelProps) {
@@ -98,9 +149,7 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
   };
 
   const handleGenerate = () => {
-    // Mock generating multiple images
     const mockImages: GeneratedImage[] = Array.from({ length: imageCount }, (_, i) => {
-      // For demo: cycle through existing images with different descriptions
       const actorSubsets = [
         selectedActors,
         selectedActors.slice(0, 1),
@@ -115,7 +164,7 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
       ];
       return {
         id: `gen-${Date.now()}-${i}`,
-        src: frame.image, // In production, AI would generate different images
+        src: frame.image,
         description: descriptions[i % descriptions.length],
         actors: actorSubsets[i % actorSubsets.length],
       };
@@ -213,41 +262,45 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
 
         <Separator />
 
-        {/* Camera */}
-        <div className="space-y-1.5">
+        {/* Camera / Shot Type — Visual Grid */}
+        <div className="space-y-2">
           <Label className="text-xs text-muted-foreground flex items-center gap-1">
             <Camera className="w-3 h-3" /> Camera / Shot Type
           </Label>
-          <Select value={shot} onValueChange={setShot}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {shotTypes.map(s => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-5 gap-1.5">
+            {shotTypes.map(s => (
+              <VisualOption
+                key={s.value}
+                label={s.label}
+                img={s.img}
+                selected={shot === s.value}
+                onClick={() => setShot(s.value)}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Mood */}
+        <Separator />
+
+        {/* Mood / Lighting — Visual Grid */}
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground flex items-center gap-1">
             <Palette className="w-3 h-3" /> Mood / Lighting
           </Label>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="grid grid-cols-4 gap-1.5">
             {moodOptions.map(m => (
-              <Badge
-                key={m}
-                variant={mood === m ? "default" : "outline"}
-                className="cursor-pointer text-[10px]"
-                onClick={() => setMood(m)}
-              >
-                {m}
-              </Badge>
+              <VisualOption
+                key={m.value}
+                label={m.label}
+                img={m.img}
+                selected={mood === m.value}
+                onClick={() => setMood(m.value)}
+              />
             ))}
           </div>
         </div>
+
+        <Separator />
 
         {/* Duration */}
         <div className="space-y-1.5">
