@@ -475,15 +475,18 @@ function AttributeRow({ label, value, options, onClick }: {
 }
 
 // ─── Slide Drawer Panel ─────────────────────────────────────
-function CharacterDrawer({ character, onChange, onClose, onDelete }: {
+function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters, onSwap }: {
   character: Character;
   onChange: (c: Character) => void;
   onClose: () => void;
   onDelete: () => void;
+  allCharacters: Character[];
+  onSwap: (fromId: string, toId: string) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState<AttributeKey | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [swapOpen, setSwapOpen] = useState(false);
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
