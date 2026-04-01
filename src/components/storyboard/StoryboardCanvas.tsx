@@ -112,6 +112,7 @@ export function StoryboardCanvas() {
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
+  const [settingsFrame, setSettingsFrame] = useState<string | null>(null);
   const [actorChangePrompt, setActorChangePrompt] = useState<{
     frameId: string;
     actorId: string;
