@@ -743,6 +743,41 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Swap dialog */}
+      <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
+        <DialogContent className="sm:max-w-md bg-card border-border">
+          <DialogHeader><DialogTitle>Swap with another actor</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Choose a character to swap all scene assignments with <span className="font-semibold text-foreground">{character.name}</span>.
+          </p>
+          <div className="space-y-2 mt-4 max-h-[300px] overflow-y-auto">
+            {allCharacters.filter(c => c.id !== character.id).map(other => (
+              <button
+                key={other.id}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-secondary/50 transition-all text-left"
+                onClick={() => {
+                  onSwap(character.id, other.id);
+                  setSwapOpen(false);
+                }}
+              >
+                {other.portrait ? (
+                  <img src={other.portrait} alt={other.name} className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{other.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{other.role} · {(characterAppearances[other.id] || []).length} scenes</p>
+                </div>
+                <ArrowLeftRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
