@@ -847,13 +847,14 @@ export default function ProductionCanvasPage() {
               {connectors.map(c => {
                 const dx = Math.abs(c.x2 - c.x1);
                 const curve = Math.min(200, Math.max(30, dx * 0.35));
+                const strokeColor = c.color.startsWith("var(") ? `hsl(${c.color})` : `hsl(${c.color})`;
                 return (
                   <g key={`${c.from}-${c.to}`} style={{ pointerEvents: "auto", cursor: "pointer" }}
                     onClick={() => setConnections(prev => prev.filter(cc => !(cc.from === c.from && cc.to === c.to)))}>
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="transparent" strokeWidth="16" fill="none" />
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`}
-                      stroke={c.isZoneConn ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"}
-                      strokeOpacity={c.isZoneConn ? 0.4 : 0.4}
+                      stroke={strokeColor}
+                      strokeOpacity={0.5}
                       strokeWidth={c.isZoneConn ? 3 : 2.5}
                       strokeLinecap="round"
                       fill="none" />
