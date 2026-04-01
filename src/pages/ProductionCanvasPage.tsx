@@ -1026,7 +1026,6 @@ export default function ProductionCanvasPage() {
                       return (
                         <button key={type} className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
                           onClick={() => {
-                            if (exists) return;
                             setZones(prev => [...prev, {
                               id: `z-${type}-${Date.now()}`,
                               label: labels[type],
@@ -1036,7 +1035,7 @@ export default function ProductionCanvasPage() {
                               color: colors[type],
                             }]);
                             setCanvasMenu(null);
-                          }}>{icons[type]} {exists ? `${labels[type]} (exists)` : `${labels[type]} Zone`}</button>
+                          }}>{icons[type]} {labels[type]} Zone</button>
                       );
                     })}
                   </>
