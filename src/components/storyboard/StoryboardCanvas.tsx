@@ -517,6 +517,19 @@ export function StoryboardCanvas() {
           <Maximize className="w-4 h-4" />
         </button>
 
+        <div className="w-6 h-px bg-border my-0.5" />
+
+        <button
+          onClick={() => setShowLocations(v => !v)}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+            showLocations ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+          )}
+          title={showLocations ? "Showing locations" : "Showing shots"}
+        >
+          <MapPin className="w-4 h-4" />
+        </button>
+
       </div>
 
       {/* Canvas */}
