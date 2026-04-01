@@ -1,90 +1,15 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
-  Sparkles, Dices, ArrowRight, X, Plus, ChevronDown,
+  Sparkles, Dices, ArrowRight, Plus, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-
-// Genre images
-import genreNoir from "@/assets/genres/noir.jpg";
-import genreScifi from "@/assets/genres/scifi.jpg";
-import genreDrama from "@/assets/genres/drama.jpg";
-import genreHorror from "@/assets/genres/horror.jpg";
-import genreComedy from "@/assets/genres/comedy.jpg";
-import genreAction from "@/assets/genres/action.jpg";
-import genreFantasy from "@/assets/genres/fantasy.jpg";
-import genreThriller from "@/assets/genres/thriller.jpg";
-import genreWestern from "@/assets/genres/western.jpg";
-import genreCyberpunk from "@/assets/genres/cyberpunk.jpg";
-import genreDocumentary from "@/assets/genres/documentary.jpg";
-import genreAnimation from "@/assets/genres/animation.jpg";
-
-// Tone images
-import toneDark from "@/assets/tones/dark.jpg";
-import toneLight from "@/assets/tones/light.jpg";
-import toneTense from "@/assets/tones/tense.jpg";
-import toneEmotional from "@/assets/tones/emotional.jpg";
-import toneFunny from "@/assets/tones/funny.jpg";
-import toneEpic from "@/assets/tones/epic.jpg";
-import toneIntimate from "@/assets/tones/intimate.jpg";
-import toneSurreal from "@/assets/tones/surreal.jpg";
-
-const genres = [
-  { label: "Noir", img: genreNoir },
-  { label: "Sci-Fi", img: genreScifi },
-  { label: "Drama", img: genreDrama },
-  { label: "Horror", img: genreHorror },
-  { label: "Comedy", img: genreComedy },
-  { label: "Action", img: genreAction },
-  { label: "Fantasy", img: genreFantasy },
-  { label: "Thriller", img: genreThriller },
-  { label: "Western", img: genreWestern },
-  { label: "Cyberpunk", img: genreCyberpunk },
-  { label: "Documentary", img: genreDocumentary },
-  { label: "Animation", img: genreAnimation },
-];
-
-const tones = [
-  { label: "Dark", img: toneDark },
-  { label: "Light", img: toneLight },
-  { label: "Tense", img: toneTense },
-  { label: "Emotional", img: toneEmotional },
-  { label: "Funny", img: toneFunny },
-  { label: "Epic", img: toneEpic },
-  { label: "Intimate", img: toneIntimate },
-  { label: "Surreal", img: toneSurreal },
-];
-
-const durations = [
-  { label: "Short", detail: "~5 min", emoji: "⚡" },
-  { label: "Medium", detail: "~15 min", emoji: "🎬" },
-  { label: "Feature", detail: "~45 min", emoji: "🎥" },
-];
-
-const pipelineSteps = ["Concept", "Script", "Storyboard", "Casting", "Locations", "Generation", "Timeline", "Export"];
-
-const mockConcept = {
-  title: "The Last Deal",
-  idea: "A private detective in a rain-soaked city takes a missing person case from a mysterious woman. The case is not what it seems.",
-  genre: "Noir",
-  tone: "Dark",
-  duration: "Short",
-  logline: "A world-weary detective takes on a missing person case that unravels into a web of betrayal, stolen money, and a client who isn't what she seems.",
-  synopsis: `Detective Marlowe hasn't taken a real case in months. When Vivian Cross walks into his office asking him to find her missing husband — and the $200,000 he took — Marlowe reluctantly agrees.
-
-But as he digs deeper, he discovers Vivian's story doesn't add up. A meeting with local fixer Eddie Rossi reveals the money was never stolen — it was payment. And Vivian is at the center of it all.
-
-Now Marlowe must decide: walk away from the case or confront the woman who hired him — knowing the truth could get him killed.`,
-  themes: ["Betrayal", "Trust", "Greed", "Moral Ambiguity"],
-  visualStyle: "Neo-noir. Rain-soaked streets, hard shadows, amber lamplight. Muted palette with occasional splashes of red and neon.",
-  estimatedCast: "4-5 characters",
-  estimatedScenes: "8-12 scenes",
-};
+import { genres, tones, settings, durations, audiences, formats } from "@/data/conceptOptions";
 
 interface ConceptEditorProps {
   projectId?: string;
@@ -124,7 +49,7 @@ function VisualCardLabel({ label, selected }: { label: string; selected: boolean
 }
 
 // Picker trigger button
-function PickerButton({ label, value, selectedImg, onClick }: { label: string; value: string; selectedImg?: string; onClick: () => void }) {
+function PickerButton({ label, value, selectedImg, emoji, onClick }: { label: string; value: string; selectedImg?: string; emoji?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -138,7 +63,12 @@ function PickerButton({ label, value, selectedImg, onClick }: { label: string; v
       {selectedImg && (
         <img src={selectedImg} alt={value} className="w-7 h-7 rounded-md object-cover" />
       )}
-      {!selectedImg && !value && (
+      {emoji && !selectedImg && (
+        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center text-sm">
+          {emoji}
+        </div>
+      )}
+      {!selectedImg && !emoji && !value && (
         <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
           <Plus className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
@@ -152,6 +82,77 @@ function PickerButton({ label, value, selectedImg, onClick }: { label: string; v
   );
 }
 
+// Reusable image grid picker dialog
+function ImagePickerDialog({
+  open, onOpenChange, title: dialogTitle, items, selected, onSelect, cols = 4,
+}: {
+  open: boolean; onOpenChange: (v: boolean) => void; title: string;
+  items: { label: string; img: string }[]; selected: string; onSelect: (v: string) => void; cols?: number;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl bg-card border-border">
+        <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
+        <div className={cn("grid gap-3 mt-4", cols === 6 ? "grid-cols-4 sm:grid-cols-6" : "grid-cols-3 sm:grid-cols-4")}>
+          {items.map((item) => (
+            <div key={item.label}>
+              <VisualCard label={item.label} img={item.img} selected={selected === item.label} onClick={() => { onSelect(selected === item.label ? "" : item.label); onOpenChange(false); }} />
+              <VisualCardLabel label={item.label} selected={selected === item.label} />
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Reusable list picker dialog (for duration, audience, format)
+function ListPickerDialog({
+  open, onOpenChange, title: dialogTitle, items, selected, onSelect,
+}: {
+  open: boolean; onOpenChange: (v: boolean) => void; title: string;
+  items: { label: string; detail: string; emoji: string }[]; selected: string; onSelect: (v: string) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md bg-card border-border">
+        <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
+        <div className="flex flex-col gap-3 mt-4">
+          {items.map((d) => (
+            <button
+              key={d.label}
+              onClick={() => { onSelect(selected === d.label ? "" : d.label); onOpenChange(false); }}
+              className={cn(
+                "flex items-center gap-4 px-5 py-4 rounded-xl border transition-all duration-200",
+                selected === d.label
+                  ? "bg-primary/10 border-primary text-primary"
+                  : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
+              )}
+            >
+              <span className="text-2xl">{d.emoji}</span>
+              <div className="text-left">
+                <p className="text-base font-semibold">{d.label}</p>
+                <p className="text-xs opacity-70">{d.detail}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const mockConcept = {
+  title: "The Last Deal",
+  idea: "A private detective in a rain-soaked city takes a missing person case from a mysterious woman. The case is not what it seems.",
+  genre: "Noir",
+  tone: "Dark",
+  duration: "Short",
+  setting: "Modern City",
+  audience: "Mature",
+  format: "Film",
+};
+
 export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const navigate = useNavigate();
   const isMockProject = projectId === "1";
@@ -161,26 +162,21 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [genre, setGenre] = useState(isMockProject ? mockConcept.genre : "");
   const [tone, setTone] = useState(isMockProject ? mockConcept.tone : "");
   const [duration, setDuration] = useState(isMockProject ? mockConcept.duration : "");
+  const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
+  const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
+  const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
   const [conceptGenerated, setConceptGenerated] = useState(isMockProject);
+
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
   const [durationOpen, setDurationOpen] = useState(false);
-  const [synopsisOpen, setSynopsisOpen] = useState(false);
-
-  const [logline, setLogline] = useState(isMockProject ? mockConcept.logline : "");
-  const [synopsis, setSynopsis] = useState(isMockProject ? mockConcept.synopsis : "");
-  const [themes, setThemes] = useState<string[]>(isMockProject ? mockConcept.themes : []);
-  const [newTheme, setNewTheme] = useState("");
-  const [visualStyle, setVisualStyle] = useState(isMockProject ? mockConcept.visualStyle : "");
+  const [settingOpen, setSettingOpen] = useState(false);
+  const [audienceOpen, setAudienceOpen] = useState(false);
+  const [formatOpen, setFormatOpen] = useState(false);
 
   const handleGenerate = () => {
     if (!title) setTitle("Untitled Film");
     setConceptGenerated(true);
-    // AI refines the idea into a proper logline — update the idea field
-    if (idea && !idea.includes("unravels")) {
-      setIdea(idea); // keep user's idea as-is for now
-    }
-    if (!synopsis) setSynopsis("Your AI-generated synopsis will appear here after generation.");
   };
 
   const handleSurpriseMe = () => {
@@ -189,21 +185,14 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
     setGenre("Sci-Fi");
     setTone("Tense");
     setDuration("Medium");
+    setSetting("Space");
+    setAudience("General");
+    setFormat("Film");
     setConceptGenerated(true);
-    setLogline("A lone engineer on a decaying space station receives a distress signal from the future — sent by a version of herself she doesn't remember becoming.");
-    setSynopsis("The Meridian Station has been in decay for years, its crew long evacuated. Only Chief Engineer Sable remains, running maintenance on systems that nobody will ever use again.\n\nWhen a corrupted transmission breaks through on a dead frequency, Sable traces it to an impossible source: her own biometric signature, timestamped three years in the future. The message contains coordinates — and a warning.");
-    setThemes(["Identity", "Time", "Isolation", "Hope"]);
-    setVisualStyle("Cold blues and clinical whites of a deteriorating space station. Flickering holographic displays. Moments of warm golden light breaking through viewport cracks.");
   };
 
-  const addTheme = () => {
-    if (newTheme.trim() && !themes.includes(newTheme.trim())) {
-      setThemes([...themes, newTheme.trim()]);
-      setNewTheme("");
-    }
-  };
-
-  const removeTheme = (t: string) => setThemes(themes.filter((th) => th !== t));
+  const selectedAudience = audiences.find(a => a.label === audience);
+  const selectedFormat = formats.find(f => f.label === format);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -234,72 +223,21 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
 
           {/* Compact picker buttons */}
           <div className="mt-6 flex flex-wrap gap-3">
-            {/* Genre picker */}
-            <Dialog open={genreOpen} onOpenChange={setGenreOpen}>
-              <DialogTrigger asChild>
-                <div><PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} /></div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-2xl bg-card border-border">
-                <DialogHeader><DialogTitle>Choose a Genre</DialogTitle></DialogHeader>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mt-4">
-                  {genres.map((g) => (
-                    <div key={g.label}>
-                      <VisualCard label={g.label} img={g.img} selected={genre === g.label} onClick={() => { setGenre(genre === g.label ? "" : g.label); setGenreOpen(false); }} />
-                      <VisualCardLabel label={g.label} selected={genre === g.label} />
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Tone picker */}
-            <Dialog open={toneOpen} onOpenChange={setToneOpen}>
-              <DialogTrigger asChild>
-                <div><PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} /></div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-2xl bg-card border-border">
-                <DialogHeader><DialogTitle>Choose a Tone</DialogTitle></DialogHeader>
-                <div className="grid grid-cols-4 sm:grid-cols-4 gap-3 mt-4">
-                  {tones.map((t) => (
-                    <div key={t.label}>
-                      <VisualCard label={t.label} img={t.img} selected={tone === t.label} onClick={() => { setTone(tone === t.label ? "" : t.label); setToneOpen(false); }} />
-                      <VisualCardLabel label={t.label} selected={tone === t.label} />
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Duration picker */}
-            <Dialog open={durationOpen} onOpenChange={setDurationOpen}>
-              <DialogTrigger asChild>
-                <div><PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} /></div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card border-border">
-                <DialogHeader><DialogTitle>Choose Duration</DialogTitle></DialogHeader>
-                <div className="flex flex-col gap-3 mt-4">
-                  {durations.map((d) => (
-                    <button
-                      key={d.label}
-                      onClick={() => { setDuration(duration === d.label ? "" : d.label); setDurationOpen(false); }}
-                      className={cn(
-                        "flex items-center gap-4 px-5 py-4 rounded-xl border transition-all duration-200",
-                        duration === d.label
-                          ? "bg-primary/10 border-primary text-primary"
-                          : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
-                      )}
-                    >
-                      <span className="text-2xl">{d.emoji}</span>
-                      <div className="text-left">
-                        <p className="text-base font-semibold">{d.label}</p>
-                        <p className="text-xs opacity-70">{d.detail}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
+            <PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} />
+            <PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} />
+            <PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => setSettingOpen(true)} />
+            <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} />
+            <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => setAudienceOpen(true)} />
+            <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => setFormatOpen(true)} />
           </div>
+
+          {/* Dialogs */}
+          <ImagePickerDialog open={genreOpen} onOpenChange={setGenreOpen} title="Choose a Genre" items={genres} selected={genre} onSelect={setGenre} cols={6} />
+          <ImagePickerDialog open={toneOpen} onOpenChange={setToneOpen} title="Choose a Tone" items={tones} selected={tone} onSelect={setTone} />
+          <ImagePickerDialog open={settingOpen} onOpenChange={setSettingOpen} title="Choose a Setting" items={settings} selected={setting} onSelect={setSetting} />
+          <ListPickerDialog open={durationOpen} onOpenChange={setDurationOpen} title="Choose Duration" items={durations} selected={duration} onSelect={setDuration} />
+          <ListPickerDialog open={audienceOpen} onOpenChange={setAudienceOpen} title="Choose Audience" items={audiences} selected={audience} onSelect={setAudience} />
+          <ListPickerDialog open={formatOpen} onOpenChange={setFormatOpen} title="Choose Format" items={formats} selected={format} onSelect={setFormat} />
 
           {/* Action buttons */}
           <div className="flex items-center gap-3 mt-8">
