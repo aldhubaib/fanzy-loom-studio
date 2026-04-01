@@ -103,8 +103,8 @@ export function StoryboardCanvas() {
   }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom]);
 
   const handleMouseUp = useCallback(() => {
+    setCtrlZooming(false);
     setPanning(false);
-    if (dragging) {
       // Snap-to-reorder: find if dragged frame overlaps another frame's position
       const draggedIdx = frames.findIndex(f => f.id === dragging);
       const draggedFrame = frames[draggedIdx];
