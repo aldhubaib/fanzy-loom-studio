@@ -770,7 +770,6 @@ export default function ProductionCanvasPage() {
                     onMouseDown={(e) => {
                       if (e.button !== 0) return;
                       e.stopPropagation();
-                      setSelected({ type: "zone", id: zone.id });
                       setDraggingZone(zone.id);
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
