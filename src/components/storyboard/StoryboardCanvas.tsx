@@ -105,6 +105,7 @@ export function StoryboardCanvas() {
   const handleMouseUp = useCallback(() => {
     setCtrlZooming(false);
     setPanning(false);
+    if (dragging) {
       // Snap-to-reorder: find if dragged frame overlaps another frame's position
       const draggedIdx = frames.findIndex(f => f.id === dragging);
       const draggedFrame = frames[draggedIdx];
@@ -124,15 +125,11 @@ export function StoryboardCanvas() {
           }
         });
         if (closestIdx >= 0) {
-          // Swap positions in array order, then auto-layout
           setFrames(prev => {
             const arr = [...prev];
             const [removed] = arr.splice(draggedIdx, 1);
             arr.splice(closestIdx, 0, removed);
-            // Re-layout after reorder
-            const cols = 3;
-            const gapX = 340;
-            const gapY = 280;
+            const cols = 3, gapX = 340, gapY = 280;
             return arr.map((f, i) => ({
               ...f,
               x: 80 + (i % cols) * gapX,
