@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, MousePointer, Hand, Grid3X3, Maximize, X, Settings, MapPin, Users,
   ArrowLeft, Film, Camera, Clock, Sparkles, ChevronDown, Check, User, Trash2,
-  ZoomIn, ZoomOut, Images, ChevronLeft, ChevronRight, Expand,
+  ZoomIn, ZoomOut, Images, ChevronLeft, ChevronRight, Expand, FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -74,6 +74,7 @@ interface FrameData {
   duration: string;
   actors: string[];
   location?: string;
+  zoneId: string;
 }
 
 interface CastNode {
@@ -81,6 +82,7 @@ interface CastNode {
   actorId: string;
   x: number;
   y: number;
+  zoneId: string;
 }
 
 interface LocationNode {
@@ -88,6 +90,18 @@ interface LocationNode {
   locationName: string;
   x: number;
   y: number;
+  zoneId: string;
+}
+
+interface Zone {
+  id: string;
+  label: string;
+  type: "casting" | "shots" | "locations";
+  // Zone position is the anchor — children are positioned relative to world coords
+  // but zone bounds are computed from children
+  x: number;
+  y: number;
+  color: string; // tailwind-friendly hsl
 }
 
 interface Connection {
@@ -99,13 +113,14 @@ type SelectedItem =
   | { type: "frame"; id: string }
   | { type: "cast"; id: string }
   | { type: "location"; id: string }
+  | { type: "zone"; id: string }
   | null;
 
 type Tool = "select" | "hand";
 
 // ─── Constants ──────────────────────────────────────────────
 const FRAME_W = 260;
-const IMAGE_H = 146; // 16:9
+const IMAGE_H = 146;
 const FRAME_H = IMAGE_H + 70;
 const PORT_Y = FRAME_H / 2;
 const CAST_W = 160;
@@ -113,6 +128,10 @@ const CAST_H = 220;
 const LOC_W = 180;
 const LOC_H = 140;
 const DRAWER_W = 360;
+const ZONE_PAD = 40;
+const ZONE_LABEL_H = 40;
+const MIN_ZONE_W = 300;
+const MIN_ZONE_H = 200;
 
 const locationImages: Record<string, string> = {
   "Office": locOffice,
@@ -151,25 +170,83 @@ const actorRoster: Actor[] = [
   { id: "a3", name: "Eddie", avatar: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant." },
 ];
 
+// ─── Initial Data ───────────────────────────────────────────
+const initialZones: Zone[] = [
+  { id: "z-casting", label: "Casting", type: "casting", x: -500, y: 0, color: "190 80% 50%" },
+  { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
+  { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
+];
+
 const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office" },
-  { id: "f2", x: 400, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"] },
-  { id: "f3", x: 720, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club" },
-  { id: "f4", x: 80, y: 340, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office" },
-  { id: "f5", x: 400, y: 340, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge" },
-  { id: "f6", x: 720, y: 340, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street" },
+  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office", zoneId: "z-shots" },
+  { id: "f2", x: 400, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], zoneId: "z-shots" },
+  { id: "f3", x: 720, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club", zoneId: "z-shots" },
+  { id: "f4", x: 80, y: 340, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office", zoneId: "z-shots" },
+  { id: "f5", x: 400, y: 340, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge", zoneId: "z-shots" },
+  { id: "f6", x: 720, y: 340, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street", zoneId: "z-shots" },
+];
+
+const initialCastNodes: CastNode[] = [
+  { id: "cn1", actorId: "a1", x: -460, y: 80, zoneId: "z-casting" },
+  { id: "cn2", actorId: "a2", x: -260, y: 80, zoneId: "z-casting" },
+  { id: "cn3", actorId: "a3", x: -460, y: 340, zoneId: "z-casting" },
+];
+
+const initialLocationNodes: LocationNode[] = [
+  { id: "ln1", locationName: "Office", x: 1240, y: 80, zoneId: "z-locations" },
+  { id: "ln2", locationName: "Bridge", x: 1460, y: 80, zoneId: "z-locations" },
+  { id: "ln3", locationName: "Jazz Club", x: 1240, y: 260, zoneId: "z-locations" },
+  { id: "ln4", locationName: "Street", x: 1460, y: 260, zoneId: "z-locations" },
 ];
 
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" }, { from: "f2", to: "f3" },
   { from: "f3", to: "f4" }, { from: "f4", to: "f5" }, { from: "f5", to: "f6" },
+  // Zone-level connections: casting → shots, locations → shots
+  { from: "z-casting", to: "z-shots" },
+  { from: "z-locations", to: "z-shots" },
 ];
+
+// ─── Zone Bounds Helper ─────────────────────────────────────
+function computeZoneBounds(
+  zone: Zone,
+  frames: FrameData[],
+  castNodes: CastNode[],
+  locationNodes: LocationNode[],
+) {
+  const children: { x: number; y: number; w: number; h: number }[] = [];
+
+  if (zone.type === "shots") {
+    frames.filter(f => f.zoneId === zone.id).forEach(f => children.push({ x: f.x, y: f.y, w: FRAME_W, h: FRAME_H }));
+  } else if (zone.type === "casting") {
+    castNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: CAST_W, h: CAST_H }));
+  } else if (zone.type === "locations") {
+    locationNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: LOC_W, h: LOC_H }));
+  }
+
+  if (children.length === 0) {
+    return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
+  }
+
+  const minX = Math.min(...children.map(c => c.x)) - ZONE_PAD;
+  const minY = Math.min(...children.map(c => c.y)) - ZONE_PAD - ZONE_LABEL_H;
+  const maxX = Math.max(...children.map(c => c.x + c.w)) + ZONE_PAD;
+  const maxY = Math.max(...children.map(c => c.y + c.h)) + ZONE_PAD;
+
+  return {
+    x: minX,
+    y: minY,
+    w: Math.max(MIN_ZONE_W, maxX - minX),
+    h: Math.max(MIN_ZONE_H, maxY - minY),
+  };
+}
 
 // ─── Drawer Components ──────────────────────────────────────
 
-function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
+function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
   frame: FrameData;
-  actorRoster: Actor[];
+  actors: Actor[];
+  connectedActors: Actor[];
   onUpdate: (f: FrameData) => void;
   onDelete: () => void;
 }) {
@@ -178,8 +255,6 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
   const [duration, setDuration] = useState(frame.duration);
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [location, setLocation] = useState(frame.location || "");
-  const [shotPickerOpen, setShotPickerOpen] = useState(false);
-  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
   useEffect(() => {
     setPrompt(frame.description);
@@ -198,54 +273,38 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
     toast.success("Shot updated");
   };
 
+  // Use connected actors (from linked casting zone) instead of full roster
+  const availableActors = connectedActors.length > 0 ? connectedActors : actors;
+
   return (
     <div className="space-y-4">
-      {/* Preview */}
       {frame.image && (
         <div className="rounded-lg overflow-hidden border border-border">
           <img src={frame.image} alt={frame.description} className="w-full object-cover max-h-[180px]" />
         </div>
       )}
 
-      {/* Scene label */}
       <div className="flex items-center gap-2">
         <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">{frame.scene}</span>
         <span className="text-xs text-muted-foreground">{frame.shot}</span>
         <span className="text-xs text-muted-foreground ml-auto">{frame.duration}</span>
       </div>
 
-      {/* Prompt */}
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Scene Prompt</Label>
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          className="min-h-[60px] text-sm resize-none"
-          placeholder="Describe the scene..."
-        />
+        <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} className="min-h-[60px] text-sm resize-none" placeholder="Describe the scene..." />
       </div>
 
       <Separator />
 
-      {/* Shot Type */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Shot Type</Label>
         <div className="grid grid-cols-5 gap-1.5">
           {shotTypes.map(st => (
-            <button
-              key={st.value}
-              onClick={() => setShot(st.value)}
-              className={cn(
-                "relative rounded-lg overflow-hidden aspect-[4/3] transition-all",
-                shot === st.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground"
-              )}
-            >
+            <button key={st.value} onClick={() => setShot(st.value)}
+              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", shot === st.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
               <img src={st.img} alt={st.label} className="w-full h-full object-cover" />
-              {shot === st.value && (
-                <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="w-2 h-2 text-primary-foreground" />
-                </div>
-              )}
+              {shot === st.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
             </button>
           ))}
         </div>
@@ -254,48 +313,27 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
 
       <Separator />
 
-      {/* Location */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Location</Label>
         <div className="grid grid-cols-4 gap-1.5">
           {locationDetailOptions.map(loc => (
-            <button
-              key={loc.value}
-              onClick={() => setLocation(location === loc.value ? "" : loc.value)}
-              className={cn(
-                "relative rounded-lg overflow-hidden aspect-[4/3] transition-all",
-                location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground"
-              )}
-            >
+            <button key={loc.value} onClick={() => setLocation(location === loc.value ? "" : loc.value)}
+              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
               <img src={loc.img} alt={loc.label} className="w-full h-full object-cover" />
-              {location === loc.value && (
-                <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="w-2 h-2 text-primary-foreground" />
-                </div>
-              )}
+              {location === loc.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-muted-foreground text-center">
-          {locationDetailOptions.find(l => l.value === location)?.label || "None"}
-        </p>
       </div>
 
       <Separator />
 
-      {/* Duration */}
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Duration</Label>
         <div className="flex gap-1.5">
           {["2s", "3s", "4s", "5s", "6s", "8s"].map(d => (
-            <button
-              key={d}
-              onClick={() => setDuration(d)}
-              className={cn(
-                "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                duration === d ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
-              )}
-            >
+            <button key={d} onClick={() => setDuration(d)}
+              className={cn("px-2.5 py-1 rounded-md text-xs font-medium transition-all", duration === d ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>
               {d}
             </button>
           ))}
@@ -304,21 +342,20 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
 
       <Separator />
 
-      {/* Actors */}
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Actors in Scene</Label>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs text-muted-foreground">Actors in Scene</Label>
+          {connectedActors.length > 0 && (
+            <span className="text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">from connected cast</span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
-          {actors.map(actor => {
+          {availableActors.map(actor => {
             const isIn = selectedActors.includes(actor.id);
             return (
-              <button
-                key={actor.id}
-                onClick={() => toggleActor(actor.id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs transition-all",
-                  isIn ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground/60"
-                )}
-              >
+              <button key={actor.id} onClick={() => toggleActor(actor.id)}
+                className={cn("flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs transition-all",
+                  isIn ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground/60")}>
                 <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
                 <span>{actor.name}</span>
               </button>
@@ -329,20 +366,11 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
 
       <Separator />
 
-      {/* Actions */}
       <div className="flex gap-2">
-        <Button size="sm" className="flex-1 gap-1.5" onClick={save}>
-          <Check className="w-3.5 h-3.5" /> Save
-        </Button>
-        <Button size="sm" variant="outline" className="gap-1.5">
-          <Sparkles className="w-3.5 h-3.5" /> Generate
-        </Button>
+        <Button size="sm" className="flex-1 gap-1.5" onClick={save}><Check className="w-3.5 h-3.5" /> Save</Button>
+        <Button size="sm" variant="outline" className="gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
       </div>
-
-      <button
-        onClick={onDelete}
-        className="w-full flex items-center justify-center gap-1.5 text-xs text-destructive hover:text-destructive/80 py-2 transition-colors"
-      >
+      <button onClick={onDelete} className="w-full flex items-center justify-center gap-1.5 text-xs text-destructive hover:text-destructive/80 py-2 transition-colors">
         <Trash2 className="w-3 h-3" /> Delete Shot
       </button>
     </div>
@@ -351,26 +379,17 @@ function ShotDrawer({ frame, actorRoster: actors, onUpdate, onDelete }: {
 
 function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
   const appearances = frames.filter(f => f.actors.includes(actor.id));
-
   return (
     <div className="space-y-4">
-      {/* Portrait */}
       <div className="rounded-xl overflow-hidden border border-border bg-secondary">
         <img src={actor.avatar} alt={actor.name} className="w-full object-cover max-h-[240px]" />
       </div>
-
-      {/* Name & Role */}
       <div>
         <h3 className="text-lg font-bold text-foreground">{actor.name}</h3>
         <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">{actor.role}</span>
       </div>
-
-      {/* Description */}
       <p className="text-sm text-muted-foreground leading-relaxed">{actor.description}</p>
-
       <Separator />
-
-      {/* Appears in */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Appears in {appearances.length} shot{appearances.length !== 1 ? "s" : ""}</Label>
         <div className="grid grid-cols-2 gap-2">
@@ -385,12 +404,6 @@ function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
           ))}
         </div>
       </div>
-
-      <Separator />
-
-      <Button size="sm" variant="outline" className="w-full gap-1.5">
-        <Settings className="w-3.5 h-3.5" /> Edit Full Profile
-      </Button>
     </div>
   );
 }
@@ -398,20 +411,11 @@ function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
 function LocationDrawer({ locationName, frames }: { locationName: string; frames: FrameData[] }) {
   const img = locationImages[locationName];
   const appearances = frames.filter(f => f.location === locationName);
-
   return (
     <div className="space-y-4">
-      {/* Image */}
-      {img && (
-        <div className="rounded-xl overflow-hidden border border-border">
-          <img src={img} alt={locationName} className="w-full object-cover max-h-[200px]" />
-        </div>
-      )}
-
+      {img && <div className="rounded-xl overflow-hidden border border-border"><img src={img} alt={locationName} className="w-full object-cover max-h-[200px]" /></div>}
       <h3 className="text-lg font-bold text-foreground">{locationName}</h3>
-
       <Separator />
-
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Used in {appearances.length} shot{appearances.length !== 1 ? "s" : ""}</Label>
         <div className="grid grid-cols-2 gap-2">
@@ -430,20 +434,50 @@ function LocationDrawer({ locationName, frames }: { locationName: string; frames
   );
 }
 
+function ZoneDrawer({ zone, castNodes, locationNodes, frames }: {
+  zone: Zone; castNodes: CastNode[]; locationNodes: LocationNode[]; frames: FrameData[];
+}) {
+  const castCount = castNodes.filter(n => n.zoneId === zone.id).length;
+  const locCount = locationNodes.filter(n => n.zoneId === zone.id).length;
+  const frameCount = frames.filter(f => f.zoneId === zone.id).length;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `hsl(${zone.color} / 0.15)` }}>
+          {zone.type === "casting" && <Users className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
+          {zone.type === "shots" && <Camera className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
+          {zone.type === "locations" && <MapPin className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-foreground">{zone.label}</h3>
+          <p className="text-xs text-muted-foreground">
+            {zone.type === "casting" && `${castCount} cast member${castCount !== 1 ? "s" : ""}`}
+            {zone.type === "shots" && `${frameCount} shot${frameCount !== 1 ? "s" : ""}`}
+            {zone.type === "locations" && `${locCount} location${locCount !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+      </div>
+      <Separator />
+      <p className="text-sm text-muted-foreground">
+        {zone.type === "casting" && "Connect this zone to a Shots zone to make these actors available in those shots."}
+        {zone.type === "shots" && "Connect a Casting zone here to pull actors. Connect a Locations zone to assign locations."}
+        {zone.type === "locations" && "Connect this zone to a Shots zone to make these locations available."}
+      </p>
+      <p className="text-[10px] text-muted-foreground/60">Right-click inside the zone to add items. Drag the zone label to reposition.</p>
+    </div>
+  );
+}
+
 // ─── Main Canvas ────────────────────────────────────────────
 export default function ProductionCanvasPage() {
   const { projectId } = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [zones, setZones] = useState<Zone[]>(initialZones);
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
-  const [castNodes, setCastNodes] = useState<CastNode[]>([
-    { id: "cn1", actorId: "a1", x: -200, y: 100 },
-    { id: "cn2", actorId: "a2", x: -200, y: 360 },
-  ]);
-  const [locationNodes, setLocationNodes] = useState<LocationNode[]>([
-    { id: "ln1", locationName: "Office", x: 1100, y: 80 },
-    { id: "ln2", locationName: "Bridge", x: 1100, y: 280 },
-  ]);
+  const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
+  const [locationNodes, setLocationNodes] = useState<LocationNode[]>(initialLocationNodes);
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -455,11 +489,38 @@ export default function ProductionCanvasPage() {
   const [selected, setSelected] = useState<SelectedItem>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
-  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
-  const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
-  const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
+  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId?: string } | null>(null);
+  const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
+  const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
 
-  // Zoom towards mouse
+  // Compute zone bounds
+  const zoneBounds = useMemo(() => {
+    const map: Record<string, { x: number; y: number; w: number; h: number }> = {};
+    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes); });
+    return map;
+  }, [zones, frames, castNodes, locationNodes]);
+
+  // Get actors connected to a shots zone via zone connections
+  const getConnectedActors = useCallback((shotsZoneId: string): Actor[] => {
+    const castingZoneIds = connections
+      .filter(c => c.to === shotsZoneId && zones.find(z => z.id === c.from)?.type === "casting")
+      .map(c => c.from);
+    const actorIds = castNodes
+      .filter(n => castingZoneIds.includes(n.zoneId))
+      .map(n => n.actorId);
+    return actorRoster.filter(a => actorIds.includes(a.id));
+  }, [connections, zones, castNodes]);
+
+  // Find which zone a world coordinate falls in
+  const findZoneAt = useCallback((wx: number, wy: number): string | undefined => {
+    for (const z of zones) {
+      const b = zoneBounds[z.id];
+      if (b && wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h) return z.id;
+    }
+    return undefined;
+  }, [zones, zoneBounds]);
+
+  // Pan/Zoom
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
@@ -493,20 +554,14 @@ export default function ProductionCanvasPage() {
     if (connectingFrom) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      setConnectingMouse({
-        x: (e.clientX - rect.left - pan.x) / zoom,
-        y: (e.clientY - rect.top - pan.y) / zoom,
-      });
+      setConnectingMouse({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
     }
-    if (panning) {
-      setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-    }
+    if (panning) setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
     if (dragging) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       const x = (e.clientX - rect.left - pan.x) / zoom - dragOffset.x;
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
-      // Update whichever array contains this id
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
       setCastNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
@@ -548,6 +603,9 @@ export default function ProductionCanvasPage() {
   }, [connectingFrom, connections]);
 
   const getPortPos = useCallback((nodeId: string, side: "left" | "right") => {
+    // Check if it's a zone
+    const zb = zoneBounds[nodeId];
+    if (zb) return { x: side === "right" ? zb.x + zb.w : zb.x, y: zb.y + zb.h / 2 };
     const f = frames.find(fr => fr.id === nodeId);
     if (f) return { x: side === "right" ? f.x + FRAME_W : f.x, y: f.y + PORT_Y };
     const cn = castNodes.find(n => n.id === nodeId);
@@ -555,51 +613,46 @@ export default function ProductionCanvasPage() {
     const ln = locationNodes.find(n => n.id === nodeId);
     if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
     return { x: 0, y: 0 };
-  }, [frames, castNodes, locationNodes]);
+  }, [frames, castNodes, locationNodes, zoneBounds]);
 
   const connectors = connections.map(c => {
     const p1 = getPortPos(c.from, "right");
     const p2 = getPortPos(c.to, "left");
-    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to };
+    const isZoneConn = zones.some(z => z.id === c.from) || zones.some(z => z.id === c.to);
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn };
   });
 
   const fitToScreen = useCallback(() => {
     if (!containerRef.current) return;
-    const allNodes = [
-      ...frames.map(f => ({ x: f.x, y: f.y, w: FRAME_W, h: FRAME_H })),
-      ...castNodes.map(n => ({ x: n.x, y: n.y, w: CAST_W, h: CAST_H })),
-      ...locationNodes.map(n => ({ x: n.x, y: n.y, w: LOC_W, h: LOC_H })),
-    ];
-    if (allNodes.length === 0) return;
+    const allBounds = Object.values(zoneBounds);
+    if (allBounds.length === 0) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const minX = Math.min(...allNodes.map(n => n.x));
-    const minY = Math.min(...allNodes.map(n => n.y));
-    const maxX = Math.max(...allNodes.map(n => n.x + n.w));
-    const maxY = Math.max(...allNodes.map(n => n.y + n.h));
+    const minX = Math.min(...allBounds.map(b => b.x));
+    const minY = Math.min(...allBounds.map(b => b.y));
+    const maxX = Math.max(...allBounds.map(b => b.x + b.w));
+    const maxY = Math.max(...allBounds.map(b => b.y + b.h));
     const cw = maxX - minX + 120;
     const ch = maxY - minY + 120;
     const drawWidth = selected ? rect.width - DRAWER_W : rect.width;
-    const nz = Math.min(drawWidth / cw, rect.height / ch, 1.5);
+    const nz = Math.min(drawWidth / cw, rect.height / ch, 1.2);
     setZoom(nz);
     setPan({ x: (drawWidth - cw * nz) / 2 - minX * nz + 60 * nz, y: (rect.height - ch * nz) / 2 - minY * nz + 60 * nz });
-  }, [frames, castNodes, locationNodes, selected]);
+  }, [zoneBounds, selected]);
 
-  const autoLayout = useCallback(() => {
-    const cols = 3, gapX = 320, gapY = 260;
-    setFrames(prev => prev.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY })));
-  }, []);
-
-  const addFrame = useCallback((x?: number, y?: number) => {
+  const addFrame = useCallback((x?: number, y?: number, zoneId?: string) => {
+    const targetZone = zoneId || zones.find(z => z.type === "shots")?.id || "z-shots";
+    const zb = zoneBounds[targetZone];
     const id = `f${Date.now()}`;
-    const last = frames[frames.length - 1];
+    const last = frames.filter(f => f.zoneId === targetZone);
+    const lastF = last[last.length - 1];
     setFrames(prev => [...prev, {
-      id, x: x ?? (last ? last.x + 320 : 80), y: y ?? (last ? last.y : 80),
+      id, x: x ?? (lastF ? lastF.x + 300 : (zb ? zb.x + ZONE_PAD : 80)),
+      y: y ?? (lastF ? lastF.y : (zb ? zb.y + ZONE_PAD + ZONE_LABEL_H : 80)),
       image: "", scene: `SC ${Math.ceil((frames.length + 1) / 2)}`, shot: "WIDE",
-      description: "New frame", duration: "3s", actors: [],
-      location: undefined,
+      description: "New frame", duration: "3s", actors: [], zoneId: targetZone,
     }]);
     setSelected({ type: "frame", id });
-  }, [frames]);
+  }, [frames, zones, zoneBounds]);
 
   // Spacebar for hand tool
   useEffect(() => {
@@ -613,64 +666,51 @@ export default function ProductionCanvasPage() {
   // Fit on mount
   useEffect(() => { const t = setTimeout(fitToScreen, 150); return () => clearTimeout(t); }, []);
 
-  // Resolve selected item for drawer
+  // Resolve selected
   const selectedFrame = selected?.type === "frame" ? frames.find(f => f.id === selected.id) : null;
   const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
   const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
+  const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
   const selectedActor = selectedCast ? actorRoster.find(a => a.id === selectedCast.actorId) : null;
 
-  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : null;
+  const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
+
+  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedZone ? selectedZone.label : null;
   const showDrawer = !!selected;
 
   return (
     <div className="h-screen w-full relative bg-background overflow-hidden flex">
-      {/* Canvas area */}
       <div className="flex-1 relative">
         {/* Back button */}
-        <Link
-          to={`/project/${projectId}/storyboard`}
-          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-xs">Back to Pipeline</span>
+        <Link to={`/project/${projectId}/storyboard`}
+          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" /><span className="text-xs">Back to Pipeline</span>
         </Link>
 
-        {/* Canvas title */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg">
           <Film className="w-4 h-4 text-primary" />
           <span className="text-sm font-bold text-foreground">Production Canvas</span>
           <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Beta</span>
         </div>
 
-        {/* Floating vertical toolbar */}
+        {/* Floating toolbar */}
         <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 flex flex-col items-center gap-1 p-1.5 rounded-2xl bg-card/90 backdrop-blur-md border border-border shadow-2xl">
-          <button onClick={() => addFrame()} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Add Frame">
-            <Plus className="w-4 h-4" />
-          </button>
+          <button onClick={() => addFrame()} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Add Shot"><Plus className="w-4 h-4" /></button>
           <div className="w-6 h-px bg-border my-0.5" />
-          <button onClick={() => setTool("select")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "select" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Select (V)">
-            <MousePointer className="w-4 h-4" />
-          </button>
-          <button onClick={() => setTool("hand")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "hand" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Pan (Space)">
-            <Hand className="w-4 h-4" />
-          </button>
+          <button onClick={() => setTool("select")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "select" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Select"><MousePointer className="w-4 h-4" /></button>
+          <button onClick={() => setTool("hand")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "hand" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Pan (Space)"><Hand className="w-4 h-4" /></button>
           <div className="w-6 h-px bg-border my-0.5" />
-          <button onClick={autoLayout} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Auto layout">
-            <Grid3X3 className="w-4 h-4" />
-          </button>
-          <button onClick={fitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
-            <Maximize className="w-4 h-4" />
-          </button>
+          <button onClick={fitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen"><Maximize className="w-4 h-4" /></button>
         </div>
 
-        {/* Zoom indicator */}
+        {/* Zoom */}
         <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-sm border border-border text-xs text-muted-foreground">
           <button onClick={() => setZoom(z => Math.max(0.15, z - 0.1))} className="p-0.5 hover:text-foreground"><ZoomOut className="w-3.5 h-3.5" /></button>
           <span className="min-w-[3ch] text-center">{Math.round(zoom * 100)}%</span>
           <button onClick={() => setZoom(z => Math.min(3, z + 0.1))} className="p-0.5 hover:text-foreground"><ZoomIn className="w-3.5 h-3.5" /></button>
         </div>
 
-        {/* Canvas surface */}
+        {/* Canvas */}
         <div
           ref={containerRef}
           className={cn("absolute inset-0", tool === "hand" || panning ? "cursor-grab" : "cursor-default", panning && "cursor-grabbing")}
@@ -681,7 +721,8 @@ export default function ProductionCanvasPage() {
             if (!rect) return;
             const worldX = (e.clientX - rect.left - pan.x) / zoom;
             const worldY = (e.clientY - rect.top - pan.y) / zoom;
-            setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY });
+            const zoneId = findZoneAt(worldX, worldY);
+            setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY, zoneId });
           }}
           onWheel={handleWheel}
           onMouseDown={(e) => { setCanvasMenu(null); setCastPickerPos(null); setLocationPickerPos(null); handleMouseDown(e); }}
@@ -690,70 +731,99 @@ export default function ProductionCanvasPage() {
           onMouseLeave={handleMouseUp}
         >
           {/* Dot grid */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px)`,
-              backgroundSize: `${32 * zoom}px ${32 * zoom}px`,
-              backgroundPosition: `${pan.x % (32 * zoom)}px ${pan.y % (32 * zoom)}px`,
-            }}
-          />
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px)`,
+            backgroundSize: `${32 * zoom}px ${32 * zoom}px`,
+            backgroundPosition: `${pan.x % (32 * zoom)}px ${pan.y % (32 * zoom)}px`,
+          }} />
 
           {/* Transform layer */}
           <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: "0 0" }}>
+
+            {/* Zone backgrounds */}
+            {zones.map(zone => {
+              const b = zoneBounds[zone.id];
+              if (!b) return null;
+              const isSelected = selected?.type === "zone" && selected.id === zone.id;
+              return (
+                <div
+                  key={zone.id}
+                  className="absolute"
+                  style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+                >
+                  {/* Dashed border */}
+                  <div
+                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors", isSelected && "border-opacity-80")}
+                    style={{ borderColor: `hsl(${zone.color} / ${isSelected ? 0.6 : 0.25})`, background: `hsl(${zone.color} / 0.03)` }}
+                  />
+                  {/* Label */}
+                  <div
+                    className="absolute -top-1 left-4 px-3 py-1 cursor-pointer select-none"
+                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "zone", id: zone.id }); }}
+                  >
+                    <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
+                  </div>
+                  {/* Zone port — right side */}
+                  <div
+                    className="absolute -right-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
+                    style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
+                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
+                  />
+                  {/* Zone port — left side */}
+                  <div
+                    className="absolute -left-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
+                    style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
+                    onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  />
+                </div>
+              );
+            })}
+
             {/* Connection lines */}
             <svg className="absolute inset-0 w-[5000px] h-[5000px]" style={{ pointerEvents: "none" }}>
               {connectors.map(c => {
                 const dx = Math.abs(c.x2 - c.x1);
-                const curve = Math.min(140, Math.max(18, dx * 0.35));
+                const curve = Math.min(200, Math.max(30, dx * 0.35));
                 return (
-                  <g key={`${c.from}-${c.to}`} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => setConnections(prev => prev.filter(cc => !(cc.from === c.from && cc.to === c.to)))}>
+                  <g key={`${c.from}-${c.to}`} style={{ pointerEvents: "auto", cursor: "pointer" }}
+                    onClick={() => setConnections(prev => prev.filter(cc => !(cc.from === c.from && cc.to === c.to)))}>
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="transparent" strokeWidth="16" fill="none" />
-                    <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="hsl(var(--primary))" strokeOpacity="0.4" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`}
+                      stroke={c.isZoneConn ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"}
+                      strokeOpacity={c.isZoneConn ? 0.25 : 0.4}
+                      strokeWidth={c.isZoneConn ? 3 : 2.5}
+                      strokeLinecap="round"
+                      strokeDasharray={c.isZoneConn ? "12 8" : "none"}
+                      fill="none" />
                   </g>
                 );
               })}
               {connectingFrom && (() => {
                 const p = getPortPos(connectingFrom, "right");
                 const dx = Math.abs(connectingMouse.x - p.x);
-                const curve = Math.min(140, Math.max(18, dx * 0.35));
+                const curve = Math.min(200, Math.max(30, dx * 0.35));
                 return <path d={`M ${p.x} ${p.y} C ${p.x + curve} ${p.y}, ${connectingMouse.x - curve} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`} stroke="hsl(var(--primary))" strokeOpacity="0.7" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="8 6" fill="none" />;
               })()}
             </svg>
 
             {/* Shot frames */}
             {frames.map((frame, idx) => (
-              <div
-                key={frame.id}
-                data-node
-                className={cn(
-                  "absolute rounded-xl border-2 bg-card select-none group transition-shadow",
-                  selected?.id === frame.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-muted-foreground/40",
-                )}
+              <div key={frame.id} data-node
+                className={cn("absolute rounded-xl border-2 bg-card select-none group transition-shadow",
+                  selected?.id === frame.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: frame.x, top: frame.y, width: FRAME_W }}
-                onMouseDown={(e) => startDrag(e, frame, { type: "frame", id: frame.id })}
-              >
-                {/* Ports */}
+                onMouseDown={(e) => startDrag(e, frame, { type: "frame", id: frame.id })}>
                 <div className="absolute -left-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
-                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} onMouseDown={(e) => e.stopPropagation()} />
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} onMouseDown={e => e.stopPropagation()} />
                 <div className="absolute -right-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
                   onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} />
-
-                {/* Frame number */}
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{idx + 1}</div>
-                {/* Shot badge */}
                 <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
-
-                {/* Image */}
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px]" style={{ height: IMAGE_H }}>
-                  {frame.image ? (
-                    <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30"><Plus className="w-8 h-8" /></div>
-                  )}
+                  {frame.image ? <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
+                    : <div className="w-full h-full flex items-center justify-center text-muted-foreground/30"><Plus className="w-8 h-8" /></div>}
                 </div>
-
-                {/* Info */}
                 <div className="p-2.5 space-y-1 rounded-b-[10px]" onMouseDown={e => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
@@ -765,14 +835,9 @@ export default function ProductionCanvasPage() {
                         const a = actorRoster.find(ac => ac.id === aid);
                         if (!a) return null;
                         return (
-                          <Tooltip key={a.id}>
-                            <TooltipTrigger asChild>
-                              <div className="w-5 h-5 rounded-full overflow-hidden border border-border">
-                                <img src={a.avatar} alt={a.name} className="w-full h-full object-cover" draggable={false} />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-xs">{a.name}</TooltipContent>
-                          </Tooltip>
+                          <Tooltip key={a.id}><TooltipTrigger asChild>
+                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.avatar} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
+                          </TooltipTrigger><TooltipContent side="bottom" className="text-xs">{a.name}</TooltipContent></Tooltip>
                         );
                       })}
                     </TooltipProvider>
@@ -793,28 +858,17 @@ export default function ProductionCanvasPage() {
               if (!actor) return null;
               const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
               return (
-                <div
-                  key={node.id}
-                  data-node
-                  className={cn(
-                    "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
-                    selected?.id === node.id ? "border-cyan-500 shadow-lg shadow-cyan-500/20" : "border-border hover:border-muted-foreground/40",
-                  )}
+                <div key={node.id} data-node
+                  className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                    selected?.id === node.id ? "border-cyan-500 shadow-lg shadow-cyan-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: CAST_W }}
-                  onMouseDown={(e) => startDrag(e, node, { type: "cast", id: node.id })}
-                >
-                  {/* Ports */}
-                  <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 z-20 w-[16px] h-[16px] rounded-full border-2 border-cyan-500/50 bg-card hover:bg-cyan-500 transition-all cursor-crosshair"
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }} />
-                  <div className="absolute -left-[8px] top-1/2 -translate-y-1/2 z-20 w-[16px] h-[16px] rounded-full border-2 border-cyan-500/50 bg-card hover:bg-cyan-500 transition-all cursor-crosshair"
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }} onMouseDown={e => e.stopPropagation()} />
-
+                  onMouseDown={(e) => startDrag(e, node, { type: "cast", id: node.id })}>
                   <div className="absolute top-2 left-2 z-10 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{sceneCount} shots</div>
-                  <button
-                    className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => { setCastNodes(prev => prev.filter(n => n.id !== node.id)); setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id)); if (selected?.id === node.id) setSelected(null); }}
-                  ><X className="w-3 h-3" /></button>
+                    onClick={() => { setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                    <X className="w-3 h-3" />
+                  </button>
                   <img src={actor.avatar} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
                   <div className="p-2">
                     <p className="text-xs font-bold text-foreground">{actor.name}</p>
@@ -830,57 +884,59 @@ export default function ProductionCanvasPage() {
               if (!img) return null;
               const shotCount = frames.filter(f => f.location === node.locationName).length;
               return (
-                <div
-                  key={node.id}
-                  data-node
-                  className={cn(
-                    "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
-                    selected?.id === node.id ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-border hover:border-muted-foreground/40",
-                  )}
+                <div key={node.id} data-node
+                  className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                    selected?.id === node.id ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: LOC_W }}
-                  onMouseDown={(e) => startDrag(e, node, { type: "location", id: node.id })}
-                >
-                  <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 z-20 w-[16px] h-[16px] rounded-full border-2 border-emerald-500/50 bg-card hover:bg-emerald-500 transition-all cursor-crosshair"
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }} />
-                  <div className="absolute -left-[8px] top-1/2 -translate-y-1/2 z-20 w-[16px] h-[16px] rounded-full border-2 border-emerald-500/50 bg-card hover:bg-emerald-500 transition-all cursor-crosshair"
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }} onMouseDown={e => e.stopPropagation()} />
-
+                  onMouseDown={(e) => startDrag(e, node, { type: "location", id: node.id })}>
                   <div className="absolute top-2 left-2 z-10 bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{shotCount} shots</div>
-                  <button
-                    className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => { setLocationNodes(prev => prev.filter(n => n.id !== node.id)); setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id)); if (selected?.id === node.id) setSelected(null); }}
-                  ><X className="w-3 h-3" /></button>
+                    onClick={() => { setLocationNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                    <X className="w-3 h-3" />
+                  </button>
                   <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
-                  <div className="p-2">
-                    <p className="text-xs font-bold text-foreground">{node.locationName}</p>
-                  </div>
+                  <div className="p-2"><p className="text-xs font-bold text-foreground">{node.locationName}</p></div>
                 </div>
               );
             })}
           </div>
 
           {/* Context menu */}
-          {canvasMenu && (
-            <div className="absolute z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: canvasMenu.x, top: canvasMenu.y }} onMouseDown={e => e.stopPropagation()}>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { addFrame(canvasMenu.worldX, canvasMenu.worldY); setCanvasMenu(null); }}>
-                <Plus className="w-4 h-4" /> Add Shot
-              </button>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { setCastPickerPos(canvasMenu); setCanvasMenu(null); }}>
-                <Users className="w-4 h-4" /> Add Cast Member
-              </button>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { setLocationPickerPos(canvasMenu); setCanvasMenu(null); }}>
-                <MapPin className="w-4 h-4" /> Add Location
-              </button>
-              <div className="h-px bg-border my-1" />
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { autoLayout(); setCanvasMenu(null); }}>
-                <Grid3X3 className="w-4 h-4" /> Auto Layout
-              </button>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
-                <Maximize className="w-4 h-4" /> Fit to Screen
-              </button>
-            </div>
-          )}
+          {canvasMenu && (() => {
+            const zone = canvasMenu.zoneId ? zones.find(z => z.id === canvasMenu.zoneId) : null;
+            return (
+              <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: canvasMenu.x, top: canvasMenu.y }} onMouseDown={e => e.stopPropagation()}>
+                {zone && (
+                  <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{zone.label} Zone</p>
+                )}
+                {(!zone || zone.type === "shots") && (
+                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                    addFrame(canvasMenu.worldX, canvasMenu.worldY, canvasMenu.zoneId || undefined);
+                    setCanvasMenu(null);
+                  }}><Camera className="w-4 h-4" /> Add Shot</button>
+                )}
+                {(!zone || zone.type === "casting") && (
+                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "casting")?.id || "z-casting";
+                    setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: targetZone });
+                    setCanvasMenu(null);
+                  }}><Users className="w-4 h-4" /> Add Cast Member</button>
+                )}
+                {(!zone || zone.type === "locations") && (
+                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "locations")?.id || "z-locations";
+                    setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: targetZone });
+                    setCanvasMenu(null);
+                  }}><MapPin className="w-4 h-4" /> Add Location</button>
+                )}
+                <div className="h-px bg-border my-1" />
+                <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
+                  <Maximize className="w-4 h-4" /> Fit to Screen
+                </button>
+              </div>
+            );
+          })()}
 
           {/* Cast Picker */}
           {castPickerPos && (
@@ -888,7 +944,10 @@ export default function ProductionCanvasPage() {
               <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
               {actorRoster.map(actor => (
                 <button key={actor.id} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
-                  onClick={() => { setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY }]); setCastPickerPos(null); }}>
+                  onClick={() => {
+                    setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY, zoneId: castPickerPos.zoneId }]);
+                    setCastPickerPos(null);
+                  }}>
                   <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
                   <span>{actor.name}</span>
                 </button>
@@ -906,7 +965,10 @@ export default function ProductionCanvasPage() {
               <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Location</p>
               {Object.entries(locationImages).map(([name, img]) => (
                 <button key={name} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
-                  onClick={() => { setLocationNodes(prev => [...prev, { id: `ln-${Date.now()}`, locationName: name, x: locationPickerPos.worldX - LOC_W / 2, y: locationPickerPos.worldY }]); setLocationPickerPos(null); }}>
+                  onClick={() => {
+                    setLocationNodes(prev => [...prev, { id: `ln-${Date.now()}`, locationName: name, x: locationPickerPos.worldX - LOC_W / 2, y: locationPickerPos.worldY, zoneId: locationPickerPos.zoneId }]);
+                    setLocationPickerPos(null);
+                  }}>
                   <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
                   <span>{name}</span>
                 </button>
@@ -920,11 +982,14 @@ export default function ProductionCanvasPage() {
         </div>
 
         {/* Minimap */}
-        <div className="absolute bottom-4 right-4 w-[140px] h-[90px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden z-20" style={{ right: showDrawer ? DRAWER_W + 16 : 16 }}>
-          <svg className="w-full h-full" viewBox="-300 -50 1600 800">
-            {frames.map(f => (
-              <rect key={f.id} x={f.x} y={f.y} width={FRAME_W} height={FRAME_H} rx={4} fill={selected?.id === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={selected?.id === f.id ? 0.6 : 0.2} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.3} strokeWidth={2} />
-            ))}
+        <div className="absolute bottom-4 w-[140px] h-[90px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden z-20" style={{ right: showDrawer ? DRAWER_W + 16 : 16 }}>
+          <svg className="w-full h-full" viewBox="-600 -100 2200 900">
+            {zones.map(z => {
+              const b = zoneBounds[z.id];
+              if (!b) return null;
+              return <rect key={z.id} x={b.x} y={b.y} width={b.w} height={b.h} rx={8} fill="none" stroke={`hsl(${z.color})`} strokeOpacity={0.2} strokeWidth={3} strokeDasharray="8 6" />;
+            })}
+            {frames.map(f => <rect key={f.id} x={f.x} y={f.y} width={FRAME_W} height={FRAME_H} rx={4} fill={selected?.id === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={selected?.id === f.id ? 0.6 : 0.2} />)}
             {castNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={4} fill="hsl(190 80% 50%)" fillOpacity={0.3} />)}
             {locationNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={4} fill="hsl(150 60% 45%)" fillOpacity={0.3} />)}
           </svg>
@@ -934,35 +999,31 @@ export default function ProductionCanvasPage() {
       {/* Context-sensitive drawer */}
       {showDrawer && (
         <div className="h-full border-l border-border bg-card flex flex-col animate-in slide-in-from-right duration-200" style={{ width: DRAWER_W }}>
-          {/* Drawer header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
             <div className="flex items-center gap-2">
               {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
               {selectedActor && <User className="w-4 h-4 text-cyan-500" />}
               {selectedLocation && <MapPin className="w-4 h-4 text-emerald-500" />}
+              {selectedZone && (
+                selectedZone.type === "casting" ? <Users className="w-4 h-4 text-cyan-500" /> :
+                selectedZone.type === "shots" ? <Camera className="w-4 h-4 text-primary" /> :
+                <MapPin className="w-4 h-4 text-emerald-500" />
+              )}
               <h2 className="text-sm font-bold text-foreground">{drawerTitle}</h2>
             </div>
             <button onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Drawer content */}
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {selectedFrame && (
-              <ShotDrawer
-                frame={selectedFrame}
-                actorRoster={actorRoster}
+              <ShotDrawer frame={selectedFrame} actors={actorRoster} connectedActors={connectedActorsForFrame}
                 onUpdate={(updated) => setFrames(prev => prev.map(f => f.id === updated.id ? updated : f))}
-                onDelete={() => {
-                  setFrames(prev => prev.filter(f => f.id !== selectedFrame.id));
-                  setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id));
-                  setSelected(null);
-                }}
-              />
+                onDelete={() => { setFrames(prev => prev.filter(f => f.id !== selectedFrame.id)); setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id)); setSelected(null); }} />
             )}
             {selectedActor && <CastDrawer actor={selectedActor} frames={frames} />}
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
+            {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
         </div>
       )}
