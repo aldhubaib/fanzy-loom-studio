@@ -21,7 +21,10 @@ const stageConfig: Record<string, { title: string; icon: React.ElementType; desc
 
 export default function ProjectPage() {
   const { projectId, stage } = useParams();
-  const project = mockProjects.find(p => p.id === projectId);
+  const isNewProject = projectId === "new";
+  const project = isNewProject
+    ? { id: "new", title: "New Project", genre: "—", scenes: 0, characters: 0, locations: 0, pipelineComplete: 0, pipelineTotal: 8, editedAgo: "just now", gradient: "" }
+    : mockProjects.find(p => p.id === projectId);
   const currentStage = stageConfig[stage || "concept"];
 
   if (!project) {
