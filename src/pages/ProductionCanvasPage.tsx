@@ -790,6 +790,40 @@ export default function ProductionCanvasPage() {
                       setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
                     }}
                   />
+                  {/* Zone-level connectors for shots zones */}
+                  {zone.type === "shots" && (() => {
+                    const zoneConnectors = [
+                      { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left" as const,  yFrac: 0.5 },
+                      { key: "location", color: "150 60% 45%",  label: "Locations", side: "right" as const, yFrac: 0.5 },
+                      { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left" as const,  yFrac: 0.2 },
+                    ];
+                    return zoneConnectors.map((port, i) => {
+                      const portColor = `hsl(${port.color})`;
+                      const yPos = b.h * port.yFrac;
+                      const isLeft = port.side === "left";
+                      return (
+                        <TooltipProvider key={port.key} delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="absolute z-30 w-[16px] h-[16px] rounded-full border-[3px] bg-card hover:scale-125 transition-all cursor-crosshair"
+                                style={{
+                                  borderColor: portColor,
+                                  [isLeft ? "left" : "right"]: -8,
+                                  top: yPos - 8,
+                                }}
+                                onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
+                                onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
+                              >
+                                <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: portColor }} />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side={isLeft ? "left" : "right"} className="text-[10px] py-0.5 px-1.5">{port.label}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    });
+                  })()}
                   {/* Label */}
                   <div
                     className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
@@ -943,13 +977,6 @@ export default function ProductionCanvasPage() {
                     selected?.id === node.id ? "border-cyan-500 shadow-lg shadow-cyan-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: CAST_W }}
                   onMouseDown={(e) => startDrag(e, node, { type: "cast", id: node.id })}>
-                  {/* Connector port */}
-                  <div className="absolute z-20 w-[14px] h-[14px] rounded-full border-[2.5px] bg-card hover:scale-125 transition-all cursor-crosshair"
-                    style={{ borderColor: "hsl(190 80% 50%)", right: -7, top: CAST_H / 2 - 7 }}
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}>
-                    <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: "hsl(190 80% 50%)" }} />
-                  </div>
                   <div className="absolute top-2 left-2 z-10 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{sceneCount} shots</div>
                   <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
@@ -976,13 +1003,6 @@ export default function ProductionCanvasPage() {
                     selected?.id === node.id ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: LOC_W }}
                   onMouseDown={(e) => startDrag(e, node, { type: "location", id: node.id })}>
-                  {/* Connector port */}
-                  <div className="absolute z-20 w-[14px] h-[14px] rounded-full border-[2.5px] bg-card hover:scale-125 transition-all cursor-crosshair"
-                    style={{ borderColor: "hsl(150 60% 45%)", left: -7, top: LOC_H / 2 - 7 }}
-                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
-                    onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}>
-                    <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: "hsl(150 60% 45%)" }} />
-                  </div>
                   <div className="absolute top-2 left-2 z-10 bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{shotCount} shots</div>
                   <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
@@ -1002,13 +1022,6 @@ export default function ProductionCanvasPage() {
                   selected?.id === node.id ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: node.x, top: node.y, width: SCRIPT_W }}
                 onMouseDown={(e) => startDrag(e, node, { type: "script", id: node.id })}>
-                {/* Connector port */}
-                <div className="absolute z-20 w-[14px] h-[14px] rounded-full border-[2.5px] bg-card hover:scale-125 transition-all cursor-crosshair"
-                  style={{ borderColor: "hsl(280 60% 55%)", right: -7, top: SCRIPT_H / 2 - 7 }}
-                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
-                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}>
-                  <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: "hsl(280 60% 55%)" }} />
-                </div>
                 <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                   onMouseDown={e => e.stopPropagation()}
                   onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
