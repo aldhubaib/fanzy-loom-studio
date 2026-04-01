@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
 import {
   Dices, ArrowRight, Plus, ChevronDown,
 } from "lucide-react";
@@ -50,15 +49,17 @@ function VisualCardLabel({ label, selected }: { label: string; selected: boolean
 }
 
 // Picker trigger button
-function PickerButton({ label, value, selectedImg, emoji, onClick }: { label: string; value: string; selectedImg?: string; emoji?: string; onClick: () => void }) {
+function PickerButton({ label, value, selectedImg, emoji, onClick, hasError }: { label: string; value: string; selectedImg?: string; emoji?: string; onClick: () => void; hasError?: boolean }) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all",
-        value
-          ? "bg-card border-primary/30 text-foreground"
-          : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+        hasError
+          ? "bg-card border-destructive/60 text-destructive animate-shake"
+          : value
+            ? "bg-card border-primary/30 text-foreground"
+            : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
       )}
     >
       {selectedImg && (
@@ -70,12 +71,12 @@ function PickerButton({ label, value, selectedImg, emoji, onClick }: { label: st
         </div>
       )}
       {!selectedImg && !emoji && !value && (
-        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
-          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className={cn("w-7 h-7 rounded-md flex items-center justify-center", hasError ? "bg-destructive/10" : "bg-secondary")}>
+          <Plus className={cn("w-3.5 h-3.5", hasError ? "text-destructive" : "text-muted-foreground")} />
         </div>
       )}
       <div className="text-left">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-0.5">{label}</p>
+        <p className={cn("text-[10px] uppercase tracking-wider leading-none mb-0.5", hasError ? "text-destructive/70" : "text-muted-foreground")}>{label}</p>
         <p className="text-sm font-medium">{value || "Choose..."}</p>
       </div>
       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
@@ -173,6 +174,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const handleSurpriseMe = () => {
     setTitle("Echoes of Tomorrow");
@@ -205,11 +207,14 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           />
 
           {/* Idea textarea — auto-grows */}
-          <div className="rounded-lg bg-card border border-border p-1">
+          <div className={cn(
+            "rounded-lg bg-card border p-1 transition-colors",
+            showErrors && !idea.trim() ? "border-destructive/60" : "border-border"
+          )}>
             <textarea
               ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
               value={idea}
-              onChange={(e) => { setIdea(e.target.value); const t = e.target; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }}
+              onChange={(e) => { setIdea(e.target.value); if (showErrors) setShowErrors(false); const t = e.target; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }}
               placeholder="Describe your film idea... What's the story about? What's the world? What's the conflict?"
               rows={2}
               className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none p-3 leading-relaxed min-h-[3.5rem]"
@@ -231,12 +236,12 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
 
           {/* Compact picker buttons */}
           <div className="mt-4 flex flex-wrap gap-3">
-            <PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => setGenreOpen(true)} />
-            <PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => setToneOpen(true)} />
-            <PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => setSettingOpen(true)} />
-            <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => setDurationOpen(true)} />
-            <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => setAudienceOpen(true)} />
-            <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => setFormatOpen(true)} />
+            <PickerButton label="Genre" value={genre} selectedImg={genres.find(g => g.label === genre)?.img} onClick={() => { setGenreOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !genre} />
+            <PickerButton label="Tone" value={tone} selectedImg={tones.find(t => t.label === tone)?.img} onClick={() => { setToneOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !tone} />
+            <PickerButton label="Setting" value={setting} selectedImg={settings.find(s => s.label === setting)?.img} onClick={() => { setSettingOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !setting} />
+            <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => { setDurationOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !duration} />
+            <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => { setAudienceOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !audience} />
+            <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => { setFormatOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !format} />
           </div>
 
           {/* Dialogs */}
@@ -251,16 +256,9 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <div className="flex items-center mt-8">
             <Button
               onClick={() => {
-                const missing: string[] = [];
-                if (!idea.trim()) missing.push("Idea");
-                if (!genre) missing.push("Genre");
-                if (!tone) missing.push("Tone");
-                if (!setting) missing.push("Setting");
-                if (!duration) missing.push("Duration");
-                if (!audience) missing.push("Audience");
-                if (!format) missing.push("Format");
-                if (missing.length > 0) {
-                  toast({ title: "Missing fields", description: `Please fill in: ${missing.join(", ")}`, variant: "destructive" });
+                const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format);
+                if (!isReady) {
+                  setShowErrors(true);
                   return;
                 }
                 navigate(`/project/${projectId}/script`);
@@ -269,7 +267,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
                 "gap-2 px-6 h-11 text-base font-semibold",
                 (idea.trim() && genre && tone && setting && duration && audience && format)
                   ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                  : "bg-primary/40 text-primary-foreground/60 cursor-not-allowed"
+                  : "bg-primary/40 text-primary-foreground/60"
               )}
             >
               Continue to Script
