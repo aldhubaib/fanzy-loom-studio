@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote,
-  Bold, Italic, Minus, Focus, Info, ChevronDown, Check,
+  Bold, Italic, Minus, Focus, Info, ChevronDown, Check, Strikethrough, Highlighter,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
@@ -39,22 +39,42 @@ export function FormattingToolbar({
   fontSize,
   onFontSizeChange,
 }: FormattingToolbarProps) {
+  const [hasSelection, setHasSelection] = useState(false);
+  const [selectionText, setSelectionText] = useState("");
+
+  const checkSelection = useCallback(() => {
+    const sel = window.getSelection();
+    const text = sel?.toString().trim() || "";
+    setHasSelection(text.length > 0);
+    setSelectionText(text);
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("selectionchange", checkSelection);
+    document.addEventListener("mouseup", checkSelection);
+    return () => {
+      document.removeEventListener("selectionchange", checkSelection);
+      document.removeEventListener("mouseup", checkSelection);
+    };
+  }, [checkSelection]);
+
   const active = elementTypes.find((e) => e.id === activeElement) ?? elementTypes[0];
   const ActiveIcon = active.icon;
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="h-11 flex items-center px-4 gap-3 border-b border-border bg-[hsl(240,5%,8%)] shrink-0">
-        {/* Left — Element type dropdown */}
+    <TooltipProvider delayDuration={200}>
+      <div className="h-11 flex items-center px-4 gap-2 border-b border-border bg-card/60 backdrop-blur-sm shrink-0 rounded-lg">
+
+        {/* Left — Element type dropdown (always visible) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium text-foreground hover:bg-secondary transition-colors">
+            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-foreground hover:bg-secondary transition-colors">
               <ActiveIcon className="w-3.5 h-3.5 text-primary" />
               <span>{active.label}</span>
               <ChevronDown className="w-3 h-3 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72 bg-[hsl(240,5%,11%)] border-border">
+          <DropdownMenuContent align="start" className="w-72 bg-popover border-border">
             {elementTypes.map((el) => {
               const Icon = el.icon;
               const isActive = el.id === activeElement;
@@ -82,28 +102,39 @@ export function FormattingToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <span className="text-[10px] text-muted-foreground hidden lg:inline">⌘1-7 to switch element type</span>
+        {/* Context-aware formatting — only shows when text is selected */}
+        {hasSelection ? (
+          <>
+            <div className="w-px h-5 bg-border" />
+            <div className="flex items-center gap-0.5 animate-in fade-in duration-150">
+              <FormatButton tooltip="Bold (⌘B)" active={false}>
+                <Bold className="w-3.5 h-3.5" />
+              </FormatButton>
+              <FormatButton tooltip="Italic (⌘I)" active={false}>
+                <Italic className="w-3.5 h-3.5" />
+              </FormatButton>
+              <FormatButton tooltip="Strikethrough" active={false}>
+                <Strikethrough className="w-3.5 h-3.5" />
+              </FormatButton>
+              <FormatButton tooltip="Highlight" active={false}>
+                <Highlighter className="w-3.5 h-3.5" />
+              </FormatButton>
+              <div className="w-px h-5 bg-border mx-1" />
+              <FormatButton tooltip="Scene Break" active={false}>
+                <Minus className="w-3.5 h-3.5" />
+              </FormatButton>
+            </div>
+            <div className="ml-2 px-2 py-0.5 rounded bg-secondary">
+              <span className="text-[10px] text-muted-foreground">
+                {selectionText.length > 30 ? `${selectionText.slice(0, 30)}…` : selectionText}
+              </span>
+            </div>
+          </>
+        ) : (
+          <span className="text-[10px] text-muted-foreground hidden lg:inline ml-1">⌘1-7 to switch type</span>
+        )}
 
-        {/* Separator */}
-        <div className="w-px h-5 bg-border" />
-
-        {/* Center — Quick format buttons */}
-        <div className="flex items-center gap-0.5">
-          <ToolbarButton tooltip="Bold">
-            <span className="text-xs font-bold">B</span>
-          </ToolbarButton>
-          <ToolbarButton tooltip="Italic">
-            <span className="text-xs italic font-serif">I</span>
-          </ToolbarButton>
-          <ToolbarButton tooltip="Scene / Page Break">
-            <Minus className="w-3.5 h-3.5" />
-          </ToolbarButton>
-        </div>
-
-        {/* Separator */}
-        <div className="w-px h-5 bg-border" />
-
-        {/* Right — Editor controls */}
+        {/* Right — Editor controls (always visible) */}
         <div className="ml-auto flex items-center gap-3">
           {/* Font size */}
           <div className="flex items-center gap-1">
@@ -133,7 +164,6 @@ export function FormattingToolbar({
 
           <div className="w-px h-5 bg-border" />
 
-          {/* Format info */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button className="text-muted-foreground hover:text-foreground transition-colors">
@@ -151,11 +181,16 @@ export function FormattingToolbar({
   );
 }
 
-function ToolbarButton({ children, tooltip }: { children: React.ReactNode; tooltip: string }) {
+function FormatButton({ children, tooltip, active }: { children: React.ReactNode; tooltip: string; active: boolean }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+        <button className={cn(
+          "w-7 h-7 rounded-md flex items-center justify-center transition-colors",
+          active
+            ? "bg-primary/15 text-primary"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+        )}>
           {children}
         </button>
       </TooltipTrigger>
