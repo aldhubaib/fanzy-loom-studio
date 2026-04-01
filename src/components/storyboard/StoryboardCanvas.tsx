@@ -14,6 +14,18 @@ import actorMarlowe from "@/assets/actors/marlowe.png";
 import actorVivian from "@/assets/actors/vivian.png";
 import actorEddie from "@/assets/actors/eddie.png";
 
+import locOffice from "@/assets/locations/office.jpg";
+import locStreet from "@/assets/locations/street.jpg";
+import locJazzClub from "@/assets/locations/jazz-club.jpg";
+import locBridge from "@/assets/locations/bridge.jpg";
+
+const locationImages: Record<string, string> = {
+  "Office": locOffice,
+  "Street": locStreet,
+  "Jazz Club": locJazzClub,
+  "Bridge": locBridge,
+};
+
 const shotDescriptions: Record<string, string> = {
   "WIDE": "Wide Shot (WS) — Shows the full scene and environment, establishing location and context.",
   "MED": "Medium Shot (MS) — Frames the subject from the waist up, balancing character and environment.",
