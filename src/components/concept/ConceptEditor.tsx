@@ -165,6 +165,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
   const [durationOpen, setDurationOpen] = useState(false);
+  const [synopsisOpen, setSynopsisOpen] = useState(false);
 
   const [logline, setLogline] = useState(isMockProject ? mockConcept.logline : "");
   const [synopsis, setSynopsis] = useState(isMockProject ? mockConcept.synopsis : "");
