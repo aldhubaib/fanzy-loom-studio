@@ -681,49 +681,47 @@ export function StoryboardCanvas() {
                 {/* Expandable gallery — horizontal scroll strip */}
                 {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
                   <div
-                    className="bg-secondary/80 px-2 py-2 flex gap-1.5 overflow-x-auto"
+                    className="bg-secondary/80 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto"
                     onMouseDown={(e) => e.stopPropagation()}
                     style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "thin" }}
                   >
+                    {/* Open gallery lightbox button */}
+                    <button
+                      className="flex-shrink-0 w-7 h-12 rounded bg-background/60 hover:bg-background/90 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const activeIdx = frame.generatedImages.findIndex(img => img.id === frame.selectedImageId);
+                        setLightbox({ frameId: frame.id, index: activeIdx >= 0 ? activeIdx : 0 });
+                      }}
+                      title="Open gallery"
+                    >
+                      <Expand className="w-3.5 h-3.5" />
+                    </button>
+
                     {frame.generatedImages.map(img => {
                       const isActive = frame.selectedImageId === img.id;
                       return (
-                        <div key={img.id} className="relative flex-shrink-0 w-16 h-12">
-                          <button
-                            className={`absolute inset-0 rounded overflow-hidden border-2 transition-all bg-card/40 ${
-                              isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFrames(prev => prev.map(f =>
-                                f.id === frame.id
-                                  ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
-                                  : f
-                              ));
-                            }}
-                          >
-                            <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
-                          </button>
-
-                          <button
-                            className="absolute top-0.5 left-0.5 z-10 w-4 h-4 rounded bg-background/85 text-foreground/80 hover:text-foreground hover:bg-background flex items-center justify-center"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(img.src, "_blank", "noopener,noreferrer");
-                            }}
-                            aria-label="Open image"
-                            title="Open full image"
-                          >
-                            <Maximize className="w-2.5 h-2.5" />
-                          </button>
-
+                        <button
+                          key={img.id}
+                          className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-16 h-12 bg-card/40 ${
+                            isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFrames(prev => prev.map(f =>
+                              f.id === frame.id
+                                ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
+                                : f
+                            ));
+                          }}
+                        >
+                          <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
                           {isActive && (
                             <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
                               <Check className="w-2 h-2 text-primary-foreground" />
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
