@@ -796,7 +796,7 @@ export default function ProductionCanvasPage() {
                       shots: [
                         { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left",  yFrac: 0.3 },
                         { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left",  yFrac: 0.15 },
-                        { key: "location", color: "35 80% 55%",   label: "Locations", side: "left",  yFrac: 0.5 },
+                        { key: "location", color: "150 60% 45%",  label: "Locations", side: "left",  yFrac: 0.5 },
                       ],
                       casting: [
                         { key: "out", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
@@ -805,7 +805,7 @@ export default function ProductionCanvasPage() {
                         { key: "out", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
                       ],
                       locations: [
-                        { key: "out", color: "35 80% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+                        { key: "out", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
                       ],
                     };
                     const ports = portConfigs[zone.type] || [];
