@@ -215,9 +215,23 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                       </div>
                     )}
                     <div {...refProps} className="pt-8 first:pt-0 pb-2 cursor-text rounded-lg px-4 -mx-4 bg-card/50">
-                      <p className="font-mono font-bold uppercase text-primary tracking-wider leading-relaxed">
-                        {el.text}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const locKey = getLocationKey(el.text);
+                          const loc = locKey ? locationThumbnails[locKey] : null;
+                          return (
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0",
+                              loc ? `bg-gradient-to-br ${loc.color}` : "bg-secondary"
+                            )}>
+                              {loc ? loc.icon : <MapPin className="w-3.5 h-3.5 text-muted-foreground" />}
+                            </div>
+                          );
+                        })()}
+                        <p className="font-mono font-bold uppercase text-primary tracking-wider leading-relaxed">
+                          {el.text}
+                        </p>
+                      </div>
                     </div>
                   </React.Fragment>
                 );
