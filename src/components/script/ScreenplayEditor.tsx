@@ -210,7 +210,7 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                 THE LAST DEAL
               </h1>
               <p className="text-xs text-muted-foreground mt-1 font-sans">
-                Noir · Written by Jane Director · ~12 min estimated runtime
+                Noir · Written by Jane Director · ~12 min · 1,247 words · 3 scenes · Saved 2m ago
               </p>
             </div>
           </div>
