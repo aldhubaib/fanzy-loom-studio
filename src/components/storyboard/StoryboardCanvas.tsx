@@ -824,25 +824,57 @@ export function StoryboardCanvas() {
                           </Tooltip>
                         );
                       })}
-                      {frame.location && locationImages[frame.location] ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-border ml-auto">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          {frame.location && locationImages[frame.location] ? (
+                            <button className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-border ml-auto cursor-pointer hover:ring-1 hover:ring-primary/50 transition-all">
                               <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} loading="lazy" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="text-xs">{frame.location}</TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-dashed border-muted-foreground/30 ml-auto flex items-center justify-center bg-muted/20">
+                            </button>
+                          ) : (
+                            <button className="w-10 h-6 rounded-[2px] overflow-hidden border-[1.5px] border-dashed border-muted-foreground/30 ml-auto flex items-center justify-center bg-muted/20 cursor-pointer hover:border-primary/50 transition-all">
                               <MapPin className="w-3 h-3 text-muted-foreground/40" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="text-xs">No location set</TooltipContent>
-                        </Tooltip>
-                      )}
+                            </button>
+                          )}
+                        </PopoverTrigger>
+                        <PopoverContent side="bottom" align="end" className="w-56 p-2 bg-card border-border">
+                          <p className="text-[10px] font-semibold text-muted-foreground mb-2 px-1">Location</p>
+                          <div className="grid grid-cols-3 gap-1.5">
+                            {/* None option */}
+                            <button
+                              onClick={() => {
+                                setFrames(prev => prev.map(f => f.id === frame.id ? { ...f, location: undefined } : f));
+                              }}
+                              className={cn(
+                                "aspect-video rounded-[2px] border flex items-center justify-center transition-all",
+                                !frame.location ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-primary/50 bg-muted/20"
+                              )}
+                            >
+                              <X className="w-3 h-3 text-muted-foreground/50" />
+                            </button>
+                            {Object.entries(locationImages).map(([name, img]) => (
+                              <button
+                                key={name}
+                                onClick={() => {
+                                  setFrames(prev => prev.map(f => f.id === frame.id ? { ...f, location: name } : f));
+                                }}
+                                className={cn(
+                                  "aspect-video rounded-[2px] overflow-hidden border transition-all",
+                                  frame.location === name ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-primary/50"
+                                )}
+                              >
+                                <img src={img} alt={name} className="w-full h-full object-cover" draggable={false} />
+                              </button>
+                            ))}
+                          </div>
+                          {/* Labels */}
+                          <div className="grid grid-cols-3 gap-1.5 mt-0.5">
+                            <p className={cn("text-[8px] text-center", !frame.location ? "text-primary" : "text-muted-foreground/60")}>None</p>
+                            {Object.keys(locationImages).map(name => (
+                              <p key={name} className={cn("text-[8px] text-center truncate", frame.location === name ? "text-primary" : "text-muted-foreground/60")}>{name}</p>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </TooltipProvider>
                   </div>
 
