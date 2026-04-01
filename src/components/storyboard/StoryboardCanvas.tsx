@@ -106,6 +106,7 @@ export function StoryboardCanvas() {
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
+  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
