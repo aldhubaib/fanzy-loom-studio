@@ -54,34 +54,7 @@ import outfitVintage from "@/assets/casting/outfit-vintage.jpg";
 import outfitStreetwear from "@/assets/casting/outfit-streetwear.jpg";
 import outfitBusiness from "@/assets/casting/outfit-business.jpg";
 
-export interface Actor {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
-export interface GeneratedImage {
-  id: string;
-  src: string;
-  description: string;
-  actors: string[];
-}
-
-export interface FrameData {
-  id: string;
-  x: number;
-  y: number;
-  image: string;
-  scene: string;
-  shot: string;
-  description: string;
-  duration: string;
-  actors: string[];
-  generatedImages: GeneratedImage[];
-  selectedImageId: string | null;
-  location?: string;
-  actorWardrobe?: Record<string, string>;
-}
+import type { Actor, GeneratedImage, FrameData } from "./types";
 
 const shotTypes = [
   { value: "WIDE", label: "Wide", img: shotWide },
