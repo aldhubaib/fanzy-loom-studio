@@ -110,7 +110,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC",
-    description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"],
+    description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street",
     generatedImages: [], selectedImageId: null,
   },
 ];
