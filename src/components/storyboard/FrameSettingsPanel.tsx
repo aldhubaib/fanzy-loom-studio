@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus,
+  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus, MapPin, Shirt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +35,25 @@ import moodRomantic from "@/assets/moods/romantic.jpg";
 import moodMysterious from "@/assets/moods/mysterious.jpg";
 import moodAction from "@/assets/moods/action.jpg";
 
+// Location images
+import locOffice from "@/assets/locations/interior-office.jpg";
+import locStreet from "@/assets/locations/exterior-street.jpg";
+import locClub from "@/assets/locations/interior-club.jpg";
+import locPenthouse from "@/assets/locations/interior-penthouse.jpg";
+import locBridge from "@/assets/locations/exterior-bridge.jpg";
+import locWarehouse from "@/assets/locations/interior-warehouse.jpg";
+import locRestaurant from "@/assets/locations/interior-restaurant.jpg";
+import locCar from "@/assets/locations/interior-car.jpg";
+
+// Wardrobe images (reuse from casting)
+import outfitCasual from "@/assets/casting/outfit-casual.jpg";
+import outfitFormal from "@/assets/casting/outfit-formal.jpg";
+import outfitHighfashion from "@/assets/casting/outfit-highfashion.jpg";
+import outfitMilitary from "@/assets/casting/outfit-military.jpg";
+import outfitVintage from "@/assets/casting/outfit-vintage.jpg";
+import outfitStreetwear from "@/assets/casting/outfit-streetwear.jpg";
+import outfitBusiness from "@/assets/casting/outfit-business.jpg";
+
 export interface Actor {
   id: string;
   name: string;
@@ -60,6 +79,8 @@ export interface FrameData {
   actors: string[];
   generatedImages: GeneratedImage[];
   selectedImageId: string | null;
+  location?: string;
+  actorWardrobe?: Record<string, string>;
 }
 
 const shotTypes = [
@@ -86,6 +107,27 @@ const moodOptions = [
   { value: "Action", label: "Action", img: moodAction },
 ];
 
+const locationOptions = [
+  { value: "Office", label: "Office", img: locOffice },
+  { value: "Street", label: "Street", img: locStreet },
+  { value: "Jazz Club", label: "Jazz Club", img: locClub },
+  { value: "Penthouse", label: "Penthouse", img: locPenthouse },
+  { value: "Bridge", label: "Bridge", img: locBridge },
+  { value: "Warehouse", label: "Warehouse", img: locWarehouse },
+  { value: "Restaurant", label: "Restaurant", img: locRestaurant },
+  { value: "Car", label: "Car Interior", img: locCar },
+];
+
+const wardrobeOptions = [
+  { value: "Casual", label: "Casual", img: outfitCasual },
+  { value: "Formal", label: "Formal", img: outfitFormal },
+  { value: "High Fashion", label: "High Fashion", img: outfitHighfashion },
+  { value: "Military", label: "Military", img: outfitMilitary },
+  { value: "Vintage", label: "Vintage", img: outfitVintage },
+  { value: "Streetwear", label: "Streetwear", img: outfitStreetwear },
+  { value: "Business", label: "Business", img: outfitBusiness },
+];
+
 interface FrameSettingsPanelProps {
   frame: FrameData;
   sceneNumber: number;
@@ -94,7 +136,6 @@ interface FrameSettingsPanelProps {
   onClose: () => void;
 }
 
-// Visual card for dialog grid (same pattern as ConceptEditor)
 function VisualCard({ label, img, selected, onClick }: { label: string; img: string; selected: boolean; onClick: () => void }) {
   return (
     <button
@@ -125,7 +166,6 @@ function VisualCardLabel({ label, selected }: { label: string; selected: boolean
   );
 }
 
-// Picker trigger button
 function PickerButton({ label, value, selectedImg, icon: Icon, onClick }: {
   label: string; value: string; selectedImg?: string; icon: React.ElementType; onClick: () => void;
 }) {
@@ -155,7 +195,6 @@ function PickerButton({ label, value, selectedImg, icon: Icon, onClick }: {
   );
 }
 
-// Image grid picker dialog
 function ImagePickerDialog({
   open, onOpenChange, title: dialogTitle, items, selected, onSelect,
 }: {
@@ -191,9 +230,13 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
   const [duration, setDuration] = useState(frame.duration);
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [mood, setMood] = useState("Noir");
+  const [location, setLocation] = useState(frame.location || "");
+  const [actorWardrobe, setActorWardrobe] = useState<Record<string, string>>(frame.actorWardrobe || {});
   const [imageCount, setImageCount] = useState(4);
   const [shotOpen, setShotOpen] = useState(false);
   const [moodOpen, setMoodOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [wardrobeOpen, setWardrobeOpen] = useState<string | null>(null);
 
   useEffect(() => {
     setPrompt(frame.description);
@@ -201,6 +244,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
     setShot(frame.shot);
     setDuration(frame.duration);
     setSelectedActors(frame.actors);
+    setLocation(frame.location || "");
+    setActorWardrobe(frame.actorWardrobe || {});
   }, [frame.id]);
 
   const toggleActor = (actorId: string) => {
@@ -217,6 +262,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
       shot,
       duration,
       actors: selectedActors,
+      location,
+      actorWardrobe,
     });
     toast.success("Frame settings saved");
   };
@@ -250,6 +297,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
       shot,
       duration,
       actors: selectedActors,
+      location,
+      actorWardrobe,
       generatedImages: [...frame.generatedImages, ...mockImages],
     });
 
@@ -297,7 +346,6 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
             value={prompt}
             onChange={(e) => {
               setPrompt(e.target.value);
-              // Auto-expand
               e.target.style.height = "auto";
               e.target.style.height = e.target.scrollHeight + "px";
             }}
@@ -305,6 +353,17 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
             placeholder="Describe the scene for AI generation..."
           />
         </div>
+
+        <Separator />
+
+        {/* Location */}
+        <PickerButton
+          label="Location"
+          value={locationOptions.find(l => l.value === location)?.label || ""}
+          selectedImg={locationOptions.find(l => l.value === location)?.img}
+          icon={MapPin}
+          onClick={() => setLocationOpen(true)}
+        />
 
         <Separator />
 
@@ -333,9 +392,46 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
           </div>
         </div>
 
+        {/* Per-actor wardrobe */}
+        {selectedActors.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                <Shirt className="w-3 h-3" /> Wardrobe per Actor
+              </Label>
+              <div className="space-y-1.5">
+                {selectedActors.map(actorId => {
+                  const actor = actorRoster.find(a => a.id === actorId);
+                  if (!actor) return null;
+                  const currentWardrobe = actorWardrobe[actorId] || "";
+                  const wardrobeImg = wardrobeOptions.find(w => w.value === currentWardrobe)?.img;
+                  return (
+                    <button
+                      key={actorId}
+                      onClick={() => setWardrobeOpen(actorId)}
+                      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl border border-border bg-card hover:border-muted-foreground/40 transition-all text-left"
+                    >
+                      <img src={actor.avatar} alt={actor.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">{actor.name}</p>
+                        <p className="text-xs font-medium text-foreground truncate">{currentWardrobe || "Choose outfit..."}</p>
+                      </div>
+                      {wardrobeImg && (
+                        <img src={wardrobeImg} alt={currentWardrobe} className="w-6 h-6 rounded-md object-cover shrink-0" />
+                      )}
+                      <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
         <Separator />
 
-        {/* Camera / Shot Type — Picker Button */}
+        {/* Camera / Shot Type */}
         <PickerButton
           label="Camera / Shot Type"
           value={shotTypes.find(s => s.value === shot)?.label || ""}
@@ -346,7 +442,7 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
 
         <Separator />
 
-        {/* Mood / Lighting — Picker Button */}
+        {/* Mood / Lighting */}
         <PickerButton
           label="Mood / Lighting"
           value={moodOptions.find(m => m.value === mood)?.label || ""}
@@ -423,6 +519,28 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         selected={mood}
         onSelect={setMood}
       />
+      <ImagePickerDialog
+        open={locationOpen}
+        onOpenChange={setLocationOpen}
+        title="Location"
+        items={locationOptions}
+        selected={location}
+        onSelect={setLocation}
+      />
+      {selectedActors.map(actorId => {
+        const actor = actorRoster.find(a => a.id === actorId);
+        return (
+          <ImagePickerDialog
+            key={`wardrobe-${actorId}`}
+            open={wardrobeOpen === actorId}
+            onOpenChange={(v) => setWardrobeOpen(v ? actorId : null)}
+            title={`Wardrobe — ${actor?.name || "Actor"}`}
+            items={wardrobeOptions}
+            selected={actorWardrobe[actorId] || ""}
+            onSelect={(v) => setActorWardrobe(prev => ({ ...prev, [actorId]: v }))}
+          />
+        );
+      })}
     </div>
   );
 }
