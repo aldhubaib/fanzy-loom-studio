@@ -182,6 +182,7 @@ const initialZones: Zone[] = [
   { id: "z-casting", label: "Casting", type: "casting", x: -500, y: 0, color: "190 80% 50%" },
   { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
   { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
+  { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
 ];
 
 const initialFrames: FrameData[] = [
