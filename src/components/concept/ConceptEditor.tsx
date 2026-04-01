@@ -174,11 +174,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
 
-  const handleGenerate = () => {
-    if (!title) setTitle("Untitled Film");
-    setConceptGenerated(true);
-  };
-
   const handleSurpriseMe = () => {
     setTitle("Echoes of Tomorrow");
     setIdea("In a crumbling space station orbiting a dying star, a lone engineer discovers a message from the future — one that was sent by herself.");
@@ -188,7 +183,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
     setSetting("Space");
     setAudience("General");
     setFormat("Film");
-    setConceptGenerated(true);
   };
 
   const selectedAudience = audiences.find(a => a.label === audience);
