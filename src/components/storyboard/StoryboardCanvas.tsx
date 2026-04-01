@@ -23,6 +23,11 @@ interface FrameData {
   duration: string;
 }
 
+interface Connection {
+  from: string; // frame id
+  to: string;   // frame id
+}
+
 const initialFrames: FrameData[] = [
   { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s" },
   { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s" },
@@ -34,7 +39,15 @@ const initialFrames: FrameData[] = [
 
 const FRAME_W = 280;
 const FRAME_H = 230;
-const CONNECTOR_PAIRS = [[0,1],[1,2],[2,3],[3,4],[4,5]];
+const PORT_RADIUS = 6;
+
+const initialConnections: Connection[] = [
+  { from: "f1", to: "f2" },
+  { from: "f2", to: "f3" },
+  { from: "f3", to: "f4" },
+  { from: "f4", to: "f5" },
+  { from: "f5", to: "f6" },
+];
 
 type Tool = "select" | "hand";
 
@@ -52,6 +65,9 @@ export function StoryboardCanvas() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
+  const [connections, setConnections] = useState<Connection[]>(initialConnections);
+  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
 
   // Zoom with scroll wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -90,6 +106,14 @@ export function StoryboardCanvas() {
       setZoom(newZoom);
       return;
     }
+    if (connectingFrom) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setConnectingMouse({
+        x: (e.clientX - rect.left - pan.x) / zoom,
+        y: (e.clientY - rect.top - pan.y) / zoom,
+      });
+    }
     if (panning) {
       setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
     }
@@ -100,7 +124,7 @@ export function StoryboardCanvas() {
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom]);
+  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
     setCtrlZooming(false);
@@ -140,6 +164,7 @@ export function StoryboardCanvas() {
       }
       setDragging(null);
     }
+    setConnectingFrom(null);
   }, [dragging, frames]);
 
   const startFrameDrag = useCallback((e: React.MouseEvent, frame: FrameData) => {
@@ -242,16 +267,50 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Connector lines between frames
-  const connectors = CONNECTOR_PAIRS.map(([a, b]) => {
-    if (!frames[a] || !frames[b]) return null;
-    const fa = frames[a], fb = frames[b];
-    const x1 = fa.x + FRAME_W;
-    const y1 = fa.y + FRAME_H / 2;
-    const x2 = fb.x;
-    const y2 = fb.y + FRAME_H / 2;
-    return { x1, y1, x2, y2, id: `${a}-${b}` };
-  }).filter(Boolean);
+  // Helper to get port positions
+  const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
+    const f = frames.find(fr => fr.id === frameId);
+    if (!f) return { x: 0, y: 0 };
+    return {
+      x: side === "right" ? f.x + FRAME_W : f.x,
+      y: f.y + FRAME_H / 2,
+    };
+  }, [frames]);
+
+  // Connector lines from connections state
+  const connectors = connections.map(c => {
+    const p1 = getPortPos(c.from, "right");
+    const p2 = getPortPos(c.to, "left");
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, id: `${c.from}-${c.to}`, from: c.from, to: c.to };
+  });
+
+  // Start connecting from a port
+  const startConnect = useCallback((e: React.MouseEvent, frameId: string) => {
+    e.stopPropagation();
+    setConnectingFrom(frameId);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setConnectingMouse({
+      x: (e.clientX - rect.left - pan.x) / zoom,
+      y: (e.clientY - rect.top - pan.y) / zoom,
+    });
+  }, [pan, zoom]);
+
+  const endConnect = useCallback((frameId: string) => {
+    if (connectingFrom && connectingFrom !== frameId) {
+      // Don't duplicate
+      const exists = connections.some(c => c.from === connectingFrom && c.to === frameId);
+      if (!exists) {
+        setConnections(prev => [...prev, { from: connectingFrom, to: frameId }]);
+      }
+    }
+    setConnectingFrom(null);
+  }, [connectingFrom, connections]);
+
+  // Delete a connection
+  const deleteConnection = useCallback((from: string, to: string) => {
+    setConnections(prev => prev.filter(c => !(c.from === from && c.to === to)));
+  }, []);
 
   return (
     <div className="h-full w-full relative bg-background overflow-hidden">
@@ -336,24 +395,50 @@ export function StoryboardCanvas() {
           }}
         >
           {/* Connectors SVG */}
-          <svg className="absolute inset-0 w-[4000px] h-[4000px] pointer-events-none">
+          <svg className="absolute inset-0 w-[4000px] h-[4000px]" style={{ pointerEvents: "none" }}>
             <defs>
               <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--muted-foreground))" opacity="0.4" />
+                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.6" />
+              </marker>
+              <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.9" />
               </marker>
             </defs>
-            {connectors.map(c => c && (
-              <g key={c.id}>
+            {connectors.map(c => (
+              <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
+                {/* Invisible fat hit area */}
                 <path
-                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 40} ${c.y1}, ${c.x2 - 40} ${c.y2}, ${c.x2} ${c.y2}`}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeOpacity="0.25"
+                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
+                  stroke="transparent"
+                  strokeWidth="14"
+                  fill="none"
+                />
+                <path
+                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity="0.35"
                   strokeWidth="2"
                   fill="none"
                   markerEnd="url(#arrowhead)"
+                  className="hover:stroke-[hsl(var(--destructive))] transition-colors"
                 />
               </g>
             ))}
+            {/* Active connecting wire */}
+            {connectingFrom && (() => {
+              const p = getPortPos(connectingFrom, "right");
+              return (
+                <path
+                  d={`M ${p.x} ${p.y} C ${p.x + 60} ${p.y}, ${connectingMouse.x - 60} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity="0.7"
+                  strokeWidth="2"
+                  strokeDasharray="6 4"
+                  fill="none"
+                  markerEnd="url(#arrowhead-active)"
+                />
+              );
+            })()}
           </svg>
 
           {/* Frames */}
@@ -371,7 +456,7 @@ export function StoryboardCanvas() {
             >
               <div
                 className={cn(
-                  "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
+                  "absolute rounded-xl border-2 transition-shadow duration-150 select-none group",
                   selectedFrame === frame.id
                     ? "border-primary shadow-lg shadow-primary/20"
                     : "border-border hover:border-muted-foreground/40",
@@ -384,6 +469,18 @@ export function StoryboardCanvas() {
                 }}
                 onMouseDown={(e) => startFrameDrag(e, frame)}
               >
+                {/* Left port (input) */}
+                <div
+                  className="absolute -left-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Right port (output) */}
+                <div
+                  className="absolute -right-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
+                />
+
                 {/* Frame number badge */}
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                   {idx + 1}
@@ -394,7 +491,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Image */}
-                <div className="w-full h-[150px] bg-secondary overflow-hidden">
+                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px]">
                   {frame.image ? (
                     <img
                       src={frame.image}
@@ -411,7 +508,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Info */}
-                <div className="bg-card p-2.5 space-y-1">
+                <div className="bg-card p-2.5 space-y-1 rounded-b-[10px]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
