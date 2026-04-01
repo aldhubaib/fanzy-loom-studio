@@ -39,7 +39,15 @@ const initialFrames: FrameData[] = [
 
 const FRAME_W = 280;
 const FRAME_H = 230;
-const CONNECTOR_PAIRS = [[0,1],[1,2],[2,3],[3,4],[4,5]];
+const PORT_RADIUS = 6;
+
+const initialConnections: Connection[] = [
+  { from: "f1", to: "f2" },
+  { from: "f2", to: "f3" },
+  { from: "f3", to: "f4" },
+  { from: "f4", to: "f5" },
+  { from: "f5", to: "f6" },
+];
 
 type Tool = "select" | "hand";
 
