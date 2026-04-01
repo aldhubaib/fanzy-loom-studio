@@ -693,6 +693,7 @@ export function StoryboardCanvas() {
                   id: newId, x: canvasMenu.worldX, y: canvasMenu.worldY,
                   image: "", scene: `SC ${Math.ceil((frames.length + 1) / 2)}`, shot: "WIDE",
                   description: "New frame — click to edit", duration: "3s", actors: [],
+                  generatedImages: [], selectedImageId: null,
                 }]);
                 setSelectedFrame(newId);
                 setCanvasMenu(null);
