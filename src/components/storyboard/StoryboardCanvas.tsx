@@ -466,6 +466,7 @@ export function StoryboardCanvas() {
                   left: frame.x,
                   top: frame.y,
                   width: FRAME_W,
+                  height: FRAME_H,
                 }}
                 onMouseDown={(e) => startFrameDrag(e, frame)}
               >
