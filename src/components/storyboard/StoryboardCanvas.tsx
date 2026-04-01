@@ -704,6 +704,7 @@ export function StoryboardCanvas() {
                   <div
                     className="bg-secondary/90 relative flex items-stretch"
                     onMouseDown={(e) => e.stopPropagation()}
+                    onWheel={(e) => e.stopPropagation()}
                     style={{ maxWidth: FRAME_W }}
                   >
                     {/* Fixed gallery button */}
