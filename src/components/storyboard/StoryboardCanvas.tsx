@@ -47,12 +47,59 @@ const actorRoster: Actor[] = [
 ];
 
 const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], generatedImages: [], selectedImageId: null },
-  { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], generatedImages: [], selectedImageId: null },
-  { id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], generatedImages: [], selectedImageId: null },
-  { id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], generatedImages: [], selectedImageId: null },
-  { id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], generatedImages: [], selectedImageId: null },
-  { id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], generatedImages: [], selectedImageId: null },
+  {
+    id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE",
+    description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"],
+    generatedImages: [
+      { id: "g1a", src: frame1, description: "Marlowe at desk — wide establishing", actors: ["a1"] },
+      { id: "g1b", src: frame4, description: "Marlowe at desk — close-up on face", actors: ["a1"] },
+      { id: "g1c", src: frame5, description: "Marlowe and Vivian at desk — alternate", actors: ["a1", "a2"] },
+    ],
+    selectedImageId: "g1a",
+  },
+  {
+    id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED",
+    description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"],
+    generatedImages: [
+      { id: "g2a", src: frame2, description: "Vivian in alley — medium shot", actors: ["a2"] },
+      { id: "g2b", src: frame3, description: "Vivian enters the jazz club", actors: ["a2", "a3"] },
+    ],
+    selectedImageId: "g2a",
+  },
+  {
+    id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE",
+    description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"],
+    generatedImages: [], selectedImageId: null,
+  },
+  {
+    id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU",
+    description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"],
+    generatedImages: [
+      { id: "g4a", src: frame4, description: "Marlowe with photo — close-up", actors: ["a1"] },
+      { id: "g4b", src: frame1, description: "Marlowe with photo — wide shot", actors: ["a1"] },
+      { id: "g4c", src: frame6, description: "Marlowe hands photo to Eddie", actors: ["a1", "a3"] },
+      { id: "g4d", src: frame2, description: "Vivian looks at the photo", actors: ["a2"] },
+    ],
+    selectedImageId: "g4a",
+  },
+  {
+    id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE",
+    description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"],
+    generatedImages: [
+      { id: "g5a", src: frame5, description: "Two silhouettes on bridge — wide", actors: ["a1", "a2"] },
+      { id: "g5b", src: frame1, description: "Marlowe alone on bridge", actors: ["a1"] },
+      { id: "g5c", src: frame2, description: "Vivian alone on bridge", actors: ["a2"] },
+      { id: "g5d", src: frame3, description: "Eddie watches from below", actors: ["a3"] },
+      { id: "g5e", src: frame6, description: "All three meet on bridge", actors: ["a1", "a2", "a3"] },
+      { id: "g5f", src: frame4, description: "Bridge from above — aerial", actors: ["a1", "a2"] },
+    ],
+    selectedImageId: "g5a",
+  },
+  {
+    id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC",
+    description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"],
+    generatedImages: [], selectedImageId: null,
+  },
 ];
 
 const FRAME_W = 280;
