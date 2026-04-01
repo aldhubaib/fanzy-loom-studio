@@ -656,38 +656,72 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               </div>
             </>
           ) : (
-           /* Custom tab — single upload button that opens modal */
-           <div className="flex flex-col items-center gap-3 py-6">
-             <p className="text-[11px] text-muted-foreground text-center">Upload reference photos to generate a custom character sheet</p>
-             <Button
-               onClick={() => setCustomModalOpen(true)}
-               variant="outline"
-               className="gap-2 h-12 px-6 rounded-xl border-dashed border-2"
-             >
-               <Upload className="w-4 h-4" />
-               Upload References
-             </Button>
+           /* Custom tab — upload button + generated results */
+           <div className="space-y-4">
+             <div className="flex flex-col items-center gap-3 py-4">
+               <p className="text-[11px] text-muted-foreground text-center">Upload reference photos to generate a custom character sheet</p>
+               <Button
+                 onClick={() => setCustomModalOpen(true)}
+                 variant="outline"
+                 className="gap-2 h-10 px-5 rounded-xl border-dashed border-2"
+               >
+                 <Upload className="w-4 h-4" />
+                 {customResults.length > 0 ? "Re-generate" : "Upload References"}
+               </Button>
 
-             {/* Show uploaded previews if any */}
-             {Object.keys(customUploads).length > 0 && (
-               <div className="flex gap-2 mt-2">
-                 {customSlots.map(slot => {
-                   const src = customUploads[slot.key];
-                   return (
-                     <div key={slot.key} className="text-center">
-                       <div className="w-16 h-20 rounded-lg overflow-hidden border border-border bg-secondary">
-                         {src ? (
-                           <img src={src} alt={slot.label} className="w-full h-full object-cover" />
-                         ) : (
-                           <div className="w-full h-full flex items-center justify-center">
-                             <User className="w-4 h-4 text-muted-foreground/20" />
+               {/* Mini preview of uploaded refs */}
+               {Object.keys(customUploads).length > 0 && (
+                 <div className="flex gap-2 mt-1">
+                   {customSlots.map(slot => {
+                     const src = customUploads[slot.key];
+                     return src ? (
+                       <div key={slot.key} className="w-10 h-12 rounded-md overflow-hidden border border-border">
+                         <img src={src} alt={slot.label} className="w-full h-full object-cover" />
+                       </div>
+                     ) : null;
+                   })}
+                 </div>
+               )}
+             </div>
+
+             {/* Generating spinner */}
+             {customGenerating && (
+               <div className="flex flex-col items-center gap-2 py-6">
+                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                 <p className="text-xs text-muted-foreground">Generating {customGenerateCount} variations…</p>
+               </div>
+             )}
+
+             {/* Generated results grid */}
+             {!customGenerating && customResults.length > 0 && (
+               <div>
+                 <h3 className="text-sm font-semibold text-foreground mb-2">Generated Results</h3>
+                 <div className="grid grid-cols-3 gap-2">
+                   {customResults.map((p, idx) => {
+                     const isActive = character.selectedPortraitId === p.id;
+                     return (
+                       <button
+                         key={p.id}
+                         className={cn(
+                           "relative rounded-lg overflow-hidden transition-all group aspect-[3/4]",
+                           isActive
+                             ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                             : "hover:scale-[1.02] ring-1 ring-border"
+                         )}
+                         onClick={() => {
+                           onChange({ ...character, portrait: p.src, selectedPortraitId: p.id, generatedPortraits: [...character.generatedPortraits.filter(gp => !gp.id.startsWith("custom-")), ...customResults] });
+                         }}
+                       >
+                         <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                         {isActive && (
+                           <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                             <Check className="w-3 h-3 text-primary-foreground" />
                            </div>
                          )}
-                       </div>
-                       <span className="text-[9px] text-muted-foreground mt-1 block">{slot.label}</span>
-                     </div>
-                   );
-                 })}
+                       </button>
+                     );
+                   })}
+                 </div>
                </div>
              )}
            </div>
