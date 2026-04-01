@@ -164,6 +164,7 @@ export function StoryboardCanvas() {
       }
       setDragging(null);
     }
+    setConnectingFrom(null);
   }, [dragging, frames]);
 
   const startFrameDrag = useCallback((e: React.MouseEvent, frame: FrameData) => {
