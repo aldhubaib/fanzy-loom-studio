@@ -242,11 +242,11 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           {/* Action buttons */}
           <div className="flex items-center gap-3 mt-8">
             <Button
-              onClick={handleGenerate}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 px-6"
+              onClick={() => navigate(`/project/${projectId}/script`)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11 text-base font-semibold"
             >
-              <Sparkles className="w-4 h-4" />
-              Generate Concept
+              Continue to Script
+              <ArrowRight className="w-4 h-4" />
             </Button>
             <Button
               onClick={handleSurpriseMe}
