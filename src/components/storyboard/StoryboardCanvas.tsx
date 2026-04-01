@@ -606,9 +606,26 @@ export function StoryboardCanvas() {
                       <RotateCcw className="w-4 h-4 mr-2" /> Reset Frame
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                  </DropdownMenu>
 
-                {/* Image */}
+                  {/* Shot type badge */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md hover:bg-primary transition-colors"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {frame.shot}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-3 text-xs" side="top" onMouseDown={(e) => e.stopPropagation()}>
+                      <p className="font-bold text-sm mb-1">{frame.shot}</p>
+                      <p className="text-muted-foreground">{shotDescriptions[frame.shot] ?? "A camera shot type used in filmmaking."}</p>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
                 <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px]">
                   {frame.image ? (
                     <img
