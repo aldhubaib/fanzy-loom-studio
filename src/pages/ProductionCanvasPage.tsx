@@ -626,11 +626,25 @@ export default function ProductionCanvasPage() {
     return { x: 0, y: 0 };
   }, [frames, castNodes, locationNodes, scriptNodes, zoneBounds]);
 
+  const getZoneColor = useCallback((nodeId: string): string => {
+    const zone = zones.find(z => z.id === nodeId);
+    if (zone) return zone.color;
+    // Check if node belongs to a zone
+    const castNode = castNodes.find(n => n.id === nodeId);
+    if (castNode) { const z = zones.find(zz => zz.id === castNode.zoneId); if (z) return z.color; }
+    const locNode = locationNodes.find(n => n.id === nodeId);
+    if (locNode) { const z = zones.find(zz => zz.id === locNode.zoneId); if (z) return z.color; }
+    const scrNode = scriptNodes.find(n => n.id === nodeId);
+    if (scrNode) { const z = zones.find(zz => zz.id === scrNode.zoneId); if (z) return z.color; }
+    return "var(--primary)";
+  }, [zones, castNodes, locationNodes, scriptNodes]);
+
   const connectors = connections.map(c => {
     const p1 = getPortPos(c.from, "right");
     const p2 = getPortPos(c.to, "left");
     const isZoneConn = zones.some(z => z.id === c.from) || zones.some(z => z.id === c.to);
-    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn };
+    const color = getZoneColor(c.from);
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
   });
 
   const fitToScreen = useCallback(() => {
@@ -833,13 +847,14 @@ export default function ProductionCanvasPage() {
               {connectors.map(c => {
                 const dx = Math.abs(c.x2 - c.x1);
                 const curve = Math.min(200, Math.max(30, dx * 0.35));
+                const strokeColor = c.color.startsWith("var(") ? `hsl(${c.color})` : `hsl(${c.color})`;
                 return (
                   <g key={`${c.from}-${c.to}`} style={{ pointerEvents: "auto", cursor: "pointer" }}
                     onClick={() => setConnections(prev => prev.filter(cc => !(cc.from === c.from && cc.to === c.to)))}>
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="transparent" strokeWidth="16" fill="none" />
                     <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`}
-                      stroke={c.isZoneConn ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"}
-                      strokeOpacity={c.isZoneConn ? 0.4 : 0.4}
+                      stroke={strokeColor}
+                      strokeOpacity={0.5}
                       strokeWidth={c.isZoneConn ? 3 : 2.5}
                       strokeLinecap="round"
                       fill="none" />
@@ -855,16 +870,47 @@ export default function ProductionCanvasPage() {
             </svg>
 
             {/* Shot frames */}
-            {frames.map((frame, idx) => (
+            {frames.map((frame, idx) => {
+              // 4 color-coded connectors for shot zone frames
+              const shotPorts = [
+                { key: "casting",    color: "190 80% 50%",  label: "Cast",   side: "left" as const,  yFrac: 0.3 },
+                { key: "script",     color: "280 60% 55%",  label: "Script", side: "left" as const,  yFrac: 0.7 },
+                { key: "location",   color: "150 60% 45%",  label: "Loc",    side: "right" as const, yFrac: 0.3 },
+                { key: "production", color: "var(--primary)", label: "Prod",  side: "right" as const, yFrac: 0.7 },
+              ];
+              return (
               <div key={frame.id} data-node
                 className={cn("absolute rounded-xl border-2 bg-card select-none group transition-shadow",
                   selected?.id === frame.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: frame.x, top: frame.y, width: FRAME_W }}
                 onMouseDown={(e) => startDrag(e, frame, { type: "frame", id: frame.id })}>
-                <div className="absolute -left-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
-                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} />
-                <div className="absolute -right-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
-                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} />
+                {/* 4 color-coded connectors */}
+                {shotPorts.map(port => {
+                  const portColor = port.color.startsWith("var(") ? port.color : `hsl(${port.color})`;
+                  const yPos = FRAME_H * port.yFrac;
+                  const isLeft = port.side === "left";
+                  return (
+                    <TooltipProvider key={port.key} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute z-20 w-[14px] h-[14px] rounded-full border-[2.5px] bg-card hover:scale-125 transition-all cursor-crosshair"
+                            style={{
+                              borderColor: portColor,
+                              [isLeft ? "left" : "right"]: -7,
+                              top: yPos - 7,
+                            }}
+                            onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
+                            onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
+                          >
+                            <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: portColor }} />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side={isLeft ? "left" : "right"} className="text-[10px] py-0.5 px-1.5">{port.label}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{idx + 1}</div>
                 <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px]" style={{ height: IMAGE_H }}>
@@ -897,7 +943,8 @@ export default function ProductionCanvasPage() {
                   <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
                 </div>
               </div>
-            ))}
+              );
+            })}
 
             {/* Cast nodes */}
             {castNodes.map(node => {
