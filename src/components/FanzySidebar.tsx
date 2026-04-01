@@ -1,33 +1,40 @@
 import {
   FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download,
-  Search, Settings, FolderOpen
+  Search, Settings, FolderOpen, ArrowLeft
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useLocation, useParams, Link } from "react-router-dom";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarFooter, SidebarHeader, useSidebar, SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { mockProjects } from "@/data/mockProjects";
 
 const pipelineStages = [
-  { title: "Script", icon: FileText },
-  { title: "Storyboard", icon: LayoutGrid },
-  { title: "Casting", icon: Users },
-  { title: "Locations", icon: MapPin },
-  { title: "Generation", icon: Sparkles },
-  { title: "Timeline", icon: Film },
-  { title: "Export", icon: Download },
+  { title: "Script", slug: "script", icon: FileText },
+  { title: "Storyboard", slug: "storyboard", icon: LayoutGrid },
+  { title: "Casting", slug: "casting", icon: Users },
+  { title: "Locations", slug: "locations", icon: MapPin },
+  { title: "Generation", slug: "generation", icon: Sparkles },
+  { title: "Timeline", slug: "timeline", icon: Film },
+  { title: "Export", slug: "export", icon: Download },
 ];
 
 const recentProjects = [
-  { name: "The Last Deal", color: "from-amber-900/60 to-amber-700/30" },
-  { name: "Sunrise Protocol", color: "from-cyan-900/60 to-blue-700/30" },
-  { name: "Neon Ronin", color: "from-purple-900/60 to-pink-700/30" },
+  { id: "1", name: "The Last Deal", color: "from-amber-900/60 to-amber-700/30" },
+  { id: "2", name: "Sunrise Protocol", color: "from-cyan-900/60 to-blue-700/30" },
+  { id: "4", name: "Neon Ronin", color: "from-purple-900/60 to-pink-700/30" },
 ];
 
 export function FanzySidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const location = useLocation();
+  const params = useParams();
+  const projectId = params.projectId;
+  const isInsideProject = !!projectId;
+  const currentProject = isInsideProject ? mockProjects.find(p => p.id === projectId) : null;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -68,7 +75,7 @@ export function FanzySidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && (
+        {!isInsideProject && !collapsed && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider">
               Recent Projects
@@ -77,9 +84,11 @@ export function FanzySidebar() {
               <SidebarMenu>
                 {recentProjects.map((project) => (
                   <SidebarMenuItem key={project.name}>
-                    <SidebarMenuButton className="hover:bg-sidebar-accent/50 cursor-pointer">
-                      <div className={`w-5 h-5 rounded bg-gradient-to-br ${project.color} flex-shrink-0`} />
-                      <span className="text-sm truncate">{project.name}</span>
+                    <SidebarMenuButton asChild className="hover:bg-sidebar-accent/50 cursor-pointer">
+                      <Link to={`/project/${project.id}/script`}>
+                        <div className={`w-5 h-5 rounded bg-gradient-to-br ${project.color} flex-shrink-0`} />
+                        <span className="text-sm truncate">{project.name}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -88,28 +97,40 @@ export function FanzySidebar() {
           </SidebarGroup>
         )}
 
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider">
-            Pipeline
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {pipelineStages.map((stage) => (
-                <SidebarMenuItem key={stage.title}>
-                  <SidebarMenuButton
-                    className="opacity-40 cursor-not-allowed"
-                    disabled
-                  >
-                    <stage.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{stage.title}</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isInsideProject && (
+          <>
+            <SidebarSeparator />
+            {!collapsed && currentProject && (
+              <div className="px-4 py-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Project</p>
+                <p className="text-sm font-semibold text-foreground truncate mt-0.5">{currentProject.title}</p>
+              </div>
+            )}
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider">
+                Pipeline
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {pipelineStages.map((stage, i) => (
+                    <SidebarMenuItem key={stage.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={`/project/${projectId}/${stage.slug}`}
+                          activeClassName="bg-sidebar-accent text-foreground font-medium"
+                          className="hover:bg-sidebar-accent/50"
+                        >
+                          <stage.icon className="mr-2 h-4 w-4" />
+                          {!collapsed && <span>{stage.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">

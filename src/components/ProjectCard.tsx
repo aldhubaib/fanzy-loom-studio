@@ -1,5 +1,6 @@
 import { Copy, ExternalLink, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export interface Project {
   id: string;
@@ -20,6 +21,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, index }: ProjectCardProps) {
+  const navigate = useNavigate();
   const progress = (project.pipelineComplete / project.pipelineTotal) * 100;
 
   return (
@@ -28,24 +30,23 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
       className="group card-lift rounded-lg border border-border bg-card overflow-hidden cursor-pointer"
+      onClick={() => navigate(`/project/${project.id}/script`)}
     >
       {/* Thumbnail */}
       <div className={`aspect-video bg-gradient-to-br ${project.gradient} relative`}>
-        {/* Hover actions */}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-          <button className="p-2 rounded-md bg-secondary/80 hover:bg-secondary text-foreground transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); }} className="p-2 rounded-md bg-secondary/80 hover:bg-secondary text-foreground transition-colors">
             <ExternalLink className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-md bg-secondary/80 hover:bg-secondary text-foreground transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); }} className="p-2 rounded-md bg-secondary/80 hover:bg-secondary text-foreground transition-colors">
             <Copy className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-md bg-secondary/80 hover:bg-destructive text-foreground transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); }} className="p-2 rounded-md bg-secondary/80 hover:bg-destructive text-foreground transition-colors">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <h3 className="font-semibold text-foreground">{project.title}</h3>
@@ -53,12 +54,9 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
             {project.genre}
           </span>
         </div>
-
         <p className="text-xs text-muted-foreground">
           {project.scenes} scenes · {project.characters} characters · Edited {project.editedAgo}
         </p>
-
-        {/* Pipeline progress */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Pipeline</span>
@@ -69,9 +67,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progress}%`,
-                background: progress === 100
-                  ? 'hsl(142 71% 45%)'
-                  : 'hsl(var(--primary))',
+                background: progress === 100 ? 'hsl(142 71% 45%)' : 'hsl(var(--primary))',
               }}
             />
           </div>
