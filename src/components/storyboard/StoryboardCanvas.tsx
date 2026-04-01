@@ -791,6 +791,22 @@ export function StoryboardCanvas() {
         </div>
       </div>
 
+      {/* Frame Settings Panel */}
+      {settingsFrame && (() => {
+        const frame = frames.find(f => f.id === settingsFrame);
+        if (!frame) return null;
+        return (
+          <FrameSettingsPanel
+            frame={frame}
+            actorRoster={actorRoster}
+            onUpdate={(updated) => {
+              setFrames(prev => prev.map(f => f.id === updated.id ? updated : f));
+            }}
+            onClose={() => setSettingsFrame(null)}
+          />
+        );
+      })()}
+
       {/* Actor change confirmation dialog */}
       <AlertDialog open={!!actorChangePrompt} onOpenChange={(open) => { if (!open) setActorChangePrompt(null); }}>
         <AlertDialogContent>
