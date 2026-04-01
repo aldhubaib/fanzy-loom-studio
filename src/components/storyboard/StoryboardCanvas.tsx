@@ -106,6 +106,14 @@ export function StoryboardCanvas() {
       setZoom(newZoom);
       return;
     }
+    if (connectingFrom) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setConnectingMouse({
+        x: (e.clientX - rect.left - pan.x) / zoom,
+        y: (e.clientY - rect.top - pan.y) / zoom,
+      });
+    }
     if (panning) {
       setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
     }
@@ -116,7 +124,7 @@ export function StoryboardCanvas() {
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom]);
+  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
     setCtrlZooming(false);
