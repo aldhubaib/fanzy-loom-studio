@@ -12,6 +12,7 @@ const pipelineStages = [
   { title: "Shots", slug: "storyboard", icon: LayoutGrid },
   { title: "Casting", slug: "casting", icon: Users },
   { title: "Production", slug: "production", icon: Film },
+  { title: "Canvas", slug: "canvas", icon: Sparkles, isCanvas: true },
 ];
 
 interface FloatingToolbarProps {
