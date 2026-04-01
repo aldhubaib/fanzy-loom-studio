@@ -39,6 +39,7 @@ const initialFrames: FrameData[] = [
 
 const FRAME_W = 280;
 const FRAME_H_BASE = 230; // fallback until measured
+const PORT_Y = FRAME_H_BASE / 2;
 
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" },
