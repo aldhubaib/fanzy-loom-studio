@@ -280,15 +280,21 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Helper to get port center positions (matching the CSS -left-[7px] / -right-[7px] + w-3.5 = 14px, center at 7px out)
+  // Get dynamic frame height based on incoming connections
+  const getFrameH = useCallback((frameId: string) => {
+    const hasIncoming = connections.some(c => c.to === frameId);
+    return hasIncoming ? FRAME_H_WITH_THUMB : FRAME_H_BASE;
+  }, [connections]);
+
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
+    const h = getFrameH(frameId);
     return {
       x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + FRAME_H / 2,
+      y: f.y + h / 2,
     };
-  }, [frames]);
+  }, [frames, getFrameH]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
