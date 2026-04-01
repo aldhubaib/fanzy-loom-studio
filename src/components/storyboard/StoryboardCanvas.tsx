@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
-  ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3,
+  ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
 
