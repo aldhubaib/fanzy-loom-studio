@@ -52,6 +52,8 @@ export default function ProjectPage() {
           <ScriptEditor />
         ) : stage === "storyboard" ? (
           <StoryboardCanvas />
+        ) : stage === "casting" ? (
+          <CastingEditor projectId={projectId} />
         ) : (
           <div className="p-8 pt-20 h-full overflow-auto">
             <div className="max-w-4xl mx-auto">
