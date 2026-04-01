@@ -176,10 +176,11 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const handleGenerate = () => {
     if (!title) setTitle("Untitled Film");
     setConceptGenerated(true);
-    if (!logline) setLogline("A compelling story unfolds in unexpected ways...");
+    // AI refines the idea into a proper logline — update the idea field
+    if (idea && !idea.includes("unravels")) {
+      setIdea(idea); // keep user's idea as-is for now
+    }
     if (!synopsis) setSynopsis("Your AI-generated synopsis will appear here after generation.");
-    if (themes.length === 0) setThemes(["Theme 1", "Theme 2"]);
-    if (!visualStyle) setVisualStyle("A cinematic visual approach.");
   };
 
   const handleSurpriseMe = () => {
