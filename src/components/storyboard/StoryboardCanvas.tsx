@@ -38,7 +38,7 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H = 230;
+const FRAME_H = 280;
 const PORT_RADIUS = 6;
 
 const initialConnections: Connection[] = [
@@ -509,7 +509,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Info */}
-                <div className="bg-card p-2.5 space-y-1 rounded-b-[10px] h-[80px]">
+                <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
@@ -517,6 +517,24 @@ export function StoryboardCanvas() {
                   <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
                     {frame.description}
                   </p>
+                  {/* Incoming connection thumbnails */}
+                  {(() => {
+                    const incoming = connections.filter(c => c.to === frame.id);
+                    if (incoming.length === 0) return null;
+                    return (
+                      <div className="flex gap-1.5 pt-1">
+                        {incoming.map(conn => {
+                          const srcFrame = frames.find(f => f.id === conn.from);
+                          if (!srcFrame || !srcFrame.image) return null;
+                          return (
+                            <div key={conn.from} className="w-10 h-7 rounded overflow-hidden border border-border/50 flex-shrink-0">
+                              <img src={srcFrame.image} alt={srcFrame.scene} className="w-full h-full object-cover" draggable={false} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </FrameContextMenu>
