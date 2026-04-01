@@ -781,7 +781,7 @@ export default function ProductionCanvasPage() {
                   <div
                     className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
                     onMouseDown={(e) => {
-                      if (e.button !== 0) return;
+                      if (e.button !== 0 || editingZoneLabel === zone.id) return;
                       e.stopPropagation();
                       setSelected({ type: "zone", id: zone.id });
                       setDraggingZone(zone.id);
@@ -789,8 +789,28 @@ export default function ProductionCanvasPage() {
                       if (!rect) return;
                       setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
                     }}
+                    onDoubleClick={(e) => { e.stopPropagation(); setEditingZoneLabel(zone.id); }}
                   >
-                    <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
+                    {editingZoneLabel === zone.id ? (
+                      <input
+                        autoFocus
+                        className="text-lg font-bold bg-transparent border-b border-current outline-none"
+                        style={{ color: `hsl(${zone.color} / 0.7)` }}
+                        defaultValue={zone.label}
+                        onBlur={(e) => {
+                          const val = e.target.value.trim();
+                          if (val) setZones(prev => prev.map(z => z.id === zone.id ? { ...z, label: val } : z));
+                          setEditingZoneLabel(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                          if (e.key === "Escape") setEditingZoneLabel(null);
+                        }}
+                        onMouseDown={e => e.stopPropagation()}
+                      />
+                    ) : (
+                      <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
+                    )}
                   </div>
                   {/* Zone port — right side */}
                   <div
