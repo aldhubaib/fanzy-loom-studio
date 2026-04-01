@@ -196,6 +196,11 @@ export function StoryboardCanvas() {
   const [lightbox, setLightbox] = useState<{ frameId: string; index: number } | null>(null);
   const [locationGallery, setLocationGallery] = useState<{ frameId: string; index: number } | null>(null);
   const [showLocations, setShowLocations] = useState(false);
+  const [castNodes, setCastNodes] = useState<CastNode[]>([]);
+  const [locationNodes, setLocationNodes] = useState<LocationNode[]>([]);
+  const [draggingNode, setDraggingNode] = useState<string | null>(null);
+  const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
+  const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
