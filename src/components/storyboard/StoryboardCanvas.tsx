@@ -455,7 +455,17 @@ export function StoryboardCanvas() {
           tool === "hand" || panning ? "cursor-grab" : "cursor-default",
           panning && "cursor-grabbing",
         )}
-        onContextMenu={(e) => e.preventDefault()}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          // Only show canvas menu if right-clicking on empty canvas (not on a frame)
+          const target = e.target as HTMLElement;
+          if (target.closest('[data-frame]')) return;
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          const worldX = (e.clientX - rect.left - pan.x) / zoom;
+          const worldY = (e.clientY - rect.top - pan.y) / zoom;
+          setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY });
+        }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
