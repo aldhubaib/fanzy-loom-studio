@@ -471,13 +471,13 @@ export function StoryboardCanvas() {
               >
                 {/* Left port (input) */}
                 <div
-                  className="absolute -left-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
                   onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
                 {/* Right port (output) */}
                 <div
-                  className="absolute -right-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
                   onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
                 />
 
