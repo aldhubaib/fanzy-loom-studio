@@ -11,14 +11,18 @@ interface SceneNavigatorProps {
   scenes: Scene[];
   activeScene: number;
   onSceneClick: (id: number) => void;
+  onAddScene: () => void;
 }
 
-export function SceneNavigator({ scenes, activeScene, onSceneClick }: SceneNavigatorProps) {
+export function SceneNavigator({ scenes, activeScene, onSceneClick, onAddScene }: SceneNavigatorProps) {
   return (
     <div className="w-[220px] flex-shrink-0 border-r border-border bg-card flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scenes</span>
-        <button className="w-6 h-6 rounded-md bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          onClick={onAddScene}
+          className="w-6 h-6 rounded-md bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        >
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -55,7 +59,10 @@ export function SceneNavigator({ scenes, activeScene, onSceneClick }: SceneNavig
       </div>
 
       <div className="p-3 border-t border-border">
-        <button className="w-full py-2 rounded-lg border-2 border-dashed border-border text-muted-foreground text-xs hover:border-primary/50 hover:text-primary transition-colors">
+        <button
+          onClick={onAddScene}
+          className="w-full py-2 rounded-lg border-2 border-dashed border-border text-muted-foreground text-xs hover:border-primary/50 hover:text-primary transition-colors"
+        >
           + Add Scene
         </button>
       </div>
