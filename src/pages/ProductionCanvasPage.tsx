@@ -532,6 +532,20 @@ export default function ProductionCanvasPage() {
   const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
   const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
 
+  // Auto-save to localStorage (debounced)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+          actors, zones, frames, castNodes, locationNodes, scriptNodes, connections, zoom, pan,
+        }));
+      } catch { /* quota exceeded — silently ignore */ }
+    }, 800);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, connections, zoom, pan, SAVE_KEY]);
+
   // Compute zone bounds
   const zoneBounds = useMemo(() => {
     const map: Record<string, { x: number; y: number; w: number; h: number }> = {};
