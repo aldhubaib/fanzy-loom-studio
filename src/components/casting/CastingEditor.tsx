@@ -533,23 +533,6 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
             placeholder="Character Name"
           />
 
-          {/* Role pills */}
-          <div className="flex gap-1.5">
-            {roleOptions.map(r => (
-              <button
-                key={r}
-                onClick={() => onChange({ ...character, role: r })}
-                className={cn(
-                  "text-[11px] px-2.5 py-1 rounded-full border transition-colors",
-                  character.role === r
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
 
           <Separator />
 
