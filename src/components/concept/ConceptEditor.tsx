@@ -167,8 +167,8 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [duration, setDuration] = useState(isMockProject ? mockConcept.duration : "");
   const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
   const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
-  const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
-  
+    const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
+    const [aspectRatio, setAspectRatio] = useState(isMockProject ? mockConcept.aspectRatio : "");
 
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
