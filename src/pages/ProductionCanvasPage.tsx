@@ -976,7 +976,7 @@ export default function ProductionCanvasPage() {
                   })}
                   {/* Label */}
                   <div
-                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
                     onMouseDown={(e) => {
                       if (e.button !== 0 || editingZoneLabel === zone.id) return;
                       e.stopPropagation();
