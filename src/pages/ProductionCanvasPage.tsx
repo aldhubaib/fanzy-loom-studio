@@ -1101,6 +1101,38 @@ export default function ProductionCanvasPage() {
               />
             )}
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
+            {selectedScript && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Scene Heading</Label>
+                  <input
+                    value={selectedScript.heading}
+                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, heading: e.target.value } : n))}
+                    className="w-full text-sm font-bold bg-secondary/50 border border-border rounded-lg px-3 py-2 mt-1 text-foreground outline-none focus:border-purple-500/50"
+                  />
+                </div>
+                <Separator />
+                <div>
+                  <Label className="text-xs text-muted-foreground">Scene Description</Label>
+                  <Textarea
+                    value={selectedScript.body}
+                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, body: e.target.value } : n))}
+                    className="mt-1 min-h-[120px] text-sm"
+                    placeholder="Describe what happens in this scene..."
+                  />
+                </div>
+                <Separator />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                  onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== selectedScript.id)); setSelected(null); }}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  Delete Scene
+                </Button>
+              </div>
+            )}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
         </motion.div>
