@@ -1212,6 +1212,12 @@ export function StoryboardCanvas() {
                 strokeWidth={2}
               />
             ))}
+            {castNodes.map(n => (
+              <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={6} fill="hsl(190 80% 50%)" fillOpacity={0.3} />
+            ))}
+            {locationNodes.map(n => (
+              <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={6} fill="hsl(150 60% 45%)" fillOpacity={0.3} />
+            ))}
             {/* Viewport indicator */}
             {containerRef.current && (
               <rect
