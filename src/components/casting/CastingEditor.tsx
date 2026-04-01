@@ -535,6 +535,8 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
 
   return (
     <>
+      {/* Backdrop overlay — click to close */}
+      <div className="fixed inset-0 z-40" onClick={onClose} />
       <div className="fixed top-0 right-0 h-full w-[400px] z-50 bg-card border-l border-border shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
