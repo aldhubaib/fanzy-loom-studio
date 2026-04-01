@@ -953,6 +953,118 @@ export function StoryboardCanvas() {
               );
             });
           })()}
+
+          {/* Cast Nodes */}
+          {castNodes.map(node => {
+            const actor = actorRoster.find(a => a.id === node.actorId);
+            if (!actor) return null;
+            const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
+            return (
+              <div
+                key={node.id}
+                data-frame
+                className={cn(
+                  "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                  selectedFrame === node.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                )}
+                style={{ left: node.x, top: node.y, width: CAST_W }}
+                onMouseDown={(e) => startNodeDrag(e, node)}
+              >
+                {/* Port */}
+                <div
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-cyan-500/60 bg-card hover:bg-cyan-500 hover:border-cyan-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
+                />
+                <div
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-cyan-500/60 bg-card hover:bg-cyan-500 hover:border-cyan-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Scene count badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {sceneCount} scenes
+                </div>
+                {/* Delete button */}
+                <button
+                  className="absolute top-2 right-2 z-10 bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-destructive hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setCastNodes(prev => prev.filter(n => n.id !== node.id));
+                    setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id));
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <img
+                  src={actor.avatar}
+                  alt={actor.name}
+                  className="w-full aspect-[3/4] object-cover"
+                  draggable={false}
+                />
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-foreground">{actor.name}</p>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Location Nodes */}
+          {locationNodes.map(node => {
+            const img = locationImages[node.locationName];
+            if (!img) return null;
+            const sceneCount = frames.filter(f => f.location === node.locationName).length;
+            return (
+              <div
+                key={node.id}
+                data-frame
+                className={cn(
+                  "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                  selectedFrame === node.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                )}
+                style={{ left: node.x, top: node.y, width: LOC_W }}
+                onMouseDown={(e) => startNodeDrag(e, node)}
+              >
+                {/* Port */}
+                <div
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-emerald-500/60 bg-card hover:bg-emerald-500 hover:border-emerald-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
+                />
+                <div
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-emerald-500/60 bg-card hover:bg-emerald-500 hover:border-emerald-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {sceneCount} shots
+                </div>
+                {/* Delete */}
+                <button
+                  className="absolute top-2 right-2 z-10 bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-destructive hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setLocationNodes(prev => prev.filter(n => n.id !== node.id));
+                    setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id));
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <img
+                  src={img}
+                  alt={node.locationName}
+                  className="w-full aspect-video object-cover"
+                  draggable={false}
+                />
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-foreground">{node.locationName}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Canvas context menu */}
