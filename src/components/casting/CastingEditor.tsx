@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
+import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,40 @@ import { Separator } from "@/components/ui/separator";
 import detectiveImg from "@/assets/casting/detective.jpg";
 import femmeFataleImg from "@/assets/casting/femme-fatale.jpg";
 import olderGentlemanImg from "@/assets/casting/older-gentleman.jpg";
+
+// Storyboard frames for "Appears in" section
+import frame1 from "@/assets/storyboard/frame-1.jpg";
+import frame2 from "@/assets/storyboard/frame-2.jpg";
+import frame3 from "@/assets/storyboard/frame-3.jpg";
+import frame4 from "@/assets/storyboard/frame-4.jpg";
+import frame5 from "@/assets/storyboard/frame-5.jpg";
+import frame6 from "@/assets/storyboard/frame-6.jpg";
+
+interface StoryboardAppearance {
+  frameId: string;
+  scene: string;
+  shot: string;
+  description: string;
+  thumbnail: string;
+}
+
+// Mock: which storyboard frames each character appears in
+const characterAppearances: Record<string, StoryboardAppearance[]> = {
+  "1": [ // Jack Marlowe
+    { frameId: "f1", scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", thumbnail: frame1 },
+    { frameId: "f2", scene: "SC 2", shot: "MED", description: "Vivian enters the office. Marlowe looks up.", thumbnail: frame2 },
+    { frameId: "f4", scene: "SC 3", shot: "CU", description: "Close-up on Marlowe's reaction.", thumbnail: frame4 },
+    { frameId: "f5", scene: "SC 4", shot: "OTS", description: "Marlowe and Vivian exchange files.", thumbnail: frame5 },
+  ],
+  "2": [ // Vivian Lake
+    { frameId: "f2", scene: "SC 2", shot: "MED", description: "Vivian enters the office. Marlowe looks up.", thumbnail: frame2 },
+    { frameId: "f3", scene: "SC 2", shot: "CU", description: "Close-up of Vivian at the jazz club.", thumbnail: frame3 },
+    { frameId: "f5", scene: "SC 4", shot: "OTS", description: "Marlowe and Vivian exchange files.", thumbnail: frame5 },
+  ],
+  "3": [ // Victor Kane
+    { frameId: "f6", scene: "SC 5", shot: "LOW", description: "Kane stands in his office, city skyline behind.", thumbnail: frame6 },
+  ],
+};
 
 // ─── Male images ────────────────────────────────────────────
 import buildSlim from "@/assets/casting/build-slim.jpg";
@@ -578,6 +612,54 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
                 <p className="text-xs text-muted-foreground text-center">Generate portrait options</p>
               </div>
             )}
+          </div>
+
+          <Separator />
+
+          {/* Appears in storyboard */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Film className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Appears in</h3>
+                <p className="text-[11px] text-muted-foreground">Storyboard frames featuring this character</p>
+              </div>
+            </div>
+
+            {(() => {
+              const appearances = characterAppearances[character.id] || [];
+              if (appearances.length === 0) {
+                return (
+                  <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-4 flex flex-col items-center gap-1.5">
+                    <Film className="w-5 h-5 text-muted-foreground/30" />
+                    <p className="text-xs text-muted-foreground text-center">Not in any storyboard frames yet</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-2">
+                  {appearances.map(app => (
+                    <div
+                      key={app.frameId}
+                      className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 hover:border-muted-foreground/40 transition-colors"
+                    >
+                      <img
+                        src={app.thumbnail}
+                        alt={app.scene}
+                        className="w-14 h-10 rounded-lg object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Delete */}
