@@ -988,13 +988,6 @@ export default function ProductionCanvasPage() {
                   selected?.id === node.id ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: node.x, top: node.y, width: SCRIPT_W }}
                 onMouseDown={(e) => startDrag(e, node, { type: "script", id: node.id })}>
-                {/* Connector port */}
-                <div className="absolute z-20 w-[14px] h-[14px] rounded-full border-[2.5px] bg-card hover:scale-125 transition-all cursor-crosshair"
-                  style={{ borderColor: "hsl(280 60% 55%)", right: -7, top: SCRIPT_H / 2 - 7 }}
-                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
-                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}>
-                  <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: "hsl(280 60% 55%)" }} />
-                </div>
                 <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                   onMouseDown={e => e.stopPropagation()}
                   onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
