@@ -560,6 +560,7 @@ export default function ProductionCanvasPage() {
       setFrames(prev => prev.map(f => f.zoneId === draggingZone ? { ...f, x: f.x + dx, y: f.y + dy } : f));
       setCastNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
       setLocationNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
+      setScriptNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
     }
     if (dragging) {
       const rect = containerRef.current?.getBoundingClientRect();
