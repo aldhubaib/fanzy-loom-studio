@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dices, ArrowRight, Plus, ChevronDown,
@@ -204,14 +204,15 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             className="w-full bg-transparent text-3xl font-bold text-foreground placeholder:text-muted-foreground/40 outline-none mb-4 tracking-tight"
           />
 
-          {/* Idea textarea */}
+          {/* Idea textarea — auto-grows */}
           <div className="rounded-lg bg-card border border-border p-1">
             <textarea
+              ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
               value={idea}
-              onChange={(e) => setIdea(e.target.value)}
+              onChange={(e) => { setIdea(e.target.value); const t = e.target; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }}
               placeholder="Describe your film idea... What's the story about? What's the world? What's the conflict?"
-              rows={4}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none p-3 leading-relaxed"
+              rows={2}
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none p-3 leading-relaxed min-h-[3.5rem]"
             />
           </div>
 
