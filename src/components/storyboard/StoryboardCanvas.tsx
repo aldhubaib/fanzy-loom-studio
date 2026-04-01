@@ -270,6 +270,8 @@ export function StoryboardCanvas() {
       description: "New frame — click to edit",
       duration: "3s",
       actors: [],
+      generatedImages: [],
+      selectedImageId: null,
     }]);
     setSelectedFrame(newId);
   }, [frames]);
