@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
   Settings, Sparkles, Images, ChevronDown, ChevronUp, Check,
-  ChevronLeft, ChevronRight, Expand, MapPin,
+  ChevronLeft, ChevronRight, Expand, MapPin, Users,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { FrameSettingsPanel } from "./FrameSettingsPanel";
@@ -48,10 +48,29 @@ import frame6 from "@/assets/storyboard/frame-6.jpg";
 
 import { FrameData, GeneratedImage, Actor } from "./FrameSettingsPanel";
 
+interface CastNode {
+  id: string;
+  actorId: string;
+  x: number;
+  y: number;
+}
+
+interface LocationNode {
+  id: string;
+  locationName: string;
+  x: number;
+  y: number;
+}
+
 interface Connection {
   from: string;
   to: string;
 }
+
+const CAST_W = 180;
+const CAST_H = 240;
+const LOC_W = 200;
+const LOC_H = 160;
 
 const actorRoster: Actor[] = [
   { id: "a1", name: "Marlowe", avatar: actorMarlowe },
@@ -177,6 +196,11 @@ export function StoryboardCanvas() {
   const [lightbox, setLightbox] = useState<{ frameId: string; index: number } | null>(null);
   const [locationGallery, setLocationGallery] = useState<{ frameId: string; index: number } | null>(null);
   const [showLocations, setShowLocations] = useState(false);
+  const [castNodes, setCastNodes] = useState<CastNode[]>([]);
+  const [locationNodes, setLocationNodes] = useState<LocationNode[]>([]);
+  const [draggingNode, setDraggingNode] = useState<string | null>(null);
+  const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
+  const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -249,6 +273,14 @@ export function StoryboardCanvas() {
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
     }
+    if (draggingNode) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = (e.clientX - rect.left - pan.x) / zoom - dragOffset.x;
+      const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
+      setCastNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
+      setLocationNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
+    }
   }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
@@ -289,8 +321,21 @@ export function StoryboardCanvas() {
       }
       setDragging(null);
     }
+    setDraggingNode(null);
     setConnectingFrom(null);
   }, [dragging, frames]);
+
+  const startNodeDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
+    if (tool !== "select") return;
+    e.stopPropagation();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+    const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+    setDragOffset({ x: mouseX - node.x, y: mouseY - node.y });
+    setDraggingNode(node.id);
+    setSelectedFrame(node.id);
+  }, [tool, pan, zoom]);
 
   const startFrameDrag = useCallback((e: React.MouseEvent, frame: FrameData) => {
     if (tool !== "select") return;
@@ -433,14 +478,15 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
-    const f = frames.find(fr => fr.id === frameId);
-    if (!f) return { x: 0, y: 0 };
-    return {
-      x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + PORT_Y,
-    };
-  }, [frames]);
+  const getPortPos = useCallback((nodeId: string, side: "left" | "right") => {
+    const f = frames.find(fr => fr.id === nodeId);
+    if (f) return { x: side === "right" ? f.x + FRAME_W : f.x, y: f.y + PORT_Y };
+    const cn = castNodes.find(n => n.id === nodeId);
+    if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
+    const ln = locationNodes.find(n => n.id === nodeId);
+    if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
+    return { x: 0, y: 0 };
+  }, [frames, castNodes, locationNodes]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
@@ -552,7 +598,7 @@ export function StoryboardCanvas() {
           setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY });
         }}
         onWheel={handleWheel}
-        onMouseDown={(e) => { setCanvasMenu(null); handleMouseDown(e); }}
+        onMouseDown={(e) => { setCanvasMenu(null); setCastPickerPos(null); setLocationPickerPos(null); handleMouseDown(e); }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -908,6 +954,118 @@ export function StoryboardCanvas() {
               );
             });
           })()}
+
+          {/* Cast Nodes */}
+          {castNodes.map(node => {
+            const actor = actorRoster.find(a => a.id === node.actorId);
+            if (!actor) return null;
+            const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
+            return (
+              <div
+                key={node.id}
+                data-frame
+                className={cn(
+                  "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                  selectedFrame === node.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                )}
+                style={{ left: node.x, top: node.y, width: CAST_W }}
+                onMouseDown={(e) => startNodeDrag(e, node)}
+              >
+                {/* Port */}
+                <div
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-cyan-500/60 bg-card hover:bg-cyan-500 hover:border-cyan-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
+                />
+                <div
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-cyan-500/60 bg-card hover:bg-cyan-500 hover:border-cyan-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Scene count badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {sceneCount} scenes
+                </div>
+                {/* Delete button */}
+                <button
+                  className="absolute top-2 right-2 z-10 bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-destructive hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setCastNodes(prev => prev.filter(n => n.id !== node.id));
+                    setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id));
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <img
+                  src={actor.avatar}
+                  alt={actor.name}
+                  className="w-full aspect-[3/4] object-cover"
+                  draggable={false}
+                />
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-foreground">{actor.name}</p>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Location Nodes */}
+          {locationNodes.map(node => {
+            const img = locationImages[node.locationName];
+            if (!img) return null;
+            const sceneCount = frames.filter(f => f.location === node.locationName).length;
+            return (
+              <div
+                key={node.id}
+                data-frame
+                className={cn(
+                  "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+                  selectedFrame === node.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                )}
+                style={{ left: node.x, top: node.y, width: LOC_W }}
+                onMouseDown={(e) => startNodeDrag(e, node)}
+              >
+                {/* Port */}
+                <div
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-emerald-500/60 bg-card hover:bg-emerald-500 hover:border-emerald-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, node.id); }}
+                />
+                <div
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-emerald-500/60 bg-card hover:bg-emerald-500 hover:border-emerald-500 hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(node.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {sceneCount} shots
+                </div>
+                {/* Delete */}
+                <button
+                  className="absolute top-2 right-2 z-10 bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-destructive hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setLocationNodes(prev => prev.filter(n => n.id !== node.id));
+                    setConnections(prev => prev.filter(c => c.from !== node.id && c.to !== node.id));
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <img
+                  src={img}
+                  alt={node.locationName}
+                  className="w-full aspect-video object-cover"
+                  draggable={false}
+                />
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-foreground">{node.locationName}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Canvas context menu */}
@@ -932,6 +1090,24 @@ export function StoryboardCanvas() {
               }}
             >
               <Plus className="w-4 h-4" /> Add New Frame
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY });
+                setCanvasMenu(null);
+              }}
+            >
+              <Users className="w-4 h-4" /> Add Cast Member
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY });
+                setCanvasMenu(null);
+              }}
+            >
+              <MapPin className="w-4 h-4" /> Add Location
             </button>
             <div className="h-px bg-border my-1" />
             <button
@@ -960,6 +1136,64 @@ export function StoryboardCanvas() {
           </div>
         )}
 
+        {/* Cast Picker */}
+        {castPickerPos && (
+          <div
+            className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: castPickerPos.x, top: castPickerPos.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
+            {actorRoster.map(actor => (
+              <button
+                key={actor.id}
+                className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onClick={() => {
+                  const newId = `cast-${Date.now()}`;
+                  setCastNodes(prev => [...prev, { id: newId, actorId: actor.id, x: castPickerPos.worldX, y: castPickerPos.worldY }]);
+                  setCastPickerPos(null);
+                }}
+              >
+                <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
+                <span>{actor.name}</span>
+              </button>
+            ))}
+            <div className="h-px bg-border my-1" />
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-muted-foreground" onClick={() => setCastPickerPos(null)}>
+              <X className="w-4 h-4" /> Cancel
+            </button>
+          </div>
+        )}
+
+        {/* Location Picker */}
+        {locationPickerPos && (
+          <div
+            className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: locationPickerPos.x, top: locationPickerPos.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Location</p>
+            {Object.entries(locationImages).map(([name, img]) => (
+              <button
+                key={name}
+                className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onClick={() => {
+                  const newId = `loc-${Date.now()}`;
+                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos.worldX, y: locationPickerPos.worldY }]);
+                  setLocationPickerPos(null);
+                }}
+              >
+                <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
+                <span>{name}</span>
+              </button>
+            ))}
+            <div className="h-px bg-border my-1" />
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-muted-foreground" onClick={() => setLocationPickerPos(null)}>
+              <X className="w-4 h-4" /> Cancel
+            </button>
+          </div>
+        )}
+
         {/* Minimap */}
         <div className="absolute bottom-4 right-4 w-[160px] h-[100px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
           <svg className="w-full h-full" viewBox="0 0 1200 700">
@@ -977,6 +1211,12 @@ export function StoryboardCanvas() {
                 strokeOpacity={0.3}
                 strokeWidth={2}
               />
+            ))}
+            {castNodes.map(n => (
+              <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={6} fill="hsl(190 80% 50%)" fillOpacity={0.3} />
+            ))}
+            {locationNodes.map(n => (
+              <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={6} fill="hsl(150 60% 45%)" fillOpacity={0.3} />
             ))}
             {/* Viewport indicator */}
             {containerRef.current && (
