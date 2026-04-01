@@ -573,7 +573,8 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                     label={cat.label}
                     value={character[cat.key] as string}
                     options={attrOptions[cat.key]}
-                    onClick={() => setPickerOpen(cat.key)}
+                    onClick={() => { setPickerOpen(cat.key); if (showErrors) setShowErrors(false); }}
+                    hasError={showErrors && !(character[cat.key] as string)}
                   />
                 ))}
               </div>
@@ -587,7 +588,10 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                     <h3 className="text-sm font-semibold text-foreground">Portraits</h3>
                     <p className="text-[11px] text-muted-foreground">Generate & pick a portrait</p>
                   </div>
-                  <Button size="sm" className="gap-1.5 h-8">
+                  <Button size="sm" className="gap-1.5 h-8" onClick={() => {
+                    const allFilled = attributeCategories.every(cat => !!(character[cat.key] as string));
+                    if (!allFilled) { setShowErrors(true); return; }
+                  }}>
                     <Sparkles className="w-3.5 h-3.5" />
                     Generate
                   </Button>
