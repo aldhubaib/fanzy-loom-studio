@@ -188,6 +188,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
     setSetting("Space");
     setAudience("General");
     setFormat("Film");
+    setAspectRatio("2.39:1");
   };
 
   const selectedAudience = audiences.find(a => a.label === audience);
