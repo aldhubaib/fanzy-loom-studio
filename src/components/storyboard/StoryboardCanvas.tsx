@@ -228,6 +228,18 @@ export function StoryboardCanvas() {
     if (!rect) return;
     const mouseX = (e.clientX - rect.left - pan.x) / zoom;
     const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+
+    // Option/Alt + drag = duplicate frame
+    if (e.altKey) {
+      const newId = `f${Date.now()}`;
+      const clone: FrameData = { ...frame, id: newId, x: frame.x, y: frame.y, actors: [...frame.actors] };
+      setFrames(prev => [...prev, clone]);
+      setDragOffset({ x: mouseX - clone.x, y: mouseY - clone.y });
+      setDragging(newId);
+      setSelectedFrame(newId);
+      return;
+    }
+
     setDragOffset({ x: mouseX - frame.x, y: mouseY - frame.y });
     setDragging(frame.id);
     setSelectedFrame(frame.id);
