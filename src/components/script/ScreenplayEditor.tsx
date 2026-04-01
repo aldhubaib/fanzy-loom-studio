@@ -93,6 +93,42 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                   <List className="w-3.5 h-3.5" />
                   Scenes
                 </button>
+
+                {/* Element type dropdown — same style */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    >
+                      <ActiveIcon className="w-3.5 h-3.5" />
+                      {active.label}
+                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 bg-popover border-border">
+                    {elementTypes.map((el) => {
+                      const Icon = el.icon;
+                      const isActive = el.id === activeElement;
+                      return (
+                        <DropdownMenuItem
+                          key={el.id}
+                          onClick={() => setActiveElement(el.id as any)}
+                          className={cn(
+                            "flex items-center gap-2.5 px-3 py-2 cursor-pointer",
+                            isActive && "bg-primary/10"
+                          )}
+                        >
+                          <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                          <span className={cn("text-xs font-medium", isActive ? "text-primary" : "text-foreground")}>
+                            {el.label}
+                          </span>
+                          {isActive && <Check className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <button
                   onClick={onToggleAI}
                   className={cn(
