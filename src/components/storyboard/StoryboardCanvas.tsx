@@ -66,7 +66,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED",
-    description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"],
+    description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], location: "Street",
     generatedImages: [
       { id: "g2a", src: frame2, description: "Vivian in alley — medium shot", actors: ["a2"] },
       { id: "g2b", src: frame3, description: "Vivian enters the jazz club", actors: ["a2", "a3"] },
