@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand, Film, Images, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand, Film, Images, ChevronDown, ChevronUp, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -475,15 +475,18 @@ function AttributeRow({ label, value, options, onClick }: {
 }
 
 // ─── Slide Drawer Panel ─────────────────────────────────────
-function CharacterDrawer({ character, onChange, onClose, onDelete }: {
+function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters, onSwap }: {
   character: Character;
   onChange: (c: Character) => void;
   onClose: () => void;
   onDelete: () => void;
+  allCharacters: Character[];
+  onSwap: (fromId: string, toId: string) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState<AttributeKey | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [swapOpen, setSwapOpen] = useState(false);
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
@@ -662,8 +665,18 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
             })()}
           </div>
 
-          {/* Delete */}
-          <div className="pt-2">
+          {/* Swap & Delete */}
+          <div className="pt-2 space-y-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1.5"
+              onClick={() => setSwapOpen(true)}
+              disabled={allCharacters.length < 2}
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              Swap with another actor
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -730,6 +743,41 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Swap dialog */}
+      <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
+        <DialogContent className="sm:max-w-md bg-card border-border">
+          <DialogHeader><DialogTitle>Swap with another actor</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Choose a character to swap all scene assignments with <span className="font-semibold text-foreground">{character.name}</span>.
+          </p>
+          <div className="space-y-2 mt-4 max-h-[300px] overflow-y-auto">
+            {allCharacters.filter(c => c.id !== character.id).map(other => (
+              <button
+                key={other.id}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-secondary/50 transition-all text-left"
+                onClick={() => {
+                  onSwap(character.id, other.id);
+                  setSwapOpen(false);
+                }}
+              >
+                {other.portrait ? (
+                  <img src={other.portrait} alt={other.name} className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{other.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{other.role} · {(characterAppearances[other.id] || []).length} scenes</p>
+                </div>
+                <ArrowLeftRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -760,6 +808,19 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
   const deleteCharacter = useCallback((id: string) => {
     setCharacters(prev => prev.filter(c => c.id !== id));
     setSelectedCharacterId(null);
+  }, []);
+
+  const swapCharacters = useCallback((fromId: string, toId: string) => {
+    setCharacters(prev => {
+      const fromChar = prev.find(c => c.id === fromId);
+      const toChar = prev.find(c => c.id === toId);
+      if (!fromChar || !toChar) return prev;
+      return prev.map(c => {
+        if (c.id === fromId) return { ...toChar, id: fromId };
+        if (c.id === toId) return { ...fromChar, id: toId };
+        return c;
+      });
+    });
   }, []);
 
   return (
@@ -937,6 +998,8 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
             onChange={updateCharacter}
             onClose={() => setSelectedCharacterId(null)}
             onDelete={() => deleteCharacter(selectedCharacter.id)}
+            allCharacters={characters}
+            onSwap={swapCharacters}
           />
         )}
       </AnimatePresence>
