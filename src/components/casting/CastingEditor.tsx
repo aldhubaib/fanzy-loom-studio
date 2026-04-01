@@ -638,84 +638,44 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               </div>
             </>
           ) : (
-           /* Custom tab — grid of selectable looks + upload */
-           <div>
-             <p className="text-[11px] text-muted-foreground mb-3">Select a look or upload your own</p>
-             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-               {(() => {
-                 const wardrobeOptions = character.gender === "Female" ? femaleOptions.clothing! : maleOptions.clothing!;
-                 return wardrobeOptions.map(opt => {
-                   const isSelected = character.clothing === opt.label;
+           /* Custom tab — single upload button that opens modal */
+           <div className="flex flex-col items-center gap-3 py-6">
+             <p className="text-[11px] text-muted-foreground text-center">Upload reference photos to generate a custom character sheet</p>
+             <Button
+               onClick={() => setCustomModalOpen(true)}
+               variant="outline"
+               className="gap-2 h-12 px-6 rounded-xl border-dashed border-2"
+             >
+               <Upload className="w-4 h-4" />
+               Upload References
+             </Button>
+
+             {/* Show uploaded previews if any */}
+             {Object.keys(customUploads).length > 0 && (
+               <div className="flex gap-2 mt-2">
+                 {customSlots.map(slot => {
+                   const src = customUploads[slot.key];
                    return (
-                     <div key={opt.label}>
-                       <button
-                         onClick={() => onChange({ ...character, clothing: opt.label })}
-                         className={cn(
-                           "relative w-full overflow-hidden rounded-xl aspect-[3/4] transition-all duration-200",
-                           isSelected
-                             ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]"
-                             : "hover:scale-[1.03] hover:ring-1 hover:ring-border"
-                         )}
-                       >
-                         <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" draggable={false} />
-                         <div className={cn("absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent", isSelected && "from-primary/30")} />
-                         {isSelected && (
-                           <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                             <Check className="w-3 h-3 text-primary-foreground" />
+                     <div key={slot.key} className="text-center">
+                       <div className="w-16 h-20 rounded-lg overflow-hidden border border-border bg-secondary">
+                         {src ? (
+                           <img src={src} alt={slot.label} className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center">
+                             <User className="w-4 h-4 text-muted-foreground/20" />
                            </div>
                          )}
-                       </button>
-                       <p className={cn("text-xs font-medium text-center mt-1.5", isSelected ? "text-primary" : "text-muted-foreground")}>
-                         {opt.label}
-                       </p>
+                       </div>
+                       <span className="text-[9px] text-muted-foreground mt-1 block">{slot.label}</span>
                      </div>
                    );
-                 });
-               })()}
-               {/* Custom uploaded images */}
-               {customPortraits.map((src, idx) => (
-                 <div key={`custom-${idx}`}>
-                   <div className="relative rounded-xl overflow-hidden aspect-[3/4] ring-2 ring-primary ring-offset-2 ring-offset-background group">
-                     <img src={src} alt={`Custom ${idx + 1}`} className="w-full h-full object-cover" />
-                     <button
-                       onClick={() => setCustomPortraits(prev => prev.filter((_, i) => i !== idx))}
-                       className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                     >
-                       <X className="w-3 h-3 text-white" />
-                     </button>
-                   </div>
-                   <p className="text-xs font-medium text-center mt-1.5 text-primary">Custom</p>
-                 </div>
-               ))}
-               {/* Upload slot */}
-               <div>
-                 <label className="w-full rounded-xl aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors bg-card">
-                   <Upload className="w-5 h-5 text-muted-foreground mb-1" />
-                   <span className="text-[10px] text-muted-foreground font-medium">Upload</span>
-                   <input
-                     type="file"
-                     accept="image/*"
-                     className="hidden"
-                     onChange={(e) => {
-                       const file = e.target.files?.[0];
-                       if (!file) return;
-                       const reader = new FileReader();
-                       reader.onload = (ev) => {
-                         const src = ev.target?.result as string;
-                         setCustomPortraits(prev => [...prev, src]);
-                         onChange({ ...character, portrait: src });
-                       };
-                       reader.readAsDataURL(file);
-                       e.target.value = "";
-                     }}
-                   />
-                 </label>
+                 })}
                </div>
-             </div>
+             )}
            </div>
-          )}
+           )}
 
-          <Separator />
+           <Separator />
 
           {/* Appears in storyboard */}
           <div>
