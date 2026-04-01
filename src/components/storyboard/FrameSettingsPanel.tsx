@@ -229,6 +229,21 @@ function ImagePickerDialog({
       <DialogContent className="sm:max-w-2xl bg-card border-border">
         <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
+          {/* None option */}
+          {allowCustom && (
+            <div>
+              <button
+                onClick={() => { onSelect(""); onOpenChange(false); }}
+                className={cn(
+                  "w-full aspect-[4/3] rounded-xl border-2 flex items-center justify-center transition-all",
+                  selected === "" ? "border-primary ring-2 ring-primary/30 bg-primary/10" : "border-border hover:border-primary/50 bg-secondary/20"
+                )}
+              >
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <p className={cn("text-xs font-medium text-center mt-1.5", selected === "" ? "text-primary" : "text-muted-foreground")}>None</p>
+            </div>
+          )}
           {allItems.map((item) => (
             <div key={item.value}>
               <VisualCard
