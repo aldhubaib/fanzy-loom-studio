@@ -343,8 +343,9 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
         </div>
         </div>
       </div>
+      </div>
 
-      {/* Status bar */}
+      {/* Status bar — always visible at bottom */}
       <div className="px-6 py-2 border-t border-border flex items-center gap-4 text-[11px] text-muted-foreground font-sans">
         <span>1,247 words</span>
         <span>·</span>
