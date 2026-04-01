@@ -456,7 +456,7 @@ export function StoryboardCanvas() {
             >
               <div
                 className={cn(
-                  "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
+                  "absolute rounded-xl border-2 transition-shadow duration-150 select-none group",
                   selectedFrame === frame.id
                     ? "border-primary shadow-lg shadow-primary/20"
                     : "border-border hover:border-muted-foreground/40",
@@ -469,6 +469,18 @@ export function StoryboardCanvas() {
                 }}
                 onMouseDown={(e) => startFrameDrag(e, frame)}
               >
+                {/* Left port (input) */}
+                <div
+                  className="absolute -left-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+                {/* Right port (output) */}
+                <div
+                  className="absolute -right-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
+                />
+
                 {/* Frame number badge */}
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                   {idx + 1}
@@ -479,7 +491,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Image */}
-                <div className="w-full h-[150px] bg-secondary overflow-hidden">
+                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px]">
                   {frame.image ? (
                     <img
                       src={frame.image}
@@ -496,7 +508,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Info */}
-                <div className="bg-card p-2.5 space-y-1">
+                <div className="bg-card p-2.5 space-y-1 rounded-b-[10px]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
