@@ -878,7 +878,7 @@ export function StoryboardCanvas() {
           <AlertDialogFooter className="flex gap-2 sm:gap-0">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              variant="outline"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               onClick={() => {
                 if (!actorChangePrompt) return;
                 const { frameId, actorId, action } = actorChangePrompt;
