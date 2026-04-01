@@ -456,7 +456,7 @@ export function StoryboardCanvas() {
             >
               <div
                 className={cn(
-                  "absolute rounded-xl border-2 transition-shadow duration-150 select-none group",
+                  "absolute rounded-xl border-2 bg-card transition-shadow duration-150 select-none group",
                   selectedFrame === frame.id
                     ? "border-primary shadow-lg shadow-primary/20"
                     : "border-border hover:border-muted-foreground/40",
@@ -509,7 +509,7 @@ export function StoryboardCanvas() {
                 </div>
 
                 {/* Info */}
-                <div className="bg-card p-2.5 space-y-1 rounded-b-[10px]">
+                <div className="bg-card p-2.5 space-y-1 rounded-b-[10px] h-[80px]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
