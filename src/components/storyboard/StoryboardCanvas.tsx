@@ -827,7 +827,7 @@ export function StoryboardCanvas() {
                       {frame.location && locationImages[frame.location] && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="w-6 h-6 rounded-md overflow-hidden border-[1.5px] border-border ml-auto">
+                            <div className="w-10 h-6 rounded-md overflow-hidden border-[1.5px] border-border ml-auto">
                               <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} loading="lazy" />
                             </div>
                           </TooltipTrigger>
