@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
   Settings, Sparkles, Images, ChevronDown, ChevronUp, Check,
-  ChevronLeft, ChevronRight, Expand,
+  ChevronLeft, ChevronRight, Expand, MapPin,
 } from "lucide-react";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { FrameSettingsPanel } from "./FrameSettingsPanel";
