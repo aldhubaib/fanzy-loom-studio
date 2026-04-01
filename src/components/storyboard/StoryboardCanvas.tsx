@@ -596,7 +596,24 @@ export function StoryboardCanvas() {
                   </Popover>
                 </div>
 
-                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px]">
+                {/* Image count badge */}
+                {frame.generatedImages.length > 0 && (
+                  <button
+                    className="absolute bottom-[calc(100%-150px+4px)] left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 hover:bg-background transition-colors"
+                    style={{ top: "auto", bottom: undefined }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGalleryOpen(galleryOpen === frame.id ? null : frame.id);
+                    }}
+                  >
+                    <Images className="w-3 h-3" />
+                    {frame.generatedImages.length}
+                    {galleryOpen === frame.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                )}
+
+                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px] relative">
                   {frame.image ? (
                     <img
                       src={frame.image}
@@ -610,7 +627,54 @@ export function StoryboardCanvas() {
                       <Plus className="w-8 h-8" />
                     </div>
                   )}
+                  {/* Image count overlay */}
+                  {frame.generatedImages.length > 0 && (
+                    <button
+                      className="absolute bottom-1.5 left-1.5 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 hover:bg-background/95 transition-colors"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setGalleryOpen(galleryOpen === frame.id ? null : frame.id);
+                      }}
+                    >
+                      <Images className="w-3 h-3" />
+                      {frame.generatedImages.length}
+                      {galleryOpen === frame.id ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                    </button>
+                  )}
                 </div>
+
+                {/* Expandable gallery */}
+                {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
+                  <div className="bg-secondary/80 px-2 py-2 grid grid-cols-3 gap-1.5" onMouseDown={(e) => e.stopPropagation()}>
+                    {frame.generatedImages.map(img => {
+                      const isActive = frame.selectedImageId === img.id;
+                      return (
+                        <button
+                          key={img.id}
+                          className={`relative rounded overflow-hidden border-2 transition-all aspect-video ${
+                            isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFrames(prev => prev.map(f =>
+                              f.id === frame.id
+                                ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
+                                : f
+                            ));
+                          }}
+                        >
+                          <img src={img.src} alt={img.description} className="w-full h-full object-cover" draggable={false} />
+                          {isActive && (
+                            <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Info */}
                 <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
