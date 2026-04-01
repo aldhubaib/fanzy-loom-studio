@@ -614,6 +614,54 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
             )}
           </div>
 
+          <Separator />
+
+          {/* Appears in storyboard */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Film className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Appears in</h3>
+                <p className="text-[11px] text-muted-foreground">Storyboard frames featuring this character</p>
+              </div>
+            </div>
+
+            {(() => {
+              const appearances = characterAppearances[character.id] || [];
+              if (appearances.length === 0) {
+                return (
+                  <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-4 flex flex-col items-center gap-1.5">
+                    <Film className="w-5 h-5 text-muted-foreground/30" />
+                    <p className="text-xs text-muted-foreground text-center">Not in any storyboard frames yet</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-2">
+                  {appearances.map(app => (
+                    <div
+                      key={app.frameId}
+                      className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 hover:border-muted-foreground/40 transition-colors"
+                    >
+                      <img
+                        src={app.thumbnail}
+                        alt={app.scene}
+                        className="w-14 h-10 rounded-lg object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+
           {/* Delete */}
           <div className="pt-2">
             <Button
