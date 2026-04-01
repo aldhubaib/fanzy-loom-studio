@@ -1008,18 +1008,43 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               );
             })}
           </div>
+
+          {/* Number of images selector */}
+          <div className="flex items-center justify-between mt-4">
+            <div>
+              <p className="text-xs font-medium text-foreground">Number of images</p>
+              <p className="text-[10px] text-muted-foreground">How many variations to generate</p>
+            </div>
+            <div className="flex items-center gap-1">
+              {[2, 4, 6, 8].map(n => (
+                <button
+                  key={n}
+                  onClick={() => setCustomGenerateCount(n)}
+                  className={cn(
+                    "w-8 h-8 rounded-lg text-xs font-bold transition-all",
+                    customGenerateCount === n
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                  )}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex justify-end mt-4">
             <Button
-              disabled={!allCustomSlotsFilled}
+              disabled={!allCustomSlotsFilled || customGenerating}
               className="gap-1.5"
-              onClick={() => {
-                // Use face as portrait for now
-                onChange({ ...character, portrait: customUploads["face"] });
-                setCustomModalOpen(false);
-              }}
+              onClick={handleCustomGenerate}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              Generate Character Sheet
+              {customGenerating ? (
+                <div className="w-3.5 h-3.5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              Generate {customGenerateCount} Images
             </Button>
           </div>
         </DialogContent>
