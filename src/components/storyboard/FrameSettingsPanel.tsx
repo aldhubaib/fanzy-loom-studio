@@ -280,6 +280,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
   const [moodOpen, setMoodOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [wardrobeOpen, setWardrobeOpen] = useState<string | null>(null);
+  const [customLocations, setCustomLocations] = useState<{ value: string; label: string; img: string }[]>([]);
+  const [customWardrobes, setCustomWardrobes] = useState<{ value: string; label: string; img: string }[]>([]);
 
   useEffect(() => {
     setPrompt(frame.description);
