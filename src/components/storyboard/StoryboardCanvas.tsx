@@ -720,10 +720,35 @@ export function StoryboardCanvas() {
                       <Expand className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Scrollable thumbnails */}
+                    {/* Drag-to-scroll thumbnails */}
                     <div
-                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 overflow-x-auto"
-                      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 overflow-x-hidden cursor-grab active:cursor-grabbing"
+                      style={{ scrollbarWidth: "none", msOverflowStyle: "none", overflow: "hidden" }}
+                      ref={(el) => {
+                        if (!el) return;
+                        let isDown = false;
+                        let startX = 0;
+                        let scrollLeft = 0;
+                        const onDown = (e: MouseEvent) => {
+                          isDown = true;
+                          el.style.cursor = "grabbing";
+                          startX = e.pageX - el.offsetLeft;
+                          scrollLeft = el.scrollLeft;
+                        };
+                        const onUp = () => { isDown = false; el.style.cursor = "grab"; };
+                        const onMove = (e: MouseEvent) => {
+                          if (!isDown) return;
+                          e.preventDefault();
+                          const x = e.pageX - el.offsetLeft;
+                          el.scrollLeft = scrollLeft - (x - startX);
+                        };
+                        el.onmousedown = onDown;
+                        el.onmouseleave = onUp;
+                        el.onmouseup = onUp;
+                        el.onmousemove = onMove;
+                        // Allow overflow for scrollLeft to work
+                        el.style.overflowX = "auto";
+                      }}
                     >
                       {frame.generatedImages.map(img => {
                         const isActive = frame.selectedImageId === img.id;
