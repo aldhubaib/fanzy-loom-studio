@@ -690,9 +690,9 @@ export function StoryboardCanvas() {
                 {/* Expandable gallery — horizontal scroll strip */}
                 {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
                   <div
-                    className="bg-secondary/80 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto"
+                    className="bg-secondary/80 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide"
                     onMouseDown={(e) => e.stopPropagation()}
-                    style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "thin" }}
+                    style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
                     {/* Open gallery lightbox button */}
                     <button
