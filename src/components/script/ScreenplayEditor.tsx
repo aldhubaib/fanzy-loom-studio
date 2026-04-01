@@ -1,10 +1,32 @@
 import React from "react";
 import { FormattingToolbar } from "./FormattingToolbar";
-import { List, Sparkles, ChevronDown, Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote, Check } from "lucide-react";
+import { List, Sparkles, ChevronDown, Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote, Check, MapPin, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+
+// Character thumbnail data
+const characterThumbnails: Record<string, { initials: string; color: string }> = {
+  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60" },
+  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60" },
+  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60" },
+  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60" },
+};
+
+// Location thumbnail data
+const locationThumbnails: Record<string, { icon: string; color: string }> = {
+  "MARLOWE'S OFFICE": { icon: "🏢", color: "from-amber-900/60 to-yellow-900/40" },
+  "RAIN-SLICKED ALLEY": { icon: "🌧️", color: "from-slate-800/80 to-blue-900/40" },
+  "THE BLUE NOTE JAZZ CLUB": { icon: "🎷", color: "from-indigo-900/60 to-blue-800/40" },
+};
+
+function getLocationKey(heading: string): string | null {
+  for (const key of Object.keys(locationThumbnails)) {
+    if (heading.includes(key)) return key;
+  }
+  return null;
+}
 
 const elementTypes = [
   { id: "scene-heading", label: "Scene Heading", icon: Hash },
