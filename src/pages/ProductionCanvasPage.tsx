@@ -373,36 +373,7 @@ function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
   );
 }
 
-function CastDrawer({ actor, frames }: { actor: Actor; frames: FrameData[] }) {
-  const appearances = frames.filter(f => f.actors.includes(actor.id));
-  return (
-    <div className="space-y-4">
-      <div className="rounded-xl overflow-hidden border border-border bg-secondary">
-        <img src={actor.portrait} alt={actor.name} className="w-full object-cover max-h-[240px]" />
-      </div>
-      <div>
-        <h3 className="text-lg font-bold text-foreground">{actor.name}</h3>
-        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">{actor.role}</span>
-      </div>
-      <p className="text-sm text-muted-foreground leading-relaxed">{actor.description}</p>
-      <Separator />
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Appears in {appearances.length} shot{appearances.length !== 1 ? "s" : ""}</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {appearances.map(f => (
-            <div key={f.id} className="rounded-lg overflow-hidden border border-border bg-secondary">
-              {f.image && <img src={f.image} alt={f.description} className="w-full aspect-video object-cover" />}
-              <div className="p-2">
-                <p className="text-[10px] font-bold text-primary">{f.scene}</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">{f.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// CastDrawer is now replaced by CharacterDetailsPanel (imported)
 
 function LocationDrawer({ locationName, frames }: { locationName: string; frames: FrameData[] }) {
   const img = locationImages[locationName];
