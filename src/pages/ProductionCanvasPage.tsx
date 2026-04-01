@@ -570,6 +570,7 @@ export default function ProductionCanvasPage() {
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
       setCastNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
+      setScriptNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
     }
   }, [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart]);
 
