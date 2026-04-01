@@ -596,22 +596,7 @@ export function StoryboardCanvas() {
                   </Popover>
                 </div>
 
-                {/* Image count badge */}
-                {frame.generatedImages.length > 0 && (
-                  <button
-                    className="absolute bottom-[calc(100%-150px+4px)] left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 hover:bg-background transition-colors"
-                    style={{ top: "auto", bottom: undefined }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setGalleryOpen(galleryOpen === frame.id ? null : frame.id);
-                    }}
-                  >
-                    <Images className="w-3 h-3" />
-                    {frame.generatedImages.length}
-                    {galleryOpen === frame.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                )}
+
 
                 <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px] relative">
                   {frame.image ? (
