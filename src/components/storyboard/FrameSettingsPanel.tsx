@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus, MapPin, Shirt,
+  X, Sparkles, Camera, Palette, Clock, Check, Images, ChevronDown, Plus, MapPin, Shirt, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -196,17 +196,40 @@ function PickerButton({ label, value, selectedImg, icon: Icon, onClick }: {
 }
 
 function ImagePickerDialog({
-  open, onOpenChange, title: dialogTitle, items, selected, onSelect,
+  open, onOpenChange, title: dialogTitle, items, selected, onSelect, allowCustom = false, customItems, onAddCustom,
 }: {
   open: boolean; onOpenChange: (v: boolean) => void; title: string;
   items: { value: string; label: string; img: string }[]; selected: string; onSelect: (v: string) => void;
+  allowCustom?: boolean;
+  customItems?: { value: string; label: string; img: string }[];
+  onAddCustom?: (item: { value: string; label: string; img: string }) => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const allItems = [...items, ...(customItems || [])];
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onAddCustom) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const src = ev.target?.result as string;
+      const name = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+      const label = name.charAt(0).toUpperCase() + name.slice(1);
+      const value = `custom-${Date.now()}`;
+      onAddCustom({ value, label, img: src });
+      onSelect(value);
+      onOpenChange(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl bg-card border-border">
         <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
-          {items.map((item) => (
+          {allItems.map((item) => (
             <div key={item.value}>
               <VisualCard
                 label={item.label}
@@ -217,6 +240,26 @@ function ImagePickerDialog({
               <VisualCardLabel label={item.label} selected={selected === item.value} />
             </div>
           ))}
+          {/* Custom upload slot */}
+          {allowCustom && (
+            <div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full aspect-[4/3] rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-1.5 transition-colors bg-secondary/20"
+              >
+                <Upload className="w-5 h-5 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground font-medium">Upload Custom</span>
+              </button>
+              <p className="text-xs font-medium text-center mt-1.5 text-muted-foreground">Custom</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -237,6 +280,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
   const [moodOpen, setMoodOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [wardrobeOpen, setWardrobeOpen] = useState<string | null>(null);
+  const [customLocations, setCustomLocations] = useState<{ value: string; label: string; img: string }[]>([]);
+  const [customWardrobes, setCustomWardrobes] = useState<{ value: string; label: string; img: string }[]>([]);
 
   useEffect(() => {
     setPrompt(frame.description);
@@ -359,8 +404,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         {/* Location */}
         <PickerButton
           label="Location"
-          value={locationOptions.find(l => l.value === location)?.label || ""}
-          selectedImg={locationOptions.find(l => l.value === location)?.img}
+          value={[...locationOptions, ...customLocations].find(l => l.value === location)?.label || ""}
+          selectedImg={[...locationOptions, ...customLocations].find(l => l.value === location)?.img}
           icon={MapPin}
           onClick={() => setLocationOpen(true)}
         />
@@ -405,7 +450,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
                   const actor = actorRoster.find(a => a.id === actorId);
                   if (!actor) return null;
                   const currentWardrobe = actorWardrobe[actorId] || "";
-                  const wardrobeImg = wardrobeOptions.find(w => w.value === currentWardrobe)?.img;
+                  const allWardrobes = [...wardrobeOptions, ...customWardrobes];
+                  const wardrobeImg = allWardrobes.find(w => w.value === currentWardrobe)?.img;
                   return (
                     <button
                       key={actorId}
@@ -526,6 +572,9 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         items={locationOptions}
         selected={location}
         onSelect={setLocation}
+        allowCustom
+        customItems={customLocations}
+        onAddCustom={(item) => setCustomLocations(prev => [...prev, item])}
       />
       {selectedActors.map(actorId => {
         const actor = actorRoster.find(a => a.id === actorId);
@@ -538,6 +587,9 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
             items={wardrobeOptions}
             selected={actorWardrobe[actorId] || ""}
             onSelect={(v) => setActorWardrobe(prev => ({ ...prev, [actorId]: v }))}
+            allowCustom
+            customItems={customWardrobes}
+            onAddCustom={(item) => setCustomWardrobes(prev => [...prev, item])}
           />
         );
       })}
