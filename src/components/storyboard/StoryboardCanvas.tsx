@@ -947,9 +947,16 @@ export function StoryboardCanvas() {
       {settingsFrame && (() => {
         const frame = frames.find(f => f.id === settingsFrame);
         if (!frame) return null;
+        const sorted = [...frames].sort((a, b) => {
+          const rowA = Math.round(a.y / 200);
+          const rowB = Math.round(b.y / 200);
+          return rowA !== rowB ? rowA - rowB : a.x - b.x;
+        });
+        const sceneNum = sorted.findIndex(f => f.id === settingsFrame) + 1;
         return (
           <FrameSettingsPanel
             frame={frame}
+            sceneNumber={sceneNum}
             actorRoster={actorRoster}
             onUpdate={(updated) => {
               setFrames(prev => prev.map(f => f.id === updated.id ? updated : f));

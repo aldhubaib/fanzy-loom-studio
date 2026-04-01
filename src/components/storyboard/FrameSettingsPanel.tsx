@@ -85,6 +85,7 @@ const moodOptions = [
 
 interface FrameSettingsPanelProps {
   frame: FrameData;
+  sceneNumber: number;
   actorRoster: Actor[];
   onUpdate: (updated: FrameData) => void;
   onClose: () => void;
@@ -113,7 +114,7 @@ function VisualOption({ label, img, selected, onClick }: { label: string; img: s
   );
 }
 
-export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: FrameSettingsPanelProps) {
+export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, onClose }: FrameSettingsPanelProps) {
   const [prompt, setPrompt] = useState(frame.description);
   const [scene, setScene] = useState(frame.scene);
   const [shot, setShot] = useState(frame.shot);
@@ -214,12 +215,9 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
         {/* Scene */}
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Scene</Label>
-          <Input
-            value={scene}
-            onChange={(e) => setScene(e.target.value)}
-            className="h-8 text-sm"
-            placeholder="SC 1"
-          />
+          <div className="h-8 px-3 flex items-center rounded-md bg-secondary text-sm text-foreground">
+            SC {sceneNumber}
+          </div>
         </div>
 
         {/* Prompt */}
