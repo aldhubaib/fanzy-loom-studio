@@ -153,6 +153,7 @@ const mockConcept = {
   setting: "Modern City",
   audience: "Mature",
   format: "Film",
+  aspectRatio: "2.39:1",
 };
 
 export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
