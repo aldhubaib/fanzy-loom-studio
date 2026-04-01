@@ -680,12 +680,13 @@ export default function ProductionCanvasPage() {
   const selectedFrame = selected?.type === "frame" ? frames.find(f => f.id === selected.id) : null;
   const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
   const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
+  const selectedScript = selected?.type === "script" ? scriptNodes.find(n => n.id === selected.id) : null;
   const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
   const selectedActor = selectedCast ? actors.find(a => a.id === selectedCast.actorId) : null;
 
   const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
 
-  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedZone ? selectedZone.label : null;
+  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedScript ? "Scene" : selectedZone ? selectedZone.label : null;
   const showDrawer = !!selected;
 
   return (
