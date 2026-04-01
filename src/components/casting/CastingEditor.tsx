@@ -879,7 +879,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
 
   return (
     <div className="h-full overflow-auto pt-16">
-      <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")}>
+      <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")} onClick={() => selectedCharacterId && setSelectedCharacterId(null)}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Cast</h1>
@@ -903,7 +903,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.03, y: -4 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => setSelectedCharacterId(char.id)}
+                onClick={(e) => { e.stopPropagation(); setSelectedCharacterId(char.id); }}
                 className={cn(
                   "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
                   selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
