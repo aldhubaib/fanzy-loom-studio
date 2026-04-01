@@ -10,6 +10,11 @@ import {
 import { FrameContextMenu } from "./FrameContextMenu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 import actorMarlowe from "@/assets/actors/marlowe.png";
 import actorVivian from "@/assets/actors/vivian.png";
@@ -107,6 +112,12 @@ export function StoryboardCanvas() {
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
+  const [actorChangePrompt, setActorChangePrompt] = useState<{
+    frameId: string;
+    actorId: string;
+    action: "add" | "remove";
+    actorName: string;
+  } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -676,9 +687,11 @@ export function StoryboardCanvas() {
                                   className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setFrames(prev => prev.map(f =>
-                                      f.id === frame.id ? { ...f, actors: f.actors.filter(a => a !== actorId) } : f
-                                    ));
+                                    const actor = actorRoster.find(a => a.id === actorId);
+                                    setActorChangePrompt({
+                                      frameId: frame.id, actorId, action: "remove",
+                                      actorName: actor?.name ?? "this actor",
+                                    });
                                   }}
                                 >
                                   <X className="w-2.5 h-2.5 text-destructive" />
@@ -709,9 +722,10 @@ export function StoryboardCanvas() {
                               className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setFrames(prev => prev.map(f =>
-                                  f.id === frame.id ? { ...f, actors: [...f.actors, actor.id] } : f
-                                ));
+                                setActorChangePrompt({
+                                  frameId: frame.id, actorId: actor.id, action: "add",
+                                  actorName: actor.name,
+                                });
                               }}
                             >
                               <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
@@ -847,6 +861,60 @@ export function StoryboardCanvas() {
           </svg>
         </div>
       </div>
+
+      {/* Actor change confirmation dialog */}
+      <AlertDialog open={!!actorChangePrompt} onOpenChange={(open) => { if (!open) setActorChangePrompt(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actorChangePrompt?.action === "add" ? "Add Actor" : "Remove Actor"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actorChangePrompt?.action === "add"
+                ? `Adding ${actorChangePrompt?.actorName} to this frame. Would you like to regenerate the image to include them?`
+                : `Removing ${actorChangePrompt?.actorName} from this frame. Would you like to regenerate the image without them?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2 sm:gap-0">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              onClick={() => {
+                if (!actorChangePrompt) return;
+                const { frameId, actorId, action } = actorChangePrompt;
+                setFrames(prev => prev.map(f => {
+                  if (f.id !== frameId) return f;
+                  return action === "add"
+                    ? { ...f, actors: [...f.actors, actorId] }
+                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
+                }));
+                setActorChangePrompt(null);
+              }}
+            >
+              {actorChangePrompt?.action === "add" ? "Add Only" : "Remove Only"}
+            </AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                if (!actorChangePrompt) return;
+                const { frameId, actorId, action, actorName } = actorChangePrompt;
+                setFrames(prev => prev.map(f => {
+                  if (f.id !== frameId) return f;
+                  return action === "add"
+                    ? { ...f, actors: [...f.actors, actorId] }
+                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
+                }));
+                toast.info(`Regenerating image ${action === "add" ? "with" : "without"} ${actorName}...`, {
+                  description: "AI image regeneration will be available soon.",
+                });
+                setActorChangePrompt(null);
+              }}
+            >
+              <Sparkles className="w-4 h-4 mr-1" />
+              {actorChangePrompt?.action === "add" ? "Add & Regenerate" : "Remove & Regenerate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
