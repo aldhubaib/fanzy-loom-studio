@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3,
 } from "lucide-react";
+import { FrameContextMenu } from "./FrameContextMenu";
 
 import frame1 from "@/assets/storyboard/frame-1.jpg";
 import frame2 from "@/assets/storyboard/frame-2.jpg";
@@ -86,8 +87,46 @@ export function StoryboardCanvas() {
 
   const handleMouseUp = useCallback(() => {
     setPanning(false);
-    setDragging(null);
-  }, []);
+    if (dragging) {
+      // Snap-to-reorder: find if dragged frame overlaps another frame's position
+      const draggedIdx = frames.findIndex(f => f.id === dragging);
+      const draggedFrame = frames[draggedIdx];
+      if (draggedFrame) {
+        const dragCenterX = draggedFrame.x + FRAME_W / 2;
+        const dragCenterY = draggedFrame.y + FRAME_H / 2;
+        let closestIdx = -1;
+        let closestDist = Infinity;
+        frames.forEach((f, i) => {
+          if (i === draggedIdx) return;
+          const cx = f.x + FRAME_W / 2;
+          const cy = f.y + FRAME_H / 2;
+          const dist = Math.hypot(dragCenterX - cx, dragCenterY - cy);
+          if (dist < FRAME_W * 0.6 && dist < closestDist) {
+            closestDist = dist;
+            closestIdx = i;
+          }
+        });
+        if (closestIdx >= 0) {
+          // Swap positions in array order, then auto-layout
+          setFrames(prev => {
+            const arr = [...prev];
+            const [removed] = arr.splice(draggedIdx, 1);
+            arr.splice(closestIdx, 0, removed);
+            // Re-layout after reorder
+            const cols = 3;
+            const gapX = 340;
+            const gapY = 280;
+            return arr.map((f, i) => ({
+              ...f,
+              x: 80 + (i % cols) * gapX,
+              y: 80 + Math.floor(i / cols) * gapY,
+            }));
+          });
+        }
+      }
+      setDragging(null);
+    }
+  }, [dragging, frames]);
 
   const startFrameDrag = useCallback((e: React.MouseEvent, frame: FrameData) => {
     if (tool !== "select") return;
@@ -144,6 +183,35 @@ export function StoryboardCanvas() {
     }]);
     setSelectedFrame(newId);
   }, [frames]);
+
+  const moveFrame = useCallback((fromIdx: number, toIdx: number) => {
+    setFrames(prev => {
+      const arr = [...prev];
+      const [removed] = arr.splice(fromIdx, 1);
+      arr.splice(toIdx, 0, removed);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+  }, []);
+
+  const duplicateFrame = useCallback((idx: number) => {
+    setFrames(prev => {
+      const dup = { ...prev[idx], id: `f${Date.now()}` };
+      const arr = [...prev];
+      arr.splice(idx + 1, 0, dup);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+  }, []);
+
+  const deleteFrame = useCallback((idx: number) => {
+    setFrames(prev => {
+      const arr = prev.filter((_, i) => i !== idx);
+      const cols = 3, gapX = 340, gapY = 280;
+      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
+    });
+    setSelectedFrame(null);
+  }, []);
 
   // Fit on mount
   useEffect(() => {
@@ -285,59 +353,70 @@ export function StoryboardCanvas() {
 
           {/* Frames */}
           {frames.map((frame, idx) => (
-            <div
+            <FrameContextMenu
               key={frame.id}
-              className={cn(
-                "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
-                selectedFrame === frame.id
-                  ? "border-primary shadow-lg shadow-primary/20"
-                  : "border-border hover:border-muted-foreground/40",
-                dragging === frame.id && "opacity-90",
-              )}
-              style={{
-                left: frame.x,
-                top: frame.y,
-                width: FRAME_W,
-              }}
-              onMouseDown={(e) => startFrameDrag(e, frame)}
+              frameIndex={idx}
+              totalFrames={frames.length}
+              onMoveLeft={() => moveFrame(idx, idx - 1)}
+              onMoveRight={() => moveFrame(idx, idx + 1)}
+              onMoveToStart={() => moveFrame(idx, 0)}
+              onMoveToEnd={() => moveFrame(idx, frames.length - 1)}
+              onDuplicate={() => duplicateFrame(idx)}
+              onDelete={() => deleteFrame(idx)}
             >
-              {/* Frame number badge */}
-              <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                {idx + 1}
-              </div>
-              {/* Shot type badge */}
-              <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                {frame.shot}
-              </div>
-
-              {/* Image */}
-              <div className="w-full h-[150px] bg-secondary overflow-hidden">
-                {frame.image ? (
-                  <img
-                    src={frame.image}
-                    alt={frame.description}
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                    <Plus className="w-8 h-8" />
-                  </div>
+              <div
+                className={cn(
+                  "absolute rounded-xl overflow-hidden border-2 transition-shadow duration-150 select-none group",
+                  selectedFrame === frame.id
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-muted-foreground/40",
+                  dragging === frame.id && "opacity-90",
                 )}
-              </div>
-
-              {/* Info */}
-              <div className="bg-card p-2.5 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
-                  <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
+                style={{
+                  left: frame.x,
+                  top: frame.y,
+                  width: FRAME_W,
+                }}
+                onMouseDown={(e) => startFrameDrag(e, frame)}
+              >
+                {/* Frame number badge */}
+                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {idx + 1}
                 </div>
-                <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
-                  {frame.description}
-                </p>
+                {/* Shot type badge */}
+                <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  {frame.shot}
+                </div>
+
+                {/* Image */}
+                <div className="w-full h-[150px] bg-secondary overflow-hidden">
+                  {frame.image ? (
+                    <img
+                      src={frame.image}
+                      alt={frame.description}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                      <Plus className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="bg-card p-2.5 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
+                    <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
+                  </div>
+                  <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
+                    {frame.description}
+                  </p>
+                </div>
               </div>
-            </div>
+            </FrameContextMenu>
           ))}
         </div>
 
