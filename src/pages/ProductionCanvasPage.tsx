@@ -1013,7 +1013,11 @@ export default function ProductionCanvasPage() {
             })}
 
             {/* Connection lines */}
-            <svg className="absolute inset-0 w-[5000px] h-[5000px]" style={{ pointerEvents: "none" }}>
+            <svg
+              className="absolute pointer-events-none overflow-visible"
+              style={{ left: -2500, top: -2500, width: 10000, height: 10000 }}
+              viewBox="-2500 -2500 10000 10000"
+            >
               {connectors.map(c => {
                 const dx = Math.abs(c.x2 - c.x1);
                 const curve = Math.min(200, Math.max(30, dx * 0.35));
