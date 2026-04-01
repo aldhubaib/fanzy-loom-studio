@@ -1004,7 +1004,7 @@ export default function ProductionCanvasPage() {
               <h2 className="text-sm font-bold text-foreground">{drawerTitle}</h2>
             </div>
             <button onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-              <X className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-4">
