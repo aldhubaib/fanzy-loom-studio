@@ -1,4 +1,5 @@
 import React from "react";
+import { FormattingToolbar } from "./FormattingToolbar";
 
 interface ScriptElement {
   type: "scene-heading" | "action" | "character" | "dialogue" | "parenthetical";
@@ -8,6 +9,8 @@ interface ScriptElement {
 
 interface ScreenplayEditorProps {
   sceneRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
+  focusMode: boolean;
+  onFocusModeChange: (v: boolean) => void;
 }
 
 const scriptElements: ScriptElement[] = [
@@ -49,7 +52,13 @@ const scriptElements: ScriptElement[] = [
   { type: "action", text: "Marlowe spots Vivian across the room, sitting in a booth with a MAN he doesn't recognize. She's laughing — a different woman than the one in his office. Marlowe watches, expressionless, and finishes his drink." },
 ];
 
-export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
+export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange }: ScreenplayEditorProps) {
+  const [activeElement, setActiveElement] = React.useState<"scene-heading" | "action" | "character" | "dialogue" | "parenthetical" | "transition" | "note">("action");
+  const [fontSize, setFontSize] = React.useState(14);
+
+  // Track current scene for dividers
+  let currentScene = 0;
+
   return (
     <div className="flex-1 min-w-0 flex flex-col h-full bg-[hsl(240,6%,10%)]">
       {/* Title area */}
@@ -66,10 +75,24 @@ export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
         </p>
       </div>
 
+      {/* Formatting Toolbar */}
+      <FormattingToolbar
+        activeElement={activeElement}
+        onElementChange={setActiveElement}
+        focusMode={focusMode}
+        onFocusModeChange={onFocusModeChange}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+      />
+
       {/* Script body */}
       <div className="flex-1 overflow-y-auto px-12 py-8">
-        <div className="max-w-2xl mx-auto space-y-1">
+        <div className="max-w-2xl mx-auto space-y-1" style={{ fontSize: `${fontSize}px` }}>
           {scriptElements.map((el, i) => {
+            const isNewScene = el.sceneId !== undefined;
+            const showDivider = isNewScene && currentScene > 0;
+            if (isNewScene) currentScene = el.sceneId!;
+
             const refProps = el.sceneId
               ? { ref: (node: HTMLDivElement | null) => { sceneRefs.current[el.sceneId!] = node; } }
               : {};
@@ -77,16 +100,26 @@ export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
             switch (el.type) {
               case "scene-heading":
                 return (
-                  <div key={i} {...refProps} className="pt-8 first:pt-0 pb-2 cursor-text">
-                    <p className="font-mono text-sm font-bold uppercase text-primary tracking-wider">
-                      {el.text}
-                    </p>
-                  </div>
+                  <React.Fragment key={i}>
+                    {showDivider && (
+                      <div className="flex items-center gap-3 pt-6 pb-2">
+                        <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">
+                          Scene {el.sceneId}
+                        </span>
+                        <div className="flex-1 h-px bg-border" />
+                      </div>
+                    )}
+                    <div {...refProps} className="pt-8 first:pt-0 pb-2 cursor-text rounded px-3 -mx-3 bg-[hsl(240,5%,12%)]">
+                      <p className="font-mono font-bold uppercase text-primary tracking-wider leading-relaxed">
+                        {el.text}
+                      </p>
+                    </div>
+                  </React.Fragment>
                 );
               case "action":
                 return (
                   <div key={i} className="py-1 cursor-text">
-                    <p className="font-mono text-sm text-foreground/90 leading-relaxed">
+                    <p className="font-mono text-foreground/90 leading-relaxed">
                       {el.text}
                     </p>
                   </div>
@@ -94,7 +127,7 @@ export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
               case "character":
                 return (
                   <div key={i} className="pt-4 pb-0 cursor-text">
-                    <p className="font-mono text-sm font-bold uppercase text-primary text-center">
+                    <p className="font-mono font-bold uppercase text-primary text-center">
                       {el.text}
                     </p>
                   </div>
@@ -102,7 +135,7 @@ export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
               case "dialogue":
                 return (
                   <div key={i} className="mx-auto w-[60%] pb-1 cursor-text">
-                    <p className="font-mono text-sm text-foreground/90 text-center leading-relaxed">
+                    <p className="font-mono text-foreground/90 text-center leading-relaxed">
                       {el.text}
                     </p>
                   </div>
@@ -110,7 +143,7 @@ export function ScreenplayEditor({ sceneRefs }: ScreenplayEditorProps) {
               case "parenthetical":
                 return (
                   <div key={i} className="mx-auto w-[60%] cursor-text">
-                    <p className="font-mono text-sm italic text-muted-foreground text-center">
+                    <p className="font-mono italic text-muted-foreground text-center">
                       {el.text}
                     </p>
                   </div>
