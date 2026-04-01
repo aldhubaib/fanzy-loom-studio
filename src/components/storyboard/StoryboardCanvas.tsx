@@ -38,7 +38,7 @@ const initialFrames: FrameData[] = [
 ];
 
 const FRAME_W = 280;
-const FRAME_H = 230;
+const FRAME_H = 280;
 const PORT_RADIUS = 6;
 
 const initialConnections: Connection[] = [
