@@ -1038,8 +1038,9 @@ export default function ProductionCanvasPage() {
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }
