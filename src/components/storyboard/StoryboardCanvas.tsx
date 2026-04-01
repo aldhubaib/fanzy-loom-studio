@@ -198,7 +198,7 @@ export function StoryboardCanvas() {
     const minX = Math.min(...frames.map(f => f.x));
     const minY = Math.min(...frames.map(f => f.y));
     const maxX = Math.max(...frames.map(f => f.x + FRAME_W));
-    const maxY = Math.max(...frames.map(f => f.y + FRAME_H));
+    const maxY = Math.max(...frames.map(f => f.y + FRAME_H_WITH_THUMB));
     const contentW = maxX - minX + 100;
     const contentH = maxY - minY + 100;
     const newZoom = Math.min(rect.width / contentW, rect.height / contentH, 1.5);
