@@ -21,7 +21,7 @@ export const mockProjects: Project[] = [
     characters: 4,
     locations: 3,
     pipelineComplete: 3,
-    pipelineTotal: 7,
+    pipelineTotal: 8,
     editedAgo: "5h ago",
     gradient: "from-cyan-900 via-blue-900/70 to-slate-900",
   },
