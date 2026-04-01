@@ -271,19 +271,17 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         </button>
       </div>
 
-      {/* Preview */}
-      <div className="px-4 pt-3">
-        <div className="w-full h-[140px] rounded-lg overflow-hidden border border-border bg-secondary">
-          {frame.image ? (
-            <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 text-xs">No image</div>
-          )}
-        </div>
-      </div>
-
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+        {/* Preview */}
+        <div className="w-full rounded-lg overflow-hidden border border-border bg-secondary">
+          {frame.image ? (
+            <img src={frame.image} alt={frame.description} className="w-full object-cover max-h-[200px]" />
+          ) : (
+            <div className="w-full h-[140px] flex items-center justify-center text-muted-foreground/40 text-xs">No image</div>
+          )}
+        </div>
+
         {/* Scene */}
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Scene</Label>
@@ -297,8 +295,13 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
           <Label className="text-xs text-muted-foreground">Scene Prompt</Label>
           <Textarea
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="min-h-[80px] text-sm resize-none"
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              // Auto-expand
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
+            className="min-h-[60px] text-sm resize-none overflow-hidden"
             placeholder="Describe the scene for AI generation..."
           />
         </div>
