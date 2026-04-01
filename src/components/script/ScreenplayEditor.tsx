@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover, PopoverTrigger, PopoverContent,
+} from "@/components/ui/popover";
 
 // Character thumbnail data
 const characterThumbnails: Record<string, { initials: string; color: string }> = {
