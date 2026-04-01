@@ -738,7 +738,8 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
 export function CastingEditor({ projectId }: { projectId?: string }) {
   const [characters, setCharacters] = useState<Character[]>(initialCharacters);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
-
+  const [galleryOpen, setGalleryOpen] = useState<string | null>(null);
+  const [castLightbox, setCastLightbox] = useState<{ charId: string; index: number } | null>(null);
   const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
 
   const addCharacter = useCallback(() => {
