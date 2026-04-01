@@ -33,7 +33,7 @@ export const mockProjects: Project[] = [
     characters: 3,
     locations: 4,
     pipelineComplete: 1,
-    pipelineTotal: 7,
+    pipelineTotal: 8,
     editedAgo: "1d ago",
     gradient: "from-emerald-900 via-green-900/60 to-stone-900",
   },
