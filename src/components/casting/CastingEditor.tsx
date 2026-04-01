@@ -501,12 +501,30 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
   const [showErrors, setShowErrors] = useState(false);
   const [customModalOpen, setCustomModalOpen] = useState(false);
   const [customUploads, setCustomUploads] = useState<Record<string, string>>({});
+  const [customGenerateCount, setCustomGenerateCount] = useState(4);
+  const [customGenerating, setCustomGenerating] = useState(false);
+  const [customResults, setCustomResults] = useState<GeneratedPortrait[]>([]);
   const customSlots = [
     { key: "face", label: "Face / Close-up" },
     { key: "threequarter", label: "3/4 Angle" },
     { key: "body", label: "Full Body" },
   ];
   const allCustomSlotsFilled = customSlots.every(s => !!customUploads[s.key]);
+
+  const handleCustomGenerate = () => {
+    setCustomGenerating(true);
+    // Simulate generation with the uploaded images
+    setTimeout(() => {
+      const results: GeneratedPortrait[] = Array.from({ length: customGenerateCount }, (_, i) => ({
+        id: `custom-${Date.now()}-${i}`,
+        src: customUploads[["face", "threequarter", "body"][i % 3]],
+        description: `Generated variant ${i + 1}`,
+      }));
+      setCustomResults(results);
+      setCustomGenerating(false);
+      setCustomModalOpen(false);
+    }, 1500);
+  };
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
