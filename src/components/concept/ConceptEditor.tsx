@@ -50,15 +50,17 @@ function VisualCardLabel({ label, selected }: { label: string; selected: boolean
 }
 
 // Picker trigger button
-function PickerButton({ label, value, selectedImg, emoji, onClick }: { label: string; value: string; selectedImg?: string; emoji?: string; onClick: () => void }) {
+function PickerButton({ label, value, selectedImg, emoji, onClick, hasError }: { label: string; value: string; selectedImg?: string; emoji?: string; onClick: () => void; hasError?: boolean }) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all",
-        value
-          ? "bg-card border-primary/30 text-foreground"
-          : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+        hasError
+          ? "bg-card border-destructive/60 text-destructive animate-[shake_0.3s_ease-in-out]"
+          : value
+            ? "bg-card border-primary/30 text-foreground"
+            : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
       )}
     >
       {selectedImg && (
@@ -70,12 +72,12 @@ function PickerButton({ label, value, selectedImg, emoji, onClick }: { label: st
         </div>
       )}
       {!selectedImg && !emoji && !value && (
-        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
-          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className={cn("w-7 h-7 rounded-md flex items-center justify-center", hasError ? "bg-destructive/10" : "bg-secondary")}>
+          <Plus className={cn("w-3.5 h-3.5", hasError ? "text-destructive" : "text-muted-foreground")} />
         </div>
       )}
       <div className="text-left">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none mb-0.5">{label}</p>
+        <p className={cn("text-[10px] uppercase tracking-wider leading-none mb-0.5", hasError ? "text-destructive/70" : "text-muted-foreground")}>{label}</p>
         <p className="text-sm font-medium">{value || "Choose..."}</p>
       </div>
       <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
