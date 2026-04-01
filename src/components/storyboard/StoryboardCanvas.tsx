@@ -284,21 +284,15 @@ export function StoryboardCanvas() {
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, []);
 
-  // Get dynamic frame height based on incoming connections
-  const getFrameH = useCallback((frameId: string) => {
-    const hasIncoming = connections.some(c => c.to === frameId);
-    return hasIncoming ? FRAME_H_WITH_THUMB : FRAME_H_BASE;
-  }, [connections]);
-
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
-    const h = getFrameH(frameId);
+    const h = getFrameHeight(frameId);
     return {
       x: side === "right" ? f.x + FRAME_W : f.x,
       y: f.y + h / 2,
     };
-  }, [frames, getFrameH]);
+  }, [frames, getFrameHeight]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
