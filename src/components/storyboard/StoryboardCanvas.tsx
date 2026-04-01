@@ -432,8 +432,7 @@ export function StoryboardCanvas() {
           <svg className="absolute inset-0 w-[4000px] h-[4000px]" style={{ pointerEvents: "none" }}>
             {connectors.map(c => {
               const dx = Math.abs(c.x2 - c.x1);
-              const dy = Math.abs(c.y2 - c.y1);
-              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
+              const curvature = Math.min(140, Math.max(18, dx * 0.35));
               return (
                 <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
                   <path
