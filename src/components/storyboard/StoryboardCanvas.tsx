@@ -791,7 +791,7 @@ export function StoryboardCanvas() {
                 {/* Info */}
                 <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
+                    <span className="text-[10px] font-semibold text-primary">SC {sceneNumber}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                   </div>
 
