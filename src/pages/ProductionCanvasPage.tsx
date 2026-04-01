@@ -955,7 +955,7 @@ export default function ProductionCanvasPage() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div
-                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair"
+                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair pointer-events-auto"
                                 style={{
                                   width: size, height: size,
                                   borderWidth: borderW, borderStyle: "solid",
