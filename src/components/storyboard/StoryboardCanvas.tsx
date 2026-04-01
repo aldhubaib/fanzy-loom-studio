@@ -706,19 +706,24 @@ export function StoryboardCanvas() {
                 </div>
 
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: IMAGE_H }}>
-                  {frame.image ? (
-                    <img
-                      src={frame.image}
-                      alt={frame.description}
-                      className="w-full h-full object-cover"
-                      draggable={false}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                      <Plus className="w-8 h-8" />
-                    </div>
-                  )}
+                  {(() => {
+                    const displayImage = showLocations
+                      ? (frame.location ? locationImages[frame.location] : undefined)
+                      : frame.image;
+                    return displayImage ? (
+                      <img
+                        src={displayImage}
+                        alt={showLocations ? (frame.location ?? "No location") : frame.description}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                        {showLocations ? <MapPin className="w-8 h-8" /> : <Plus className="w-8 h-8" />}
+                      </div>
+                    );
+                  })()}
                   {/* Image count overlay */}
                   {frame.generatedImages.length > 0 && (
                     <button
