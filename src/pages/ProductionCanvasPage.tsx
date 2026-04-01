@@ -1048,6 +1048,7 @@ export default function ProductionCanvasPage() {
             {frames.map(f => <rect key={f.id} x={f.x} y={f.y} width={FRAME_W} height={FRAME_H} rx={4} fill={selected?.id === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={selected?.id === f.id ? 0.6 : 0.2} />)}
             {castNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={4} fill="hsl(190 80% 50%)" fillOpacity={0.3} />)}
             {locationNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={4} fill="hsl(150 60% 45%)" fillOpacity={0.3} />)}
+            {scriptNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={SCRIPT_W} height={SCRIPT_H} rx={4} fill="hsl(280 60% 55%)" fillOpacity={0.3} />)}
           </svg>
         </div>
       </div>
