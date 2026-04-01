@@ -273,6 +273,14 @@ export function StoryboardCanvas() {
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
     }
+    if (draggingNode) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = (e.clientX - rect.left - pan.x) / zoom - dragOffset.x;
+      const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
+      setCastNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
+      setLocationNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
+    }
   }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
