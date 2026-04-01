@@ -50,7 +50,7 @@ const actorRoster: Actor[] = [
 const initialFrames: FrameData[] = [
   {
     id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE",
-    description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"],
+    description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office",
     generatedImages: [
       { id: "g1a", src: frame1, description: "Marlowe at desk — wide establishing", actors: ["a1"] },
       { id: "g1b", src: frame4, description: "Marlowe at desk — close-up on face", actors: ["a1"] },
@@ -66,7 +66,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED",
-    description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"],
+    description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], location: "Street",
     generatedImages: [
       { id: "g2a", src: frame2, description: "Vivian in alley — medium shot", actors: ["a2"] },
       { id: "g2b", src: frame3, description: "Vivian enters the jazz club", actors: ["a2", "a3"] },
@@ -75,12 +75,12 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE",
-    description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"],
+    description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club",
     generatedImages: [], selectedImageId: null,
   },
   {
     id: "f4", x: 80, y: 360, image: frame4, scene: "SC 2", shot: "CU",
-    description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"],
+    description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office",
     generatedImages: [
       { id: "g4a", src: frame4, description: "Marlowe with photo — close-up", actors: ["a1"] },
       { id: "g4b", src: frame1, description: "Marlowe with photo — wide shot", actors: ["a1"] },
@@ -97,7 +97,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f5", x: 420, y: 360, image: frame5, scene: "SC 3", shot: "WIDE",
-    description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"],
+    description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge",
     generatedImages: [
       { id: "g5a", src: frame5, description: "Two silhouettes on bridge — wide", actors: ["a1", "a2"] },
       { id: "g5b", src: frame1, description: "Marlowe alone on bridge", actors: ["a1"] },
@@ -110,7 +110,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f6", x: 760, y: 360, image: frame6, scene: "SC 3", shot: "DYNAMIC",
-    description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"],
+    description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street",
     generatedImages: [], selectedImageId: null,
   },
 ];
