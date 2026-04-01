@@ -314,12 +314,11 @@ export function StoryboardCanvas() {
   const getPortPos = useCallback((frameId: string, side: "left" | "right") => {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
-    const h = getFrameHeight(frameId);
     return {
       x: side === "right" ? f.x + FRAME_W : f.x,
-      y: f.y + h / 2,
+      y: f.y + PORT_Y,
     };
-  }, [frames, getFrameHeight]);
+  }, [frames]);
 
   // Connector lines from connections state
   const connectors = connections.map(c => {
