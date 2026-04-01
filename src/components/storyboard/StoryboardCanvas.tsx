@@ -284,7 +284,7 @@ export function StoryboardCanvas() {
     const f = frames.find(fr => fr.id === frameId);
     if (!f) return { x: 0, y: 0 };
     return {
-      x: side === "right" ? f.x + FRAME_W + 7 : f.x - 7,
+      x: side === "right" ? f.x + FRAME_W + 9 : f.x - 9,
       y: f.y + FRAME_H / 2,
     };
   }, [frames]);
@@ -399,46 +399,43 @@ export function StoryboardCanvas() {
         >
           {/* Connectors SVG */}
           <svg className="absolute inset-0 w-[4000px] h-[4000px]" style={{ pointerEvents: "none" }}>
-            <defs>
-              <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.6" />
-              </marker>
-              <marker id="arrowhead-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                <polygon points="0 0, 8 3, 0 6" fill="hsl(var(--primary))" opacity="0.9" />
-              </marker>
-            </defs>
-            {connectors.map(c => (
-              <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
-                {/* Invisible fat hit area */}
-                <path
-                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
-                  stroke="transparent"
-                  strokeWidth="14"
-                  fill="none"
-                />
-                <path
-                  d={`M ${c.x1} ${c.y1} C ${c.x1 + 60} ${c.y1}, ${c.x2 - 60} ${c.y2}, ${c.x2} ${c.y2}`}
-                  stroke="hsl(var(--primary))"
-                  strokeOpacity="0.35"
-                  strokeWidth="2"
-                  fill="none"
-                  markerEnd="url(#arrowhead)"
-                  className="hover:stroke-[hsl(var(--destructive))] transition-colors"
-                />
-              </g>
-            ))}
+            {connectors.map(c => {
+              const dx = Math.abs(c.x2 - c.x1);
+              const dy = Math.abs(c.y2 - c.y1);
+              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
+              return (
+                <g key={c.id} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={() => deleteConnection(c.from, c.to)}>
+                  <path
+                    d={`M ${c.x1} ${c.y1} C ${c.x1 + curvature} ${c.y1}, ${c.x2 - curvature} ${c.y2}, ${c.x2} ${c.y2}`}
+                    stroke="transparent"
+                    strokeWidth="16"
+                    fill="none"
+                  />
+                  <path
+                    d={`M ${c.x1} ${c.y1} C ${c.x1 + curvature} ${c.y1}, ${c.x2 - curvature} ${c.y2}, ${c.x2} ${c.y2}`}
+                    stroke="hsl(var(--primary))"
+                    strokeOpacity="0.45"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </g>
+              );
+            })}
             {/* Active connecting wire */}
             {connectingFrom && (() => {
               const p = getPortPos(connectingFrom, "right");
+              const dx = Math.abs(connectingMouse.x - p.x);
+              const curvature = Math.max(60, Math.min(dx * 0.4, 200));
               return (
                 <path
-                  d={`M ${p.x} ${p.y} C ${p.x + 60} ${p.y}, ${connectingMouse.x - 60} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
+                  d={`M ${p.x} ${p.y} C ${p.x + curvature} ${p.y}, ${connectingMouse.x - curvature} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`}
                   stroke="hsl(var(--primary))"
                   strokeOpacity="0.7"
-                  strokeWidth="2"
-                  strokeDasharray="6 4"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray="8 6"
                   fill="none"
-                  markerEnd="url(#arrowhead-active)"
                 />
               );
             })()}
@@ -474,13 +471,13 @@ export function StoryboardCanvas() {
               >
                 {/* Left port (input) */}
                 <div
-                  className="absolute -left-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
                   onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
                 {/* Right port (output) */}
                 <div
-                  className="absolute -right-[7px] top-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background hover:bg-primary hover:scale-125 transition-all cursor-crosshair"
+                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
                   onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
                 />
 
