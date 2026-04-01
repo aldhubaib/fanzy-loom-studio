@@ -12,6 +12,7 @@ import {
 import { mockProjects } from "@/data/mockProjects";
 
 const pipelineStages = [
+  { title: "Concept", slug: "concept", icon: Lightbulb },
   { title: "Script", slug: "script", icon: FileText },
   { title: "Storyboard", slug: "storyboard", icon: LayoutGrid },
   { title: "Casting", slug: "casting", icon: Users },
