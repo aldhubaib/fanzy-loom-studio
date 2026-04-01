@@ -722,9 +722,10 @@ export function StoryboardCanvas() {
                               className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setFrames(prev => prev.map(f =>
-                                  f.id === frame.id ? { ...f, actors: [...f.actors, actor.id] } : f
-                                ));
+                                setActorChangePrompt({
+                                  frameId: frame.id, actorId: actor.id, action: "add",
+                                  actorName: actor.name,
+                                });
                               }}
                             >
                               <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
