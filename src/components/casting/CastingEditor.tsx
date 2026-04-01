@@ -741,6 +741,113 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
                 </div>
               </div>
             </div>
+           /* Custom tab */
+           <div className="space-y-5">
+             {/* Module 1: AI Character Sheet */}
+             <div className="rounded-xl border border-border bg-secondary/20 p-4">
+               <h3 className="text-sm font-bold text-foreground">AI Character Sheet</h3>
+               <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">Upload one photo — AI generates all angles</p>
+
+               <div className="flex gap-3 items-center mb-4">
+                 {customPortraits.length > 0 ? (
+                   <div className="relative w-16 h-20 rounded-lg overflow-hidden shrink-0 border border-border">
+                     <img src={customPortraits[0]} alt="Reference" className="w-full h-full object-cover" />
+                     <button
+                       onClick={() => setCustomPortraits([])}
+                       className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 flex items-center justify-center"
+                     >
+                       <X className="w-2.5 h-2.5 text-white" />
+                     </button>
+                   </div>
+                 ) : (
+                   <label className="w-16 h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors shrink-0">
+                     <Upload className="w-4 h-4 text-muted-foreground mb-0.5" />
+                     <span className="text-[7px] text-muted-foreground">Upload</span>
+                     <input
+                       type="file"
+                       accept="image/*"
+                       className="hidden"
+                       onChange={(e) => {
+                         const file = e.target.files?.[0];
+                         if (!file) return;
+                         const reader = new FileReader();
+                         reader.onload = (ev) => {
+                           const src = ev.target?.result as string;
+                           setCustomPortraits([src]);
+                           onChange({ ...character, portrait: src });
+                         };
+                         reader.readAsDataURL(file);
+                         e.target.value = "";
+                       }}
+                     />
+                   </label>
+                 )}
+                 <Button
+                   size="sm"
+                   className="flex-1 gap-1.5 h-10"
+                   disabled={customPortraits.length === 0}
+                 >
+                   <Sparkles className="w-3.5 h-3.5" />
+                   Generate Character Sheet
+                 </Button>
+               </div>
+
+               {/* Generated views */}
+               <div className="grid grid-cols-4 gap-2">
+                 {["Close-up", "3/4 Angle", "Full Body", "Side Profile"].map(view => (
+                   <div key={view} className="rounded-lg border border-border bg-card aspect-[3/4] flex flex-col items-center justify-center gap-1">
+                     <User className="w-5 h-5 text-muted-foreground/20" />
+                     <span className="text-[8px] text-muted-foreground font-medium">{view}</span>
+                   </div>
+                 ))}
+               </div>
+             </div>
+
+             {/* Module 2: Manual Upload */}
+             <div className="rounded-xl border border-border bg-secondary/20 p-4">
+               <h3 className="text-sm font-bold text-foreground">Manual Upload</h3>
+               <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">Upload specific views yourself</p>
+
+               <div className="grid grid-cols-4 gap-2">
+                 {["Close-up", "3/4 Angle", "Full Body", "Side Profile"].map(view => {
+                   const key = `manual-${view}`;
+                   const img = (character as any)[`custom_${view}`] as string | undefined;
+                   return img ? (
+                     <div key={key} className="relative rounded-lg overflow-hidden aspect-[3/4] group border border-border">
+                       <img src={img} alt={view} className="w-full h-full object-cover" />
+                       <button
+                         onClick={() => onChange({ ...character, [`custom_${view}`]: undefined } as any)}
+                         className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                       >
+                         <X className="w-2.5 h-2.5 text-white" />
+                       </button>
+                       <p className="absolute bottom-0 inset-x-0 text-[7px] text-center py-0.5 bg-black/60 text-white font-medium">{view}</p>
+                     </div>
+                   ) : (
+                     <label key={key} className="rounded-lg aspect-[3/4] border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors bg-card">
+                       <Upload className="w-4 h-4 text-muted-foreground mb-1" />
+                       <span className="text-[7px] text-muted-foreground text-center leading-tight font-medium">{view}</span>
+                       <input
+                         type="file"
+                         accept="image/*"
+                         className="hidden"
+                         onChange={(e) => {
+                           const file = e.target.files?.[0];
+                           if (!file) return;
+                           const reader = new FileReader();
+                           reader.onload = (ev) => {
+                             onChange({ ...character, [`custom_${view}`]: ev.target?.result as string } as any);
+                           };
+                           reader.readAsDataURL(file);
+                           e.target.value = "";
+                         }}
+                       />
+                     </label>
+                   );
+                 })}
+               </div>
+             </div>
+           </div>
           )}
 
           <Separator />
