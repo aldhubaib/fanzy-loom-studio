@@ -281,6 +281,7 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
             }
           })}
         </div>
+        </div>
       </div>
 
       {/* Status bar */}
