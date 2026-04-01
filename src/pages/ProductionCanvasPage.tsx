@@ -990,7 +990,7 @@ export default function ProductionCanvasPage() {
 
       {/* Context-sensitive drawer */}
       {showDrawer && (
-        <div className="h-full border-l border-border bg-card flex flex-col animate-in slide-in-from-right duration-200" style={{ width: DRAWER_W }}>
+        <div className="h-full border-l border-border bg-card flex flex-col animate-in slide-in-from-right duration-200 z-50 relative shrink-0" style={{ width: DRAWER_W }}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
             <div className="flex items-center gap-2">
               {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
