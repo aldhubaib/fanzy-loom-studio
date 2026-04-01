@@ -154,7 +154,7 @@ export function StoryboardCanvas() {
         frames.forEach((f, i) => {
           if (i === draggedIdx) return;
           const cx = f.x + FRAME_W / 2;
-          const cy = f.y + FRAME_H / 2;
+          const cy = f.y + FRAME_H_BASE / 2;
           const dist = Math.hypot(dragCenterX - cx, dragCenterY - cy);
           if (dist < FRAME_W * 0.6 && dist < closestDist) {
             closestDist = dist;
