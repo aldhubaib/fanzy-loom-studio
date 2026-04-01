@@ -804,35 +804,38 @@ export function StoryboardCanvas() {
                 <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">SC {sceneNumber}</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
-                      {frame.location && locationImages[frame.location] && (
-                        <img src={locationImages[frame.location]} alt={frame.location} className="w-8 h-8 rounded-md object-cover border border-border" loading="lazy" />
-                      )}
-                    </div>
+                    <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                   </div>
 
-                  {/* Actors (read-only) */}
-                  {frame.actors.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <TooltipProvider delayDuration={200}>
-                        {frame.actors.map(actorId => {
-                          const actor = actorRoster.find(a => a.id === actorId);
-                          if (!actor) return null;
-                          return (
-                            <Tooltip key={actor.id}>
-                              <TooltipTrigger asChild>
-                                <div className="w-6 h-6 rounded-full overflow-hidden border-[1.5px] border-border">
-                                  <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </TooltipProvider>
-                    </div>
-                  )}
+                  {/* Actors + Location */}
+                  <div className="flex items-center gap-1">
+                    <TooltipProvider delayDuration={200}>
+                      {frame.actors.map(actorId => {
+                        const actor = actorRoster.find(a => a.id === actorId);
+                        if (!actor) return null;
+                        return (
+                          <Tooltip key={actor.id}>
+                            <TooltipTrigger asChild>
+                              <div className="w-6 h-6 rounded-full overflow-hidden border-[1.5px] border-border">
+                                <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                      {frame.location && locationImages[frame.location] && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-6 h-6 rounded-md overflow-hidden border-[1.5px] border-border ml-auto">
+                              <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} loading="lazy" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">{frame.location}</TooltipContent>
+                        </Tooltip>
+                      )}
+                    </TooltipProvider>
+                  </div>
 
                   <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
                     {frame.description}
