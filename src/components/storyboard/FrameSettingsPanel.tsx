@@ -332,43 +332,25 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
 
         <Separator />
 
-        {/* Camera / Shot Type — Visual Grid */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <Camera className="w-3 h-3" /> Camera / Shot Type
-          </Label>
-          <div className="grid grid-cols-5 gap-1.5">
-            {shotTypes.map(s => (
-              <VisualOption
-                key={s.value}
-                label={s.label}
-                img={s.img}
-                selected={shot === s.value}
-                onClick={() => setShot(s.value)}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Camera / Shot Type — Picker Button */}
+        <PickerButton
+          label="Camera / Shot Type"
+          value={shotTypes.find(s => s.value === shot)?.label || ""}
+          selectedImg={shotTypes.find(s => s.value === shot)?.img}
+          icon={Camera}
+          onClick={() => setShotOpen(true)}
+        />
 
         <Separator />
 
-        {/* Mood / Lighting — Visual Grid */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <Palette className="w-3 h-3" /> Mood / Lighting
-          </Label>
-          <div className="grid grid-cols-4 gap-1.5">
-            {moodOptions.map(m => (
-              <VisualOption
-                key={m.value}
-                label={m.label}
-                img={m.img}
-                selected={mood === m.value}
-                onClick={() => setMood(m.value)}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Mood / Lighting — Picker Button */}
+        <PickerButton
+          label="Mood / Lighting"
+          value={moodOptions.find(m => m.value === mood)?.label || ""}
+          selectedImg={moodOptions.find(m => m.value === mood)?.img}
+          icon={Palette}
+          onClick={() => setMoodOpen(true)}
+        />
 
         <Separator />
 
