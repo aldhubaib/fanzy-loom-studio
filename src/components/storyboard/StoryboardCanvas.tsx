@@ -763,6 +763,55 @@ export function StoryboardCanvas() {
           ))}
         </div>
 
+        {/* Canvas context menu */}
+        {canvasMenu && (
+          <div
+            className="absolute z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: canvasMenu.x, top: canvasMenu.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                const newId = `f${Date.now()}`;
+                setFrames(prev => [...prev, {
+                  id: newId, x: canvasMenu.worldX, y: canvasMenu.worldY,
+                  image: "", scene: `SC ${Math.ceil((frames.length + 1) / 2)}`, shot: "WIDE",
+                  description: "New frame — click to edit", duration: "3s", actors: [],
+                }]);
+                setSelectedFrame(newId);
+                setCanvasMenu(null);
+              }}
+            >
+              <Plus className="w-4 h-4" /> Add New Frame
+            </button>
+            <div className="h-px bg-border my-1" />
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => { autoLayout(); setCanvasMenu(null); }}
+            >
+              <Grid3X3 className="w-4 h-4" /> Auto Layout
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => { fitToScreen(); setCanvasMenu(null); }}
+            >
+              <Maximize className="w-4 h-4" /> Fit to Screen
+            </button>
+            <div className="h-px bg-border my-1" />
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setFrames(prev => prev.map(f => ({ ...f })));
+                setSelectedFrame(null);
+                setCanvasMenu(null);
+              }}
+            >
+              <MousePointer className="w-4 h-4" /> Select All
+            </button>
+          </div>
+        )}
+
         {/* Minimap */}
         <div className="absolute bottom-4 right-4 w-[160px] h-[100px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
           <svg className="w-full h-full" viewBox="0 0 1200 700">
