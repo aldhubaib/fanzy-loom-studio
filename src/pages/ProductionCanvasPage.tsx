@@ -790,27 +790,43 @@ export default function ProductionCanvasPage() {
                       setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
                     }}
                   />
-                  {/* Zone-level connectors for shots zones */}
-                  {zone.type === "shots" && (() => {
-                    const zoneConnectors = [
-                      { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left" as const,  yFrac: 0.5 },
-                      { key: "location", color: "150 60% 45%",  label: "Locations", side: "right" as const, yFrac: 0.5 },
-                      { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left" as const,  yFrac: 0.2 },
-                    ];
-                    return zoneConnectors.map((port, i) => {
+                  {/* Zone-level connectors */}
+                  {(() => {
+                    const portConfigs: Record<string, { key: string; color: string; label: string; side: "left" | "right"; yFrac: number }[]> = {
+                      shots: [
+                        { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left",  yFrac: 0.3 },
+                        { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left",  yFrac: 0.15 },
+                        { key: "location", color: "35 80% 55%",   label: "Locations", side: "left",  yFrac: 0.5 },
+                      ],
+                      casting: [
+                        { key: "out", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+                      ],
+                      script: [
+                        { key: "out", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+                      ],
+                      locations: [
+                        { key: "out", color: "35 80% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+                      ],
+                    };
+                    const ports = portConfigs[zone.type] || [];
+                    return ports.map((port) => {
                       const portColor = `hsl(${port.color})`;
                       const yPos = b.h * port.yFrac;
                       const isLeft = port.side === "left";
+                      const size = zone.type === "shots" ? 20 : 18;
+                      const borderW = zone.type === "shots" ? 4 : 3;
                       return (
                         <TooltipProvider key={port.key} delayDuration={100}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div
-                                className="absolute z-30 w-[16px] h-[16px] rounded-full border-[3px] bg-card hover:scale-125 transition-all cursor-crosshair"
+                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair"
                                 style={{
+                                  width: size, height: size,
+                                  borderWidth: borderW, borderStyle: "solid",
                                   borderColor: portColor,
-                                  [isLeft ? "left" : "right"]: -16,
-                                  top: yPos - 8,
+                                  [isLeft ? "left" : "right"]: -(size / 2),
+                                  top: yPos - (size / 2),
                                 }}
                                 onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
                                 onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
