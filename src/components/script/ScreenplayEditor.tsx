@@ -69,6 +69,8 @@ const scriptElements: ScriptElement[] = [
 export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onToggleScenes, onToggleAI, showScenes, showAI }: ScreenplayEditorProps) {
   const [activeElement, setActiveElement] = React.useState<"scene-heading" | "action" | "character" | "dialogue" | "parenthetical" | "transition" | "note">("action");
   const [fontSize, setFontSize] = React.useState(14);
+  const active = elementTypes.find((e) => e.id === activeElement) ?? elementTypes[0];
+  const ActiveIcon = active.icon;
 
   let currentScene = 0;
 
