@@ -2,7 +2,11 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
+  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FrameContextMenu } from "./FrameContextMenu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -550,6 +554,43 @@ export function StoryboardCanvas() {
                     <p className="text-muted-foreground">{shotDescriptions[frame.shot] ?? "A camera shot type used in filmmaking."}</p>
                   </PopoverContent>
                 </Popover>
+
+                {/* Settings button */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="absolute top-2 right-[52px] z-10 bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Settings className="w-3 h-3" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48" side="bottom" align="end" onMouseDown={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Sparkles className="w-4 h-4 mr-2" /> AI Regenerate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Camera className="w-4 h-4 mr-2" /> Change Angle
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Palette className="w-4 h-4 mr-2" /> Change Mood / Lighting
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Replace className="w-4 h-4 mr-2" /> Replace Image
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Type className="w-4 h-4 mr-2" /> Edit Description
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <Clock className="w-4 h-4 mr-2" /> Change Duration
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
+                      <RotateCcw className="w-4 h-4 mr-2" /> Reset Frame
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Image */}
                 <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px]">
