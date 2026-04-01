@@ -52,6 +52,7 @@ type Tool = "select" | "hand";
 
 export function StoryboardCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const frameRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [frames, setFrames] = useState<FrameData[]>(initialFrames);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -67,6 +68,11 @@ export function StoryboardCanvas() {
   const [connections, setConnections] = useState<Connection[]>(initialConnections);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
+  const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
+
+  const getFrameHeight = useCallback((frameId: string) => {
+    return frameHeights[frameId] ?? FRAME_H_BASE;
+  }, [frameHeights]);
 
   // Zoom with scroll wheel — zoom towards mouse position
   const handleWheel = useCallback((e: React.WheelEvent) => {
