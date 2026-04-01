@@ -498,6 +498,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
   const [customWardrobeImages, setCustomWardrobeImages] = useState<Record<string, string[]>>({});
   const [lookTab, setLookTab] = useState<"build" | "custom">("build");
   const [customPortraits, setCustomPortraits] = useState<string[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
