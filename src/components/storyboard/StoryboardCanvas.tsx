@@ -804,59 +804,6 @@ export function StoryboardCanvas() {
         );
       })()}
 
-      {/* Actor change confirmation dialog */}
-      <AlertDialog open={!!actorChangePrompt} onOpenChange={(open) => { if (!open) setActorChangePrompt(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {actorChangePrompt?.action === "add" ? "Add Actor" : "Remove Actor"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {actorChangePrompt?.action === "add"
-                ? `Adding ${actorChangePrompt?.actorName} to this frame. Would you like to regenerate the image to include them?`
-                : `Removing ${actorChangePrompt?.actorName} from this frame. Would you like to regenerate the image without them?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex gap-2 sm:gap-0">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              onClick={() => {
-                if (!actorChangePrompt) return;
-                const { frameId, actorId, action } = actorChangePrompt;
-                setFrames(prev => prev.map(f => {
-                  if (f.id !== frameId) return f;
-                  return action === "add"
-                    ? { ...f, actors: [...f.actors, actorId] }
-                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
-                }));
-                setActorChangePrompt(null);
-              }}
-            >
-              {actorChangePrompt?.action === "add" ? "Add Only" : "Remove Only"}
-            </AlertDialogAction>
-            <AlertDialogAction
-              onClick={() => {
-                if (!actorChangePrompt) return;
-                const { frameId, actorId, action, actorName } = actorChangePrompt;
-                setFrames(prev => prev.map(f => {
-                  if (f.id !== frameId) return f;
-                  return action === "add"
-                    ? { ...f, actors: [...f.actors, actorId] }
-                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
-                }));
-                toast.info(`Regenerating image ${action === "add" ? "with" : "without"} ${actorName}...`, {
-                  description: "AI image regeneration will be available soon.",
-                });
-                setActorChangePrompt(null);
-              }}
-            >
-              <Sparkles className="w-4 h-4 mr-1" />
-              {actorChangePrompt?.action === "add" ? "Add & Regenerate" : "Remove & Regenerate"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
