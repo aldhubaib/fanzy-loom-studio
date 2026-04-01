@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { CharacterDetailsPanel, type CharacterData } from "@/components/casting/CharacterDetailsPanel";
 
 // Shot frame images
 import frame1 from "@/assets/storyboard/frame-1.jpg";
