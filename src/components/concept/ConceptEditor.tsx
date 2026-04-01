@@ -263,7 +263,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <div className="flex items-center mt-8">
             <Button
               onClick={() => {
-                const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format);
+                const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format && aspectRatio);
                 if (!isReady) {
                   setShowErrors(true);
                   return;
