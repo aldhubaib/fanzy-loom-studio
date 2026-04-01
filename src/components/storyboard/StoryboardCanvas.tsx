@@ -650,7 +650,7 @@ export function StoryboardCanvas() {
                     <img
                       src={frame.image}
                       alt={frame.description}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-secondary"
                       draggable={false}
                       loading="lazy"
                     />
@@ -686,27 +686,42 @@ export function StoryboardCanvas() {
                     {frame.generatedImages.map(img => {
                       const isActive = frame.selectedImageId === img.id;
                       return (
-                        <button
-                          key={img.id}
-                          className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-16 h-12 ${
-                            isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setFrames(prev => prev.map(f =>
-                              f.id === frame.id
-                                ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
-                                : f
-                            ));
-                          }}
-                        >
-                          <img src={img.src} alt={img.description} className="w-full h-full object-cover" draggable={false} />
+                        <div key={img.id} className="relative flex-shrink-0 w-16 h-12">
+                          <button
+                            className={`absolute inset-0 rounded overflow-hidden border-2 transition-all bg-card/40 ${
+                              isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFrames(prev => prev.map(f =>
+                                f.id === frame.id
+                                  ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
+                                  : f
+                              ));
+                            }}
+                          >
+                            <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
+                          </button>
+
+                          <button
+                            className="absolute top-0.5 left-0.5 z-10 w-4 h-4 rounded bg-background/85 text-foreground/80 hover:text-foreground hover:bg-background flex items-center justify-center"
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(img.src, "_blank", "noopener,noreferrer");
+                            }}
+                            aria-label="Open image"
+                            title="Open full image"
+                          >
+                            <Maximize className="w-2.5 h-2.5" />
+                          </button>
+
                           {isActive && (
                             <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
                               <Check className="w-2 h-2 text-primary-foreground" />
                             </div>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
