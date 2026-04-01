@@ -971,6 +971,21 @@ export default function ProductionCanvasPage() {
                     setCanvasMenu(null);
                   }}><MapPin className="w-4 h-4" /> Add Location</button>
                 )}
+                {(!zone || zone.type === "script") && (
+                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "script")?.id || "z-script";
+                    const zb = zoneBounds[targetZone];
+                    setScriptNodes(prev => [...prev, {
+                      id: `sn-${Date.now()}`,
+                      heading: "INT. NEW LOCATION - DAY",
+                      body: "Description of the scene...",
+                      x: canvasMenu.worldX - SCRIPT_W / 2,
+                      y: canvasMenu.worldY,
+                      zoneId: targetZone,
+                    }]);
+                    setCanvasMenu(null);
+                  }}><FileText className="w-4 h-4" /> Add Scene</button>
+                )}
                 <div className="h-px bg-border my-1" />
                 <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
                   <Maximize className="w-4 h-4" /> Fit to Screen
