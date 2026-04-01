@@ -595,41 +595,13 @@ export function StoryboardCanvas() {
                 {/* Top-right badges */}
                 <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
                   {/* Settings button */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Settings className="w-3 h-3" />
-                      </button>
-                    </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48" side="bottom" align="end" onMouseDown={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Sparkles className="w-4 h-4 mr-2" /> AI Regenerate
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Camera className="w-4 h-4 mr-2" /> Change Angle
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Palette className="w-4 h-4 mr-2" /> Change Mood / Lighting
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Replace className="w-4 h-4 mr-2" /> Replace Image
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Type className="w-4 h-4 mr-2" /> Edit Description
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Clock className="w-4 h-4 mr-2" /> Change Duration
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <RotateCcw className="w-4 h-4 mr-2" /> Reset Frame
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                  </DropdownMenu>
+                  <button
+                    className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setSettingsFrame(frame.id); }}
+                  >
+                    <Settings className="w-3 h-3" />
+                  </button>
 
                   {/* Shot type badge */}
                   <Popover>
