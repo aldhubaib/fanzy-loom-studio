@@ -926,12 +926,12 @@ export default function ProductionCanvasPage() {
               return (
                 <div
                   key={zone.id}
-                  className="absolute"
+                  className="absolute pointer-events-none"
                   style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
                 >
                   {/* Dashed border */}
                   <div
-                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing", isSelected && "border-opacity-80")}
+                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto", isSelected && "border-opacity-80")}
                     style={{ borderColor: `hsl(${zone.color} / ${isSelected ? 0.6 : 0.25})`, background: `hsl(var(--background))` }}
                     onMouseDown={(e) => {
                       if (e.button !== 0) return;
@@ -955,7 +955,7 @@ export default function ProductionCanvasPage() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div
-                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair"
+                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair pointer-events-auto"
                                 style={{
                                   width: size, height: size,
                                   borderWidth: borderW, borderStyle: "solid",
@@ -976,7 +976,7 @@ export default function ProductionCanvasPage() {
                   })}
                   {/* Label */}
                   <div
-                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
                     onMouseDown={(e) => {
                       if (e.button !== 0 || editingZoneLabel === zone.id) return;
                       e.stopPropagation();
