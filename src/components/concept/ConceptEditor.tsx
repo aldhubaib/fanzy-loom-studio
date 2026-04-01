@@ -176,10 +176,11 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const handleGenerate = () => {
     if (!title) setTitle("Untitled Film");
     setConceptGenerated(true);
-    if (!logline) setLogline("A compelling story unfolds in unexpected ways...");
+    // AI refines the idea into a proper logline — update the idea field
+    if (idea && !idea.includes("unravels")) {
+      setIdea(idea); // keep user's idea as-is for now
+    }
     if (!synopsis) setSynopsis("Your AI-generated synopsis will appear here after generation.");
-    if (themes.length === 0) setThemes(["Theme 1", "Theme 2"]);
-    if (!visualStyle) setVisualStyle("A cinematic visual approach.");
   };
 
   const handleSurpriseMe = () => {
@@ -328,17 +329,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-10 space-y-6 border-t border-border pt-8"
           >
-            {/* Logline */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Logline</label>
-              <textarea
-                value={logline}
-                onChange={(e) => setLogline(e.target.value)}
-                rows={2}
-                className="w-full bg-card border border-border rounded-lg p-4 text-foreground text-base leading-relaxed outline-none resize-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
             {/* Synopsis — collapsible */}
             <div>
               <button
