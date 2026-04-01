@@ -768,13 +768,14 @@ export default function ProductionCanvasPage() {
                     className="absolute -right-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
                     style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
                     onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
+                    onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
                   />
                   {/* Zone port — left side */}
                   <div
                     className="absolute -left-[10px] top-1/2 -translate-y-1/2 z-20 w-[20px] h-[20px] rounded-full border-[2.5px] bg-card hover:scale-110 transition-all cursor-crosshair"
                     style={{ borderColor: `hsl(${zone.color} / 0.5)` }}
                     onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
                   />
                 </div>
               );
@@ -815,9 +816,9 @@ export default function ProductionCanvasPage() {
                 style={{ left: frame.x, top: frame.y, width: FRAME_W }}
                 onMouseDown={(e) => startDrag(e, frame, { type: "frame", id: frame.id })}>
                 <div className="absolute -left-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
-                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} onMouseDown={e => e.stopPropagation()} />
+                  onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} />
                 <div className="absolute -right-[8px] z-20 w-[16px] h-[16px] rounded-full border-2 border-primary/50 bg-card hover:bg-primary hover:border-primary transition-all cursor-crosshair" style={{ top: PORT_Y - 8 }}
-                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} />
+                  onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }} onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }} />
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{idx + 1}</div>
                 <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px]" style={{ height: IMAGE_H }}>
