@@ -1090,6 +1090,24 @@ export function StoryboardCanvas() {
             >
               <Plus className="w-4 h-4" /> Add New Frame
             </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY });
+                setCanvasMenu(null);
+              }}
+            >
+              <Users className="w-4 h-4" /> Add Cast Member
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
+              onClick={() => {
+                setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY });
+                setCanvasMenu(null);
+              }}
+            >
+              <MapPin className="w-4 h-4" /> Add Location
+            </button>
             <div className="h-px bg-border my-1" />
             <button
               className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-foreground"
@@ -1113,6 +1131,64 @@ export function StoryboardCanvas() {
               }}
             >
               <MousePointer className="w-4 h-4" /> Select All
+            </button>
+          </div>
+        )}
+
+        {/* Cast Picker */}
+        {castPickerPos && (
+          <div
+            className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: castPickerPos.x, top: castPickerPos.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
+            {actorRoster.map(actor => (
+              <button
+                key={actor.id}
+                className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onClick={() => {
+                  const newId = `cast-${Date.now()}`;
+                  setCastNodes(prev => [...prev, { id: newId, actorId: actor.id, x: castPickerPos.worldX, y: castPickerPos.worldY }]);
+                  setCastPickerPos(null);
+                }}
+              >
+                <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
+                <span>{actor.name}</span>
+              </button>
+            ))}
+            <div className="h-px bg-border my-1" />
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-muted-foreground" onClick={() => setCastPickerPos(null)}>
+              <X className="w-4 h-4" /> Cancel
+            </button>
+          </div>
+        )}
+
+        {/* Location Picker */}
+        {locationPickerPos && (
+          <div
+            className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+            style={{ left: locationPickerPos.x, top: locationPickerPos.y }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Location</p>
+            {Object.entries(locationImages).map(([name, img]) => (
+              <button
+                key={name}
+                className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onClick={() => {
+                  const newId = `loc-${Date.now()}`;
+                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos.worldX, y: locationPickerPos.worldY }]);
+                  setLocationPickerPos(null);
+                }}
+              >
+                <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
+                <span>{name}</span>
+              </button>
+            ))}
+            <div className="h-px bg-border my-1" />
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 transition-colors text-muted-foreground" onClick={() => setLocationPickerPos(null)}>
+              <X className="w-4 h-4" /> Cancel
             </button>
           </div>
         )}
