@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Hash, AlignLeft, User, MessageSquare, Parentheses, ArrowRight, StickyNote,
-  Bold, Italic, Minus, Focus, Info, ChevronDown, Check, Strikethrough, Highlighter,
+  Bold, Italic, Minus, ChevronDown, Check, Strikethrough, Highlighter,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
