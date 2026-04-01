@@ -1014,7 +1014,19 @@ export default function ProductionCanvasPage() {
                 onUpdate={(updated) => setFrames(prev => prev.map(f => f.id === updated.id ? updated : f))}
                 onDelete={() => { setFrames(prev => prev.filter(f => f.id !== selectedFrame.id)); setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id)); setSelected(null); }} />
             )}
-            {selectedActor && <CastDrawer actor={selectedActor} frames={frames} />}
+            {selectedActor && (
+              <CharacterDetailsPanel
+                character={selectedActor}
+                onChange={(updated) => setActors(prev => prev.map(a => a.id === updated.id ? updated : a))}
+                onDelete={() => {
+                  setCastNodes(prev => prev.filter(n => n.actorId !== selectedActor.id));
+                  setSelected(null);
+                }}
+                appearances={frames.filter(f => f.actors.includes(selectedActor.id)).map(f => ({
+                  id: f.id, scene: f.scene, shot: f.shot, description: f.description, image: f.image,
+                }))}
+              />
+            )}
             {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
             {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
           </div>
