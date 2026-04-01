@@ -210,7 +210,7 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                 THE LAST DEAL
               </h1>
               <p className="text-xs text-muted-foreground mt-1 font-sans">
-                Noir · Written by Jane Director · ~12 min estimated runtime
+                Noir · Written by Jane Director · ~12 min · 1,247 words · 3 scenes · Saved 2m ago
               </p>
             </div>
           </div>
@@ -345,16 +345,6 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
       </div>
       </div>
 
-      {/* Status bar — always visible at bottom */}
-      <div className="px-6 py-2 border-t border-border flex items-center gap-4 text-[11px] text-muted-foreground font-sans">
-        <span>1,247 words</span>
-        <span>·</span>
-        <span>3 scenes</span>
-        <span>·</span>
-        <span>~12 min</span>
-        <span>·</span>
-        <span>Saved 2m ago</span>
-      </div>
     </div>
   );
 }
