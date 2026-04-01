@@ -591,7 +591,17 @@ export function StoryboardCanvas() {
           </svg>
 
           {/* Frames */}
-          {frames.map((frame, idx) => (
+          {(() => {
+            // Compute position-based scene numbers (left-to-right, top-to-bottom)
+            const sorted = [...frames].sort((a, b) => {
+              const rowA = Math.round(a.y / 200);
+              const rowB = Math.round(b.y / 200);
+              return rowA !== rowB ? rowA - rowB : a.x - b.x;
+            });
+            const orderMap = new Map(sorted.map((f, i) => [f.id, i + 1]));
+            return frames.map((frame, idx) => {
+              const sceneNumber = orderMap.get(frame.id) ?? idx + 1;
+              return (
             <FrameContextMenu
               key={frame.id}
               frameIndex={idx}
@@ -781,7 +791,7 @@ export function StoryboardCanvas() {
                 {/* Info */}
                 <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
+                    <span className="text-[10px] font-semibold text-primary">SC {sceneNumber}</span>
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                   </div>
 
@@ -842,7 +852,9 @@ export function StoryboardCanvas() {
                 </div>
               </div>
             </FrameContextMenu>
-          ))}
+              );
+            });
+          })()}
         </div>
 
         {/* Canvas context menu */}
