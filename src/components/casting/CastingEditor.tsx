@@ -901,6 +901,78 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
         </div>
       )}
 
+      {/* Custom Upload Modal */}
+      <Dialog open={customModalOpen} onOpenChange={setCustomModalOpen}>
+        <DialogContent className="sm:max-w-lg bg-card border-border">
+          <DialogHeader><DialogTitle>Upload Reference Photos</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Upload a photo for each angle. All three are required to generate.</p>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            {customSlots.map(slot => {
+              const src = customUploads[slot.key];
+              return (
+                <label key={slot.key} className="cursor-pointer group">
+                  <div className={cn(
+                    "aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center",
+                    src ? "border-primary" : "border-dashed border-border hover:border-primary/50 bg-secondary/30"
+                  )}>
+                    {src ? (
+                      <div className="relative w-full h-full">
+                        <img src={src} alt={slot.label} className="w-full h-full object-cover" />
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCustomUploads(prev => { const n = { ...prev }; delete n[slot.key]; return n; });
+                          }}
+                          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1.5">
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground font-medium">{slot.label}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className={cn("text-xs font-medium text-center mt-1.5", src ? "text-primary" : "text-muted-foreground")}>{slot.label}</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const result = ev.target?.result as string;
+                        setCustomUploads(prev => ({ ...prev, [slot.key]: result }));
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button
+              disabled={!allCustomSlotsFilled}
+              className="gap-1.5"
+              onClick={() => {
+                // Use face as portrait for now
+                onChange({ ...character, portrait: customUploads["face"] });
+                setCustomModalOpen(false);
+              }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Generate Character Sheet
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-md">
