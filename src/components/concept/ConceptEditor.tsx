@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { genres, tones, settings, durations, audiences, formats } from "@/data/conceptOptions";
+import { genres, tones, settings, durations, audiences, formats, aspectRatios } from "@/data/conceptOptions";
 
 interface ConceptEditorProps {
   projectId?: string;
