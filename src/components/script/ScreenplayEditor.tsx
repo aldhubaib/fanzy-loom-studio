@@ -9,12 +9,18 @@ import {
   Popover, PopoverTrigger, PopoverContent,
 } from "@/components/ui/popover";
 
+// Character photo imports
+import charMarlowe from "@/assets/characters/marlowe.jpg";
+import charVivian from "@/assets/characters/vivian.jpg";
+import charEddie from "@/assets/characters/eddie.jpg";
+import charBartender from "@/assets/characters/bartender.jpg";
+
 // Character thumbnail data
-const characterThumbnails: Record<string, { initials: string; color: string }> = {
-  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60" },
-  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60" },
-  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60" },
-  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60" },
+const characterThumbnails: Record<string, { initials: string; color: string; photo?: string }> = {
+  "MARLOWE": { initials: "DM", color: "from-amber-700/80 to-amber-900/60", photo: charMarlowe },
+  "VIVIAN": { initials: "VC", color: "from-rose-700/80 to-rose-900/60", photo: charVivian },
+  "EDDIE": { initials: "ER", color: "from-emerald-700/80 to-emerald-900/60", photo: charEddie },
+  "BARTENDER": { initials: "BT", color: "from-sky-700/80 to-sky-900/60", photo: charBartender },
 };
 
 // Location thumbnail data
@@ -353,19 +359,29 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                         <Popover>
                           <PopoverTrigger asChild>
                             <button className={cn(
-                              "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 transition-all",
+                              "w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 transition-all overflow-hidden",
                               "hover:scale-110 hover:ring-2 hover:ring-primary/50",
-                              isDefined
-                                ? `bg-gradient-to-br ${charData.color} text-foreground`
-                                : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
+                              !isDefined && "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
                             )}>
-                              {isDefined ? charData.initials : <UserCircle className="w-3 h-3" />}
+                              {isDefined && charData.photo ? (
+                                <img src={charData.photo} alt={el.text} className="w-full h-full object-cover" />
+                              ) : isDefined ? (
+                                <span className={cn("w-full h-full flex items-center justify-center bg-gradient-to-br", charData.color)}>{charData.initials}</span>
+                              ) : (
+                                <UserCircle className="w-3 h-3" />
+                              )}
                             </button>
                           </PopoverTrigger>
                           <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
                             {isDefined ? (
                               <div className="flex items-center gap-3">
-                                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br", charData.color, "text-foreground")}>{charData.initials}</div>
+                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                  {charData.photo ? (
+                                    <img src={charData.photo} alt={el.text} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className={cn("w-full h-full flex items-center justify-center text-sm font-bold bg-gradient-to-br", charData.color, "text-foreground")}>{charData.initials}</div>
+                                  )}
+                                </div>
                                 <div>
                                   <p className="text-sm font-semibold text-foreground">{el.text}</p>
                                   <p className="text-xs text-muted-foreground">Defined character</p>
