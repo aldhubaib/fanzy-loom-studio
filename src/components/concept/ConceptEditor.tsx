@@ -259,23 +259,6 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           </div>
         </motion.div>
 
-        {/* Continue button */}
-        {conceptGenerated && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-10 flex justify-end"
-          >
-            <Button
-              onClick={() => navigate(`/project/${projectId}/script`)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-8 h-12 text-base font-semibold"
-            >
-              Continue to Script
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </motion.div>
-        )}
       </div>
     </div>
   );
