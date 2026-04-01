@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { mockProjects } from "@/data/mockProjects";
 import { ScriptEditor } from "@/components/script/ScriptEditor";
 import { ConceptEditor } from "@/components/concept/ConceptEditor";
+import { StoryboardCanvas } from "@/components/storyboard/StoryboardCanvas";
 import { FloatingToolbar } from "@/components/FloatingToolbar";
 import {
   Lightbulb, FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download
@@ -48,6 +49,8 @@ export default function ProjectPage() {
           <ConceptEditor projectId={projectId} />
         ) : stage === "script" ? (
           <ScriptEditor />
+        ) : stage === "storyboard" ? (
+          <StoryboardCanvas />
         ) : (
           <div className="p-8 pt-20 h-full overflow-auto">
             <div className="max-w-4xl mx-auto">
