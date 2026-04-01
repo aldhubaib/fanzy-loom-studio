@@ -497,16 +497,26 @@ function ZoneDrawer({ zone, castNodes, locationNodes, frames }: {
 export default function ProductionCanvasPage() {
   const { projectId } = useParams();
   const containerRef = useRef<HTMLDivElement>(null);
+  const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
-  const [actors, setActors] = useState<Actor[]>(actorRoster);
-  const [zones, setZones] = useState<Zone[]>(initialZones);
-  const [frames, setFrames] = useState<FrameData[]>(initialFrames);
-  const [castNodes, setCastNodes] = useState<CastNode[]>(initialCastNodes);
-  const [locationNodes, setLocationNodes] = useState<LocationNode[]>(initialLocationNodes);
-  const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(initialScriptNodes);
-  const [connections, setConnections] = useState<Connection[]>(initialConnections);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  // Load saved state or fall back to defaults
+  const saved = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+  }, [SAVE_KEY]);
+
+  const [actors, setActors] = useState<Actor[]>(saved?.actors ?? actorRoster);
+  const [zones, setZones] = useState<Zone[]>(saved?.zones ?? initialZones);
+  const [frames, setFrames] = useState<FrameData[]>(saved?.frames ?? initialFrames);
+  const [castNodes, setCastNodes] = useState<CastNode[]>(saved?.castNodes ?? initialCastNodes);
+  const [locationNodes, setLocationNodes] = useState<LocationNode[]>(saved?.locationNodes ?? initialLocationNodes);
+  const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(saved?.scriptNodes ?? initialScriptNodes);
+  const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
+  const [zoom, setZoom] = useState(saved?.zoom ?? 1);
+  const [pan, setPan] = useState(saved?.pan ?? { x: 0, y: 0 });
   const [tool, setTool] = useState<Tool>("select");
   const [dragging, setDragging] = useState<string | null>(null);
   const [draggingZone, setDraggingZone] = useState<string | null>(null);
