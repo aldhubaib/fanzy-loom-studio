@@ -806,13 +806,8 @@ export function StoryboardCanvas() {
                     <span className="text-[10px] font-semibold text-primary">SC {sceneNumber}</span>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
-                      {frame.location && (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-secondary">
-                          {locationImages[frame.location] && (
-                            <img src={locationImages[frame.location]} alt={frame.location} className="w-4 h-4 rounded-sm object-cover" loading="lazy" />
-                          )}
-                          <span className="text-[9px] text-muted-foreground truncate max-w-[60px]">{frame.location}</span>
-                        </div>
+                      {frame.location && locationImages[frame.location] && (
+                        <img src={locationImages[frame.location]} alt={frame.location} className="w-8 h-8 rounded-md object-cover border border-border" loading="lazy" />
                       )}
                     </div>
                   </div>
