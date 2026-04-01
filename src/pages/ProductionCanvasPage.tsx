@@ -478,7 +478,7 @@ export default function ProductionCanvasPage() {
     const actorIds = castNodes
       .filter(n => castingZoneIds.includes(n.zoneId))
       .map(n => n.actorId);
-    return actorRoster.filter(a => actorIds.includes(a.id));
+    return actors.filter(a => actorIds.includes(a.id));
   }, [connections, zones, castNodes]);
 
   // Find which zone a world coordinate falls in
@@ -825,7 +825,7 @@ export default function ProductionCanvasPage() {
                   <div className="flex items-center gap-1">
                     <TooltipProvider delayDuration={200}>
                       {frame.actors.map(aid => {
-                        const a = actorRoster.find(ac => ac.id === aid);
+                        const a = actors.find(ac => ac.id === aid);
                         if (!a) return null;
                         return (
                           <Tooltip key={a.id}><TooltipTrigger asChild>
@@ -847,7 +847,7 @@ export default function ProductionCanvasPage() {
 
             {/* Cast nodes */}
             {castNodes.map(node => {
-              const actor = actorRoster.find(a => a.id === node.actorId);
+              const actor = actors.find(a => a.id === node.actorId);
               if (!actor) return null;
               const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
               return (
@@ -935,7 +935,7 @@ export default function ProductionCanvasPage() {
           {castPickerPos && (
             <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: castPickerPos.x, top: castPickerPos.y }} onMouseDown={e => e.stopPropagation()}>
               <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
-              {actorRoster.map(actor => (
+              {actors.map(actor => (
                 <button key={actor.id} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
                   onClick={() => {
                     setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY, zoneId: castPickerPos.zoneId }]);
