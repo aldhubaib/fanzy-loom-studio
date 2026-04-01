@@ -191,8 +191,9 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
       </div>
 
       {/* Script body */}
-      <div className="flex-1 overflow-y-auto px-16 py-8">
-        <div className="max-w-2xl mx-auto space-y-1" style={{ fontSize: `${fontSize}px` }}>
+      <div className="flex-1 overflow-y-auto px-8 sm:px-16 py-8">
+        <div className="max-w-3xl mx-auto bg-card/60 border border-border/50 rounded-xl px-10 sm:px-16 py-10 shadow-lg shadow-black/20">
+        <div className="space-y-1" style={{ fontSize: `${fontSize}px` }}>
           {scriptElements.map((el, i) => {
             const isNewScene = el.sceneId !== undefined;
             const showDivider = isNewScene && currentScene > 0;
