@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,29 +12,79 @@ import detectiveImg from "@/assets/casting/detective.jpg";
 import femmeFataleImg from "@/assets/casting/femme-fatale.jpg";
 import olderGentlemanImg from "@/assets/casting/older-gentleman.jpg";
 
-// Build
+// ─── Male images ────────────────────────────────────────────
 import buildSlim from "@/assets/casting/build-slim.jpg";
 import buildAverage from "@/assets/casting/build-average.jpg";
 import buildMuscular from "@/assets/casting/build-muscular.jpg";
 import buildHeavy from "@/assets/casting/build-heavy.jpg";
-// Hair style
 import hairShort from "@/assets/casting/hair-short.jpg";
 import hairLong from "@/assets/casting/hair-long.jpg";
 import hairCurly from "@/assets/casting/hair-curly.jpg";
 import hairBald from "@/assets/casting/hair-bald.jpg";
 import hairSlicked from "@/assets/casting/hair-slicked.jpg";
 import hairBraided from "@/assets/casting/hair-braided.jpg";
-// Gender
-import genderMale from "@/assets/casting/gender-male.jpg";
-import genderFemale from "@/assets/casting/gender-female.jpg";
-import genderNonbinary from "@/assets/casting/gender-nonbinary.jpg";
-// Age
 import ageChild from "@/assets/casting/age-child.jpg";
 import ageTeen from "@/assets/casting/age-teen.jpg";
 import ageYoungAdult from "@/assets/casting/age-young-adult.jpg";
 import ageMiddle from "@/assets/casting/age-middle.jpg";
 import ageSenior from "@/assets/casting/age-senior.jpg";
-// Ethnicity
+import heightShort from "@/assets/casting/height-short.jpg";
+import heightAverage from "@/assets/casting/height-average.jpg";
+import heightTall from "@/assets/casting/height-tall.jpg";
+import heightVeryTall from "@/assets/casting/height-very-tall.jpg";
+import outfitCasual from "@/assets/casting/outfit-casual.jpg";
+import outfitFormal from "@/assets/casting/outfit-formal.jpg";
+import outfitHighfashion from "@/assets/casting/outfit-highfashion.jpg";
+import outfitMilitary from "@/assets/casting/outfit-military.jpg";
+import outfitVintage from "@/assets/casting/outfit-vintage.jpg";
+import outfitStreetwear from "@/assets/casting/outfit-streetwear.jpg";
+import outfitBusiness from "@/assets/casting/outfit-business.jpg";
+import detailNone from "@/assets/casting/detail-none.jpg";
+import detailScar from "@/assets/casting/detail-scar.jpg";
+import detailFreckles from "@/assets/casting/detail-freckles.jpg";
+import detailTattoos from "@/assets/casting/detail-tattoos.jpg";
+import detailGlasses from "@/assets/casting/detail-glasses.jpg";
+import detailBirthmark from "@/assets/casting/detail-birthmark.jpg";
+
+// ─── Female images ──────────────────────────────────────────
+import fBuildSlim from "@/assets/casting/f-build-slim.jpg";
+import fBuildAverage from "@/assets/casting/f-build-average.jpg";
+import fBuildMuscular from "@/assets/casting/f-build-muscular.jpg";
+import fBuildHeavy from "@/assets/casting/f-build-heavy.jpg";
+import fHairShort from "@/assets/casting/f-hair-short.jpg";
+import fHairLong from "@/assets/casting/f-hair-long.jpg";
+import fHairCurly from "@/assets/casting/f-hair-curly.jpg";
+import fHairBald from "@/assets/casting/f-hair-bald.jpg";
+import fHairSlicked from "@/assets/casting/f-hair-slicked.jpg";
+import fHairBraided from "@/assets/casting/f-hair-braided.jpg";
+import fAgeChild from "@/assets/casting/f-age-child.jpg";
+import fAgeTeen from "@/assets/casting/f-age-teen.jpg";
+import fAgeYoungAdult from "@/assets/casting/f-age-young-adult.jpg";
+import fAgeMiddle from "@/assets/casting/f-age-middle.jpg";
+import fAgeSenior from "@/assets/casting/f-age-senior.jpg";
+import fHeightShort from "@/assets/casting/f-height-short.jpg";
+import fHeightAverage from "@/assets/casting/f-height-average.jpg";
+import fHeightTall from "@/assets/casting/f-height-tall.jpg";
+import fHeightVeryTall from "@/assets/casting/f-height-very-tall.jpg";
+import fOutfitCasual from "@/assets/casting/f-outfit-casual.jpg";
+import fOutfitFormal from "@/assets/casting/f-outfit-formal.jpg";
+import fOutfitHighfashion from "@/assets/casting/f-outfit-highfashion.jpg";
+import fOutfitMilitary from "@/assets/casting/f-outfit-military.jpg";
+import fOutfitVintage from "@/assets/casting/f-outfit-vintage.jpg";
+import fOutfitStreetwear from "@/assets/casting/f-outfit-streetwear.jpg";
+import fOutfitBusiness from "@/assets/casting/f-outfit-business.jpg";
+import fDetailNone from "@/assets/casting/f-detail-none.jpg";
+import fDetailScar from "@/assets/casting/f-detail-scar.jpg";
+import fDetailFreckles from "@/assets/casting/f-detail-freckles.jpg";
+import fDetailTattoos from "@/assets/casting/f-detail-tattoos.jpg";
+import fDetailGlasses from "@/assets/casting/f-detail-glasses.jpg";
+import fDetailBirthmark from "@/assets/casting/f-detail-birthmark.jpg";
+
+// Gender (shared)
+import genderMale from "@/assets/casting/gender-male.jpg";
+import genderFemale from "@/assets/casting/gender-female.jpg";
+import genderNonbinary from "@/assets/casting/gender-nonbinary.jpg";
+// Ethnicity (shared)
 import ethCaucasian from "@/assets/casting/eth-caucasian.jpg";
 import ethAfrican from "@/assets/casting/eth-african.jpg";
 import ethEastAsian from "@/assets/casting/eth-east-asian.jpg";
@@ -42,19 +92,14 @@ import ethSouthAsian from "@/assets/casting/eth-south-asian.jpg";
 import ethHispanic from "@/assets/casting/eth-hispanic.jpg";
 import ethMiddleEastern from "@/assets/casting/eth-middle-eastern.jpg";
 import ethMixed from "@/assets/casting/eth-mixed.jpg";
-// Height
-import heightShort from "@/assets/casting/height-short.jpg";
-import heightAverage from "@/assets/casting/height-average.jpg";
-import heightTall from "@/assets/casting/height-tall.jpg";
-import heightVeryTall from "@/assets/casting/height-very-tall.jpg";
-// Eye color
+// Eye color (shared – close-up eyes are gender-neutral)
 import eyeBrown from "@/assets/casting/eye-brown.jpg";
 import eyeBlue from "@/assets/casting/eye-blue.jpg";
 import eyeGreen from "@/assets/casting/eye-green.jpg";
 import eyeHazel from "@/assets/casting/eye-hazel.jpg";
 import eyeGray from "@/assets/casting/eye-gray.jpg";
 import eyeAmber from "@/assets/casting/eye-amber.jpg";
-// Hair color
+// Hair color (shared)
 import haircBlack from "@/assets/casting/hairc-black.jpg";
 import haircDarkBrown from "@/assets/casting/hairc-dark-brown.jpg";
 import haircLightBrown from "@/assets/casting/hairc-light-brown.jpg";
@@ -63,28 +108,13 @@ import haircRed from "@/assets/casting/hairc-red.jpg";
 import haircAuburn from "@/assets/casting/hairc-auburn.jpg";
 import haircGray from "@/assets/casting/hairc-gray.jpg";
 import haircWhite from "@/assets/casting/hairc-white.jpg";
-// Skin tone
+// Skin tone (shared)
 import skinVeryLight from "@/assets/casting/skin-very-light.jpg";
 import skinLight from "@/assets/casting/skin-light.jpg";
 import skinMediumLight from "@/assets/casting/skin-medium-light.jpg";
 import skinMedium from "@/assets/casting/skin-medium.jpg";
 import skinMediumDark from "@/assets/casting/skin-medium-dark.jpg";
 import skinDark from "@/assets/casting/skin-dark.jpg";
-// Clothing
-import outfitCasual from "@/assets/casting/outfit-casual.jpg";
-import outfitFormal from "@/assets/casting/outfit-formal.jpg";
-import outfitHighfashion from "@/assets/casting/outfit-highfashion.jpg";
-import outfitMilitary from "@/assets/casting/outfit-military.jpg";
-import outfitVintage from "@/assets/casting/outfit-vintage.jpg";
-import outfitStreetwear from "@/assets/casting/outfit-streetwear.jpg";
-import outfitBusiness from "@/assets/casting/outfit-business.jpg";
-// Details
-import detailNone from "@/assets/casting/detail-none.jpg";
-import detailScar from "@/assets/casting/detail-scar.jpg";
-import detailFreckles from "@/assets/casting/detail-freckles.jpg";
-import detailTattoos from "@/assets/casting/detail-tattoos.jpg";
-import detailGlasses from "@/assets/casting/detail-glasses.jpg";
-import detailBirthmark from "@/assets/casting/detail-birthmark.jpg";
 
 // ─── Types ──────────────────────────────────────────────────
 interface GeneratedPortrait {
@@ -135,18 +165,12 @@ const attributeCategories: { key: AttributeKey; label: string }[] = [
   { key: "distinguishingFeatures", label: "Details" },
 ];
 
-const attributeOptions: Record<AttributeKey, VisualOption[]> = {
+// Gender-neutral options (same for all)
+const sharedOptions: Partial<Record<AttributeKey, VisualOption[]>> = {
   gender: [
     { label: "Male", image: genderMale },
     { label: "Female", image: genderFemale },
     { label: "Non-binary", image: genderNonbinary },
-  ],
-  ageRange: [
-    { label: "Child (5-12)", image: ageChild },
-    { label: "Teen (13-17)", image: ageTeen },
-    { label: "Young Adult (18-30)", image: ageYoungAdult },
-    { label: "Middle Age (31-55)", image: ageMiddle },
-    { label: "Senior (56+)", image: ageSenior },
   ],
   ethnicity: [
     { label: "Caucasian", image: ethCaucasian },
@@ -156,6 +180,43 @@ const attributeOptions: Record<AttributeKey, VisualOption[]> = {
     { label: "Hispanic", image: ethHispanic },
     { label: "Middle Eastern", image: ethMiddleEastern },
     { label: "Mixed", image: ethMixed },
+  ],
+  eyeColor: [
+    { label: "Brown", image: eyeBrown },
+    { label: "Blue", image: eyeBlue },
+    { label: "Green", image: eyeGreen },
+    { label: "Hazel", image: eyeHazel },
+    { label: "Gray", image: eyeGray },
+    { label: "Amber", image: eyeAmber },
+  ],
+  hairColor: [
+    { label: "Black", image: haircBlack },
+    { label: "Dark Brown", image: haircDarkBrown },
+    { label: "Light Brown", image: haircLightBrown },
+    { label: "Blonde", image: haircBlonde },
+    { label: "Red", image: haircRed },
+    { label: "Auburn", image: haircAuburn },
+    { label: "Gray", image: haircGray },
+    { label: "White", image: haircWhite },
+  ],
+  skinTone: [
+    { label: "Very Light", image: skinVeryLight },
+    { label: "Light", image: skinLight },
+    { label: "Medium Light", image: skinMediumLight },
+    { label: "Medium", image: skinMedium },
+    { label: "Medium Dark", image: skinMediumDark },
+    { label: "Dark", image: skinDark },
+  ],
+};
+
+// Male-specific options
+const maleOptions: Partial<Record<AttributeKey, VisualOption[]>> = {
+  ageRange: [
+    { label: "Child (5-12)", image: ageChild },
+    { label: "Teen (13-17)", image: ageTeen },
+    { label: "Young Adult (18-30)", image: ageYoungAdult },
+    { label: "Middle Age (31-55)", image: ageMiddle },
+    { label: "Senior (56+)", image: ageSenior },
   ],
   bodyType: [
     { label: "Slim", image: buildSlim },
@@ -177,32 +238,6 @@ const attributeOptions: Record<AttributeKey, VisualOption[]> = {
     { label: "Slicked Back", image: hairSlicked },
     { label: "Braided", image: hairBraided },
   ],
-  hairColor: [
-    { label: "Black", image: haircBlack },
-    { label: "Dark Brown", image: haircDarkBrown },
-    { label: "Light Brown", image: haircLightBrown },
-    { label: "Blonde", image: haircBlonde },
-    { label: "Red", image: haircRed },
-    { label: "Auburn", image: haircAuburn },
-    { label: "Gray", image: haircGray },
-    { label: "White", image: haircWhite },
-  ],
-  eyeColor: [
-    { label: "Brown", image: eyeBrown },
-    { label: "Blue", image: eyeBlue },
-    { label: "Green", image: eyeGreen },
-    { label: "Hazel", image: eyeHazel },
-    { label: "Gray", image: eyeGray },
-    { label: "Amber", image: eyeAmber },
-  ],
-  skinTone: [
-    { label: "Very Light", image: skinVeryLight },
-    { label: "Light", image: skinLight },
-    { label: "Medium Light", image: skinMediumLight },
-    { label: "Medium", image: skinMedium },
-    { label: "Medium Dark", image: skinMediumDark },
-    { label: "Dark", image: skinDark },
-  ],
   clothing: [
     { label: "Casual", image: outfitCasual },
     { label: "Formal", image: outfitFormal },
@@ -221,6 +256,71 @@ const attributeOptions: Record<AttributeKey, VisualOption[]> = {
     { label: "Birthmark", image: detailBirthmark },
   ],
 };
+
+// Female-specific options
+const femaleOptions: Partial<Record<AttributeKey, VisualOption[]>> = {
+  ageRange: [
+    { label: "Child (5-12)", image: fAgeChild },
+    { label: "Teen (13-17)", image: fAgeTeen },
+    { label: "Young Adult (18-30)", image: fAgeYoungAdult },
+    { label: "Middle Age (31-55)", image: fAgeMiddle },
+    { label: "Senior (56+)", image: fAgeSenior },
+  ],
+  bodyType: [
+    { label: "Slim", image: fBuildSlim },
+    { label: "Average", image: fBuildAverage },
+    { label: "Muscular", image: fBuildMuscular },
+    { label: "Heavy", image: fBuildHeavy },
+  ],
+  height: [
+    { label: "Short", image: fHeightShort },
+    { label: "Average", image: fHeightAverage },
+    { label: "Tall", image: fHeightTall },
+    { label: "Very Tall", image: fHeightVeryTall },
+  ],
+  hairStyle: [
+    { label: "Short", image: fHairShort },
+    { label: "Long", image: fHairLong },
+    { label: "Curly", image: fHairCurly },
+    { label: "Bald", image: fHairBald },
+    { label: "Slicked Back", image: fHairSlicked },
+    { label: "Braided", image: fHairBraided },
+  ],
+  clothing: [
+    { label: "Casual", image: fOutfitCasual },
+    { label: "Formal", image: fOutfitFormal },
+    { label: "High Fashion", image: fOutfitHighfashion },
+    { label: "Military", image: fOutfitMilitary },
+    { label: "Vintage", image: fOutfitVintage },
+    { label: "Streetwear", image: fOutfitStreetwear },
+    { label: "Business", image: fOutfitBusiness },
+  ],
+  distinguishingFeatures: [
+    { label: "None", image: fDetailNone },
+    { label: "Facial Scar", image: fDetailScar },
+    { label: "Freckles", image: fDetailFreckles },
+    { label: "Tattoos", image: fDetailTattoos },
+    { label: "Glasses", image: fDetailGlasses },
+    { label: "Birthmark", image: fDetailBirthmark },
+  ],
+};
+
+function getAttributeOptions(gender: string): Record<AttributeKey, VisualOption[]> {
+  const gendered = gender === "Female" ? femaleOptions : maleOptions;
+  return {
+    gender: sharedOptions.gender!,
+    ageRange: gendered.ageRange || maleOptions.ageRange!,
+    ethnicity: sharedOptions.ethnicity!,
+    bodyType: gendered.bodyType || maleOptions.bodyType!,
+    height: gendered.height || maleOptions.height!,
+    hairStyle: gendered.hairStyle || maleOptions.hairStyle!,
+    hairColor: sharedOptions.hairColor!,
+    eyeColor: sharedOptions.eyeColor!,
+    skinTone: sharedOptions.skinTone!,
+    clothing: gendered.clothing || maleOptions.clothing!,
+    distinguishingFeatures: gendered.distinguishingFeatures || maleOptions.distinguishingFeatures!,
+  };
+}
 
 const roleOptions = ["Protagonist", "Antagonist", "Supporting", "Extra"];
 
@@ -262,7 +362,7 @@ const initialCharacters: Character[] = [
   },
 ];
 
-// ─── Attribute Picker Dialog (all images) ───────────────────
+// ─── Attribute Picker Dialog ────────────────────────────────
 function AttributePickerDialog({
   open, onOpenChange, category, options, selected, onSelect,
 }: {
@@ -311,7 +411,7 @@ function AttributePickerDialog({
   );
 }
 
-// ─── Picker Row (in drawer) ─────────────────────────────────
+// ─── Picker Row ─────────────────────────────────────────────
 function AttributeRow({ label, value, options, onClick }: {
   label: string;
   value: string;
@@ -350,6 +450,9 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
   const [pickerOpen, setPickerOpen] = useState<AttributeKey | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Get gender-matched attribute options
+  const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
 
   const selectPortrait = (p: GeneratedPortrait) => {
     onChange({ ...character, portrait: p.src, selectedPortraitId: p.id });
@@ -425,7 +528,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
                 key={cat.key}
                 label={cat.label}
                 value={character[cat.key] as string}
-                options={attributeOptions[cat.key]}
+                options={attrOptions[cat.key]}
                 onClick={() => setPickerOpen(cat.key)}
               />
             ))}
@@ -506,7 +609,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
           open={!!pickerOpen}
           onOpenChange={(v) => { if (!v) setPickerOpen(null); }}
           category={attributeCategories.find(c => c.key === pickerOpen)?.label || ""}
-          options={attributeOptions[pickerOpen]}
+          options={attrOptions[pickerOpen]}
           selected={character[pickerOpen] as string}
           onSelect={(v) => onChange({ ...character, [pickerOpen]: v })}
         />
