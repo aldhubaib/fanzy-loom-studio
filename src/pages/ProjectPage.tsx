@@ -1,8 +1,8 @@
-import { useParams, useLocation, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { FanzySidebar } from "@/components/FanzySidebar";
-import { TopBar } from "@/components/TopBar";
 import { mockProjects } from "@/data/mockProjects";
+import { ScriptEditor } from "@/components/script/ScriptEditor";
 import {
   FileText, LayoutGrid, Users, MapPin, Sparkles, Film, Download, ArrowLeft
 } from "lucide-react";
