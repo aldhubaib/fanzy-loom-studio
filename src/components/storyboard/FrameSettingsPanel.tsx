@@ -450,7 +450,8 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
                   const actor = actorRoster.find(a => a.id === actorId);
                   if (!actor) return null;
                   const currentWardrobe = actorWardrobe[actorId] || "";
-                  const wardrobeImg = wardrobeOptions.find(w => w.value === currentWardrobe)?.img;
+                  const allWardrobes = [...wardrobeOptions, ...customWardrobes];
+                  const wardrobeImg = allWardrobes.find(w => w.value === currentWardrobe)?.img;
                   return (
                     <button
                       key={actorId}
