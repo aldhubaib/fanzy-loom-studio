@@ -657,12 +657,12 @@ export function StoryboardCanvas() {
                   </Popover>
                 </div>
 
-                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px] relative">
+                <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: IMAGE_H }}>
                   {frame.image ? (
                     <img
                       src={frame.image}
                       alt={frame.description}
-                      className="w-full h-full object-contain bg-secondary"
+                      className="w-full h-full object-cover"
                       draggable={false}
                       loading="lazy"
                     />
