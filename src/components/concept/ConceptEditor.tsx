@@ -157,15 +157,16 @@ const mockConcept = {
 
 export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const navigate = useNavigate();
+  const isMockProject = projectId === "1";
 
-  const [title, setTitle] = useState("");
-  const [idea, setIdea] = useState("");
-  const [genre, setGenre] = useState("");
-  const [tone, setTone] = useState("");
-  const [duration, setDuration] = useState("");
-  const [setting, setSetting] = useState("");
-  const [audience, setAudience] = useState("");
-  const [format, setFormat] = useState("");
+  const [title, setTitle] = useState(isMockProject ? mockConcept.title : "");
+  const [idea, setIdea] = useState(isMockProject ? mockConcept.idea : "");
+  const [genre, setGenre] = useState(isMockProject ? mockConcept.genre : "");
+  const [tone, setTone] = useState(isMockProject ? mockConcept.tone : "");
+  const [duration, setDuration] = useState(isMockProject ? mockConcept.duration : "");
+  const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
+  const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
+  const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
   
 
   const [genreOpen, setGenreOpen] = useState(false);
