@@ -23,6 +23,11 @@ interface FrameData {
   duration: string;
 }
 
+interface Connection {
+  from: string; // frame id
+  to: string;   // frame id
+}
+
 const initialFrames: FrameData[] = [
   { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s" },
   { id: "f2", x: 420, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s" },
