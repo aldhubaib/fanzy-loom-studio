@@ -499,6 +499,14 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
   const [lookTab, setLookTab] = useState<"build" | "custom">("build");
   const [customPortraits, setCustomPortraits] = useState<string[]>([]);
   const [showErrors, setShowErrors] = useState(false);
+  const [customModalOpen, setCustomModalOpen] = useState(false);
+  const [customUploads, setCustomUploads] = useState<Record<string, string>>({});
+  const customSlots = [
+    { key: "face", label: "Face / Close-up" },
+    { key: "threequarter", label: "3/4 Angle" },
+    { key: "body", label: "Full Body" },
+  ];
+  const allCustomSlotsFilled = customSlots.every(s => !!customUploads[s.key]);
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
