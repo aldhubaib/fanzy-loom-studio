@@ -116,10 +116,6 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
           <FormattingToolbar
             activeElement={activeElement}
             onElementChange={setActiveElement}
-            focusMode={focusMode}
-            onFocusModeChange={onFocusModeChange}
-            fontSize={fontSize}
-            onFontSizeChange={setFontSize}
           />
         </div>
       </div>
