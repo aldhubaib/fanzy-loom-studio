@@ -113,6 +113,14 @@ interface Connection {
   to: string;
 }
 
+interface ZoneConnectorConfig {
+  key: "casting" | "script" | "locations";
+  color: string;
+  label: string;
+  side: "left" | "right";
+  yFrac: number;
+}
+
 type SelectedItem =
   | { type: "frame"; id: string }
   | { type: "cast"; id: string }
@@ -139,6 +147,34 @@ const ZONE_PAD = 40;
 const ZONE_LABEL_H = 40;
 const MIN_ZONE_W = 300;
 const MIN_ZONE_H = 200;
+
+const CONNECTION_PORT_SEPARATOR = "::";
+
+const zoneConnectorConfigs = {
+  casting: [
+    { key: "casting", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+  shots: [
+    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
+    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
+    { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
+  ],
+  locations: [
+    { key: "locations", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+  script: [
+    { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+} satisfies Record<Zone["type"], ZoneConnectorConfig[]>;
+
+const makeZonePortId = (zoneId: string, portKey: ZoneConnectorConfig["key"]) => `${zoneId}${CONNECTION_PORT_SEPARATOR}${portKey}`;
+
+const getConnectionBaseId = (endpoint: string) => endpoint.split(CONNECTION_PORT_SEPARATOR)[0];
+
+const getConnectionPortKey = (endpoint: string) => {
+  if (!endpoint.includes(CONNECTION_PORT_SEPARATOR)) return undefined;
+  return endpoint.split(CONNECTION_PORT_SEPARATOR)[1] as ZoneConnectorConfig["key"];
+};
 
 const locationImages: Record<string, string> = {
   "Office": locOffice,
@@ -216,9 +252,9 @@ const initialScriptNodes: ScriptNode[] = [
 const initialConnections: Connection[] = [
   { from: "f1", to: "f2" }, { from: "f2", to: "f3" },
   { from: "f3", to: "f4" }, { from: "f4", to: "f5" }, { from: "f5", to: "f6" },
-  { from: "z-casting", to: "z-shots" },
-  { from: "z-locations", to: "z-shots" },
-  { from: "z-script", to: "z-shots" },
+  { from: makeZonePortId("z-casting", "casting"), to: makeZonePortId("z-shots", "casting") },
+  { from: makeZonePortId("z-locations", "locations"), to: makeZonePortId("z-shots", "locations") },
+  { from: makeZonePortId("z-script", "script"), to: makeZonePortId("z-shots", "script") },
 ];
 
 // ─── Zone Bounds Helper ─────────────────────────────────────
@@ -493,16 +529,68 @@ export default function ProductionCanvasPage() {
     return map;
   }, [zones, frames, castNodes, locationNodes, scriptNodes]);
 
+  useEffect(() => {
+    setConnections(prev => {
+      const normalized = prev.map(connection => {
+        const fromId = getConnectionBaseId(connection.from);
+        const toId = getConnectionBaseId(connection.to);
+        const fromZone = zones.find(z => z.id === fromId);
+        const toZone = zones.find(z => z.id === toId);
+
+        if (!fromZone || !toZone) return connection;
+
+        const fromPort = getConnectionPortKey(connection.from) ?? (fromZone.type === "shots" ? (toZone.type === "shots" ? undefined : toZone.type) : fromZone.type);
+        const toPort = getConnectionPortKey(connection.to) ?? (toZone.type === "shots" ? (fromZone.type === "shots" ? undefined : fromZone.type) : toZone.type);
+
+        if (!fromPort || !toPort || fromPort !== toPort) return connection;
+
+        if (fromZone.type === "shots" && toZone.type !== "shots") {
+          return {
+            from: makeZonePortId(toId, toPort),
+            to: makeZonePortId(fromId, fromPort),
+          };
+        }
+
+        if (toZone.type === "shots" && fromZone.type !== "shots") {
+          return {
+            from: makeZonePortId(fromId, fromPort),
+            to: makeZonePortId(toId, toPort),
+          };
+        }
+
+        return connection;
+      });
+
+      const deduped = normalized.filter((connection, index, array) => (
+        array.findIndex(item => item.from === connection.from && item.to === connection.to) === index
+      ));
+
+      const changed =
+        deduped.length !== prev.length ||
+        deduped.some((connection, index) => connection.from !== prev[index]?.from || connection.to !== prev[index]?.to);
+
+      return changed ? deduped : prev;
+    });
+  }, [zones]);
+
   // Get actors connected to a shots zone via zone connections
   const getConnectedActors = useCallback((shotsZoneId: string): Actor[] => {
-    const castingZoneIds = connections
-      .filter(c => c.to === shotsZoneId && zones.find(z => z.id === c.from)?.type === "casting")
-      .map(c => c.from);
+    const castingZoneIds = [...new Set(connections.flatMap(c => {
+      const fromId = getConnectionBaseId(c.from);
+      const toId = getConnectionBaseId(c.to);
+      const fromZone = zones.find(z => z.id === fromId);
+      const toZone = zones.find(z => z.id === toId);
+
+      if (!fromZone || !toZone) return [];
+      if (fromId === shotsZoneId && toZone.type === "casting") return [toId];
+      if (toId === shotsZoneId && fromZone.type === "casting") return [fromId];
+      return [];
+    }))];
     const actorIds = castNodes
       .filter(n => castingZoneIds.includes(n.zoneId))
       .map(n => n.actorId);
     return actors.filter(a => actorIds.includes(a.id));
-  }, [connections, zones, castNodes]);
+  }, [actors, connections, zones, castNodes]);
 
   // Find which zone a world coordinate falls in
   const findZoneAt = useCallback((wx: number, wy: number): string | undefined => {
@@ -604,45 +692,109 @@ export default function ProductionCanvasPage() {
   }, [pan, zoom]);
 
   const endConnect = useCallback((id: string) => {
-    if (connectingFrom && connectingFrom !== id) {
-      const exists = connections.some(c => c.from === connectingFrom && c.to === id);
-      if (!exists) setConnections(prev => [...prev, { from: connectingFrom, to: id }]);
+    if (!connectingFrom || connectingFrom === id) {
+      setConnectingFrom(null);
+      return;
     }
+
+    let nextFrom = connectingFrom;
+    let nextTo = id;
+
+    const fromZone = zones.find(z => z.id === getConnectionBaseId(connectingFrom));
+    const toZone = zones.find(z => z.id === getConnectionBaseId(id));
+
+    if (fromZone || toZone) {
+      if (!fromZone || !toZone) {
+        setConnectingFrom(null);
+        return;
+      }
+
+      const fromPort = getConnectionPortKey(connectingFrom);
+      const toPort = getConnectionPortKey(id);
+
+      const validForward =
+        toZone.type === "shots" &&
+        fromZone.type !== "shots" &&
+        !!fromPort &&
+        fromPort === toPort &&
+        fromZone.type === fromPort;
+
+      const validReverse =
+        fromZone.type === "shots" &&
+        toZone.type !== "shots" &&
+        !!fromPort &&
+        fromPort === toPort &&
+        toZone.type === fromPort;
+
+      if (!validForward && !validReverse) {
+        setConnectingFrom(null);
+        return;
+      }
+
+      if (validReverse) {
+        nextFrom = id;
+        nextTo = connectingFrom;
+      }
+    }
+
+    const exists = connections.some(c => c.from === nextFrom && c.to === nextTo);
+    if (!exists) setConnections(prev => [...prev, { from: nextFrom, to: nextTo }]);
     setConnectingFrom(null);
-  }, [connectingFrom, connections]);
+  }, [connectingFrom, connections, zones]);
 
   const getPortPos = useCallback((nodeId: string, side: "left" | "right") => {
-    // Check if it's a zone
-    const zb = zoneBounds[nodeId];
-    if (zb) return { x: side === "right" ? zb.x + zb.w : zb.x, y: zb.y + zb.h / 2 };
-    const f = frames.find(fr => fr.id === nodeId);
+    const baseId = getConnectionBaseId(nodeId);
+    const portKey = getConnectionPortKey(nodeId);
+    const zone = zones.find(z => z.id === baseId);
+    const zb = zoneBounds[baseId];
+
+    if (zone && zb) {
+      const port = zoneConnectorConfigs[zone.type].find(config => config.key === portKey);
+      if (port) {
+        return {
+          x: port.side === "right" ? zb.x + zb.w : zb.x,
+          y: zb.y + (zb.h * port.yFrac),
+        };
+      }
+
+      return { x: side === "right" ? zb.x + zb.w : zb.x, y: zb.y + zb.h / 2 };
+    }
+
+    const f = frames.find(fr => fr.id === baseId);
     if (f) return { x: side === "right" ? f.x + FRAME_W : f.x, y: f.y + PORT_Y };
-    const cn = castNodes.find(n => n.id === nodeId);
+    const cn = castNodes.find(n => n.id === baseId);
     if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
-    const ln = locationNodes.find(n => n.id === nodeId);
+    const ln = locationNodes.find(n => n.id === baseId);
     if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
-    const sn = scriptNodes.find(n => n.id === nodeId);
+    const sn = scriptNodes.find(n => n.id === baseId);
     if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
     return { x: 0, y: 0 };
-  }, [frames, castNodes, locationNodes, scriptNodes, zoneBounds]);
+  }, [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes]);
 
   const getZoneColor = useCallback((nodeId: string): string => {
-    const zone = zones.find(z => z.id === nodeId);
-    if (zone) return zone.color;
+    const baseId = getConnectionBaseId(nodeId);
+    const portKey = getConnectionPortKey(nodeId);
+    const zone = zones.find(z => z.id === baseId);
+    if (zone) {
+      const port = zoneConnectorConfigs[zone.type].find(config => config.key === portKey);
+      return port?.color ?? zone.color;
+    }
     // Check if node belongs to a zone
-    const castNode = castNodes.find(n => n.id === nodeId);
+    const castNode = castNodes.find(n => n.id === baseId);
     if (castNode) { const z = zones.find(zz => zz.id === castNode.zoneId); if (z) return z.color; }
-    const locNode = locationNodes.find(n => n.id === nodeId);
+    const locNode = locationNodes.find(n => n.id === baseId);
     if (locNode) { const z = zones.find(zz => zz.id === locNode.zoneId); if (z) return z.color; }
-    const scrNode = scriptNodes.find(n => n.id === nodeId);
+    const scrNode = scriptNodes.find(n => n.id === baseId);
     if (scrNode) { const z = zones.find(zz => zz.id === scrNode.zoneId); if (z) return z.color; }
     return "var(--primary)";
   }, [zones, castNodes, locationNodes, scriptNodes]);
 
   const connectors = connections.map(c => {
+    const fromId = getConnectionBaseId(c.from);
+    const toId = getConnectionBaseId(c.to);
     const p1 = getPortPos(c.from, "right");
     const p2 = getPortPos(c.to, "left");
-    const isZoneConn = zones.some(z => z.id === c.from) || zones.some(z => z.id === c.to);
+    const isZoneConn = zones.some(z => z.id === fromId) || zones.some(z => z.id === toId);
     const color = getZoneColor(c.from);
     return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
   });
@@ -791,25 +943,8 @@ export default function ProductionCanvasPage() {
                     }}
                   />
                   {/* Zone-level connectors */}
-                  {(() => {
-                    const portConfigs: Record<string, { key: string; color: string; label: string; side: "left" | "right"; yFrac: number }[]> = {
-                      shots: [
-                        { key: "casting",  color: "190 80% 50%",  label: "Casting",   side: "left",  yFrac: 0.3 },
-                        { key: "script",   color: "280 60% 55%",  label: "Script",    side: "left",  yFrac: 0.15 },
-                        { key: "location", color: "150 60% 45%",  label: "Locations", side: "left",  yFrac: 0.5 },
-                      ],
-                      casting: [
-                        { key: "out", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-                      ],
-                      script: [
-                        { key: "out", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-                      ],
-                      locations: [
-                        { key: "out", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-                      ],
-                    };
-                    const ports = portConfigs[zone.type] || [];
-                    return ports.map((port) => {
+                  {zoneConnectorConfigs[zone.type].map((port) => {
+                      const portId = makeZonePortId(zone.id, port.key);
                       const portColor = `hsl(${port.color})`;
                       const yPos = b.h * port.yFrac;
                       const isLeft = port.side === "left";
@@ -828,8 +963,8 @@ export default function ProductionCanvasPage() {
                                   [isLeft ? "left" : "right"]: -(size / 2),
                                   top: yPos - (size / 2),
                                 }}
-                                onMouseDown={(e) => { e.stopPropagation(); startConnect(e, zone.id); }}
-                                onMouseUp={(e) => { e.stopPropagation(); endConnect(zone.id); }}
+                                onMouseDown={(e) => { e.stopPropagation(); startConnect(e, portId); }}
+                                onMouseUp={(e) => { e.stopPropagation(); endConnect(portId); }}
                               >
                                 <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: portColor }} />
                               </div>
@@ -838,8 +973,7 @@ export default function ProductionCanvasPage() {
                           </Tooltip>
                         </TooltipProvider>
                       );
-                    });
-                  })()}
+                  })}
                   {/* Label */}
                   <div
                     className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none"
