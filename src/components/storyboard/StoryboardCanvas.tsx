@@ -364,15 +364,6 @@ export function StoryboardCanvas() {
           <Maximize className="w-4 h-4" />
         </button>
 
-        <div className="w-6 h-px bg-border my-0.5" />
-
-        <button onClick={() => setZoom(z => Math.max(0.2, z - 0.15))} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Zoom out">
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <span className="text-[10px] text-muted-foreground font-mono">{Math.round(zoom * 100)}%</span>
-        <button onClick={() => setZoom(z => Math.min(3, z + 0.15))} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Zoom in">
-          <ZoomIn className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Canvas */}
