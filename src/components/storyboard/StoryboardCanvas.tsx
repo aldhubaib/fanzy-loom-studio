@@ -321,8 +321,21 @@ export function StoryboardCanvas() {
       }
       setDragging(null);
     }
+    setDraggingNode(null);
     setConnectingFrom(null);
   }, [dragging, frames]);
+
+  const startNodeDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
+    if (tool !== "select") return;
+    e.stopPropagation();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+    const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+    setDragOffset({ x: mouseX - node.x, y: mouseY - node.y });
+    setDraggingNode(node.id);
+    setSelectedFrame(node.id);
+  }, [tool, pan, zoom]);
 
   const startFrameDrag = useCallback((e: React.MouseEvent, frame: FrameData) => {
     if (tool !== "select") return;
