@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand, Film, Images, ChevronDown, ChevronUp, ArrowLeftRight } from "lucide-react";
+import { Plus, User, Trash2, Sparkles, Check, ChevronLeft, ChevronRight, X, Expand, Film, Images, ChevronDown, ChevronUp, ArrowLeftRight, Shirt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -487,6 +487,8 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [swapOpen, setSwapOpen] = useState(false);
+  const [expandedScene, setExpandedScene] = useState<string | null>(null);
+  const [sceneWardrobe, setSceneWardrobe] = useState<Record<string, string>>({});
 
   // Get gender-matched attribute options
   const attrOptions = useMemo(() => getAttributeOptions(character.gender), [character.gender]);
@@ -625,12 +627,13 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               <Film className="w-4 h-4 text-muted-foreground" />
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Appears in</h3>
-                <p className="text-[11px] text-muted-foreground">Storyboard frames featuring this character</p>
+                <p className="text-[11px] text-muted-foreground">Click a scene to set wardrobe</p>
               </div>
             </div>
 
             {(() => {
               const appearances = characterAppearances[character.id] || [];
+              const wardrobeOptions = character.gender === "Female" ? femaleOptions.clothing! : maleOptions.clothing!;
               if (appearances.length === 0) {
                 return (
                   <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-4 flex flex-col items-center gap-1.5">
@@ -641,25 +644,76 @@ function CharacterDrawer({ character, onChange, onClose, onDelete, allCharacters
               }
               return (
                 <div className="space-y-2">
-                  {appearances.map(app => (
-                    <div
-                      key={app.frameId}
-                      className="flex items-center gap-3 rounded-xl border border-border bg-card p-2 hover:border-muted-foreground/40 transition-colors"
-                    >
-                      <img
-                        src={app.thumbnail}
-                        alt={app.scene}
-                        className="w-14 h-10 rounded-lg object-cover shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                  {appearances.map(app => {
+                    const isExpanded = expandedScene === app.frameId;
+                    const currentWardrobe = sceneWardrobe[app.frameId] || character.clothing || "";
+                    const wardrobeOpt = wardrobeOptions?.find(o => o.label === currentWardrobe);
+                    return (
+                      <div key={app.frameId} className="rounded-xl border border-border bg-card overflow-hidden">
+                        <button
+                          onClick={() => setExpandedScene(isExpanded ? null : app.frameId)}
+                          className="flex items-center gap-3 w-full p-2 hover:bg-secondary/30 transition-colors text-left"
+                        >
+                          <img
+                            src={app.thumbnail}
+                            alt={app.scene}
+                            className="w-14 h-10 rounded-lg object-cover shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-semibold text-primary">{app.scene}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{app.shot}</span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{app.description}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {wardrobeOpt && (
+                              <img src={wardrobeOpt.image} alt={currentWardrobe} className="w-6 h-6 rounded object-cover" />
+                            )}
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+                          </div>
+                        </button>
+
+                        {/* Expanded wardrobe picker */}
+                        {isExpanded && (
+                          <div className="px-2 pb-2 pt-1 border-t border-border bg-secondary/20">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Shirt className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Wardrobe for this scene</span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-1.5">
+                              {wardrobeOptions?.map(opt => {
+                                const isSelected = currentWardrobe === opt.label;
+                                return (
+                                  <button
+                                    key={opt.label}
+                                    onClick={() => setSceneWardrobe(prev => ({ ...prev, [app.frameId]: opt.label }))}
+                                    className={cn(
+                                      "relative rounded-lg overflow-hidden aspect-[3/4] transition-all",
+                                      isSelected
+                                        ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                                        : "hover:ring-1 hover:ring-border"
+                                    )}
+                                  >
+                                    <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" draggable={false} />
+                                    <div className={cn("absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent", isSelected && "from-primary/30")} />
+                                    {isSelected && (
+                                      <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
+                                        <Check className="w-2 h-2 text-primary-foreground" />
+                                      </div>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <p className={cn("text-[10px] text-center mt-1.5", currentWardrobe ? "text-primary font-medium" : "text-muted-foreground")}>
+                              {currentWardrobe || "Choose wardrobe"}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
