@@ -14,6 +14,18 @@ import actorMarlowe from "@/assets/actors/marlowe.png";
 import actorVivian from "@/assets/actors/vivian.png";
 import actorEddie from "@/assets/actors/eddie.png";
 
+import locOffice from "@/assets/locations/office.jpg";
+import locStreet from "@/assets/locations/street.jpg";
+import locJazzClub from "@/assets/locations/jazz-club.jpg";
+import locBridge from "@/assets/locations/bridge.jpg";
+
+const locationImages: Record<string, string> = {
+  "Office": locOffice,
+  "Street": locStreet,
+  "Jazz Club": locJazzClub,
+  "Bridge": locBridge,
+};
+
 const shotDescriptions: Record<string, string> = {
   "WIDE": "Wide Shot (WS) — Shows the full scene and environment, establishing location and context.",
   "MED": "Medium Shot (MS) — Frames the subject from the waist up, balancing character and environment.",
@@ -792,12 +804,15 @@ export function StoryboardCanvas() {
                 <div className="bg-card p-2.5 space-y-1.5 rounded-b-[10px] flex-1 overflow-hidden" onMouseDown={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-primary">SC {sceneNumber}</span>
-                    <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                       {frame.location && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground truncate max-w-[100px]">
-                          📍 {frame.location}
-                        </span>
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-secondary">
+                          {locationImages[frame.location] && (
+                            <img src={locationImages[frame.location]} alt={frame.location} className="w-4 h-4 rounded-sm object-cover" loading="lazy" />
+                          )}
+                          <span className="text-[9px] text-muted-foreground truncate max-w-[60px]">{frame.location}</span>
+                        </div>
                       )}
                     </div>
                   </div>
