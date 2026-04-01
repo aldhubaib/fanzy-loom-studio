@@ -193,6 +193,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
 
   const selectedAudience = audiences.find(a => a.label === audience);
   const selectedFormat = formats.find(f => f.label === format);
+  const selectedAspectRatio = aspectRatios.find(ar => ar.label === aspectRatio);
 
   return (
     <div className="h-full overflow-y-auto">
