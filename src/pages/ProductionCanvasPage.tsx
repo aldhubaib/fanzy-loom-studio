@@ -1015,7 +1015,6 @@ export default function ProductionCanvasPage() {
                   <>
                     <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
                     {["casting", "shots", "locations", "script"].map(type => {
-                      const exists = zones.some(z => z.type === type);
                       const icons: Record<string, React.ReactNode> = {
                         casting: <Users className="w-4 h-4" />,
                         shots: <Camera className="w-4 h-4" />,
@@ -1025,8 +1024,7 @@ export default function ProductionCanvasPage() {
                       const labels: Record<string, string> = { casting: "Casting", shots: "Shots", locations: "Locations", script: "Script" };
                       const colors: Record<string, string> = { casting: "190 80% 50%", shots: "220 70% 55%", locations: "150 60% 45%", script: "280 60% 55%" };
                       return (
-                        <button key={type} className={cn("flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground", exists && "opacity-40")}
-                          disabled={exists}
+                        <button key={type} className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
                           onClick={() => {
                             if (exists) return;
                             setZones(prev => [...prev, {
