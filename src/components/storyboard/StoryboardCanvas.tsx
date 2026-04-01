@@ -46,6 +46,9 @@ export function StoryboardCanvas() {
   const [tool, setTool] = useState<Tool>("select");
   const [dragging, setDragging] = useState<string | null>(null);
   const [panning, setPanning] = useState(false);
+  const [ctrlZooming, setCtrlZooming] = useState(false);
+  const [ctrlZoomStartY, setCtrlZoomStartY] = useState(0);
+  const [ctrlZoomStartZoom, setCtrlZoomStartZoom] = useState(1);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
@@ -61,8 +64,16 @@ export function StoryboardCanvas() {
     }
   }, []);
 
-  // Mouse down — start drag or pan
+  // Mouse down — start drag, pan, or ctrl+drag zoom
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0 && (e.ctrlKey || e.metaKey)) {
+      // Ctrl+drag to zoom
+      setCtrlZooming(true);
+      setCtrlZoomStartY(e.clientY);
+      setCtrlZoomStartZoom(zoom);
+      e.preventDefault();
+      return;
+    }
     if (e.button === 1 || (e.button === 0 && tool === "hand")) {
       setPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
@@ -70,9 +81,15 @@ export function StoryboardCanvas() {
     } else if (e.button === 0 && tool === "select") {
       setSelectedFrame(null);
     }
-  }, [tool, pan]);
+  }, [tool, pan, zoom]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (ctrlZooming) {
+      const deltaY = ctrlZoomStartY - e.clientY;
+      const newZoom = Math.min(3, Math.max(0.2, ctrlZoomStartZoom + deltaY * 0.005));
+      setZoom(newZoom);
+      return;
+    }
     if (panning) {
       setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
     }
@@ -83,9 +100,10 @@ export function StoryboardCanvas() {
       const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
       setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom]);
+  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom]);
 
   const handleMouseUp = useCallback(() => {
+    setCtrlZooming(false);
     setPanning(false);
     if (dragging) {
       // Snap-to-reorder: find if dragged frame overlaps another frame's position
@@ -107,15 +125,11 @@ export function StoryboardCanvas() {
           }
         });
         if (closestIdx >= 0) {
-          // Swap positions in array order, then auto-layout
           setFrames(prev => {
             const arr = [...prev];
             const [removed] = arr.splice(draggedIdx, 1);
             arr.splice(closestIdx, 0, removed);
-            // Re-layout after reorder
-            const cols = 3;
-            const gapX = 340;
-            const gapY = 280;
+            const cols = 3, gapX = 340, gapY = 280;
             return arr.map((f, i) => ({
               ...f,
               x: 80 + (i % cols) * gapX,
