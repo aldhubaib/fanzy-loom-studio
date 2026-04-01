@@ -559,6 +559,18 @@ export default function ProductionCanvasPage() {
       setConnectingMouse({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
     }
     if (panning) setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
+    if (draggingZone && zoneDragStart) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const worldX = (e.clientX - rect.left - pan.x) / zoom;
+      const worldY = (e.clientY - rect.top - pan.y) / zoom;
+      const dx = worldX - zoneDragStart.x;
+      const dy = worldY - zoneDragStart.y;
+      setZoneDragStart({ x: worldX, y: worldY });
+      setFrames(prev => prev.map(f => f.zoneId === draggingZone ? { ...f, x: f.x + dx, y: f.y + dy } : f));
+      setCastNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
+      setLocationNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
+    }
     if (dragging) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -568,7 +580,7 @@ export default function ProductionCanvasPage() {
       setCastNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom]);
+  }, [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart]);
 
   const handleMouseUp = useCallback(() => {
     setPanning(false);
