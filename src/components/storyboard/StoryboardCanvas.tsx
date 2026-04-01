@@ -139,6 +139,7 @@ export function StoryboardCanvas() {
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
   const [settingsFrame, setSettingsFrame] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ frameId: string; index: number } | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
