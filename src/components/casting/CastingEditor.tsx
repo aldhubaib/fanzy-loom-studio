@@ -794,7 +794,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                   selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
                 )}
               >
-                <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
+                <div className="aspect-[3/4] w-full bg-secondary overflow-hidden relative">
                   {displayImage ? (
                     <img src={displayImage} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" draggable={false} />
                   ) : (
@@ -813,35 +813,95 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                       {char.role}
                     </span>
                   </div>
+                  {/* Image count overlay */}
+                  {char.generatedPortraits.length > 0 && (
+                    <button
+                      className="absolute bottom-1.5 left-1.5 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 hover:bg-background/95 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setGalleryOpen(galleryOpen === char.id ? null : char.id);
+                      }}
+                    >
+                      <Images className="w-3 h-3" />
+                      {char.generatedPortraits.length}
+                      {galleryOpen === char.id ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                    </button>
+                  )}
                 </div>
 
-                {/* Portrait variants strip */}
-                {char.generatedPortraits.length > 1 && (
-                  <div className="flex gap-1 px-2 py-1.5 bg-card border-t border-border overflow-hidden">
-                    {char.generatedPortraits.slice(0, 4).map(p => {
-                      const isActive = char.selectedPortraitId === p.id;
-                      return (
-                        <div
-                          key={p.id}
-                          className={cn(
-                            "relative w-10 h-8 rounded-md overflow-hidden shrink-0 border",
-                            isActive ? "border-primary ring-1 ring-primary" : "border-border"
-                          )}
-                        >
-                          <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
-                          {isActive && (
-                            <div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
-                              <Check className="w-2 h-2 text-primary-foreground" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {char.generatedPortraits.length > 4 && (
-                      <div className="w-10 h-8 rounded-md bg-secondary flex items-center justify-center shrink-0 border border-border">
-                        <span className="text-[9px] text-muted-foreground">+{char.generatedPortraits.length - 4}</span>
-                      </div>
-                    )}
+                {/* Expandable gallery strip */}
+                {galleryOpen === char.id && char.generatedPortraits.length > 0 && (
+                  <div
+                    className="bg-secondary/90 relative flex items-stretch"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Expand button */}
+                    <button
+                      className="flex-shrink-0 w-9 flex items-center justify-center bg-card/80 hover:bg-card border-r border-border text-muted-foreground hover:text-foreground transition-colors z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const activeIdx = char.generatedPortraits.findIndex(p => p.id === char.selectedPortraitId);
+                        setCastLightbox({ charId: char.id, index: activeIdx >= 0 ? activeIdx : 0 });
+                      }}
+                      title="Open gallery"
+                    >
+                      <Expand className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Drag-to-scroll thumbnails */}
+                    <div
+                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 cursor-grab active:cursor-grabbing select-none"
+                      style={{ scrollbarWidth: "none", msOverflowStyle: "none", overflowX: "auto" }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        const el = e.currentTarget;
+                        const startX = e.pageX;
+                        const startScroll = el.scrollLeft;
+                        let moved = false;
+                        const onMove = (ev: MouseEvent) => {
+                          const dx = ev.pageX - startX;
+                          if (Math.abs(dx) > 3) moved = true;
+                          el.scrollLeft = startScroll - dx;
+                        };
+                        const onUp = () => {
+                          document.removeEventListener("mousemove", onMove);
+                          document.removeEventListener("mouseup", onUp);
+                          if (moved) {
+                            const blocker = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); };
+                            el.addEventListener("click", blocker, { capture: true, once: true });
+                          }
+                        };
+                        document.addEventListener("mousemove", onMove);
+                        document.addEventListener("mouseup", onUp);
+                      }}
+                    >
+                      {char.generatedPortraits.map(p => {
+                        const isActive = char.selectedPortraitId === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-14 h-10 ${
+                              isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCharacters(prev => prev.map(c =>
+                                c.id === char.id
+                                  ? { ...c, portrait: p.src, selectedPortraitId: p.id }
+                                  : c
+                              ));
+                            }}
+                          >
+                            <img src={p.src} alt={p.description} className="w-full h-full object-cover" draggable={false} />
+                            {isActive && (
+                              <div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-1.5 h-1.5 text-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
