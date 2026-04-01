@@ -281,7 +281,7 @@ export function StoryboardCanvas() {
       setCastNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
       setLocationNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
     }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
+  }, [panning, panStart, dragging, draggingNode, dragOffset, pan, zoom, ctrlZooming, ctrlZoomStartY, ctrlZoomStartZoom, connectingFrom]);
 
   const handleMouseUp = useCallback(() => {
     setCtrlZooming(false);
@@ -327,6 +327,7 @@ export function StoryboardCanvas() {
 
   const startNodeDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
     if (tool !== "select") return;
+    if (e.button !== 0) return;
     e.stopPropagation();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -1148,10 +1149,13 @@ export function StoryboardCanvas() {
               <button
                 key={actor.id}
                 className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   const newId = `cast-${Date.now()}`;
-                  setCastNodes(prev => [...prev, { id: newId, actorId: actor.id, x: castPickerPos.worldX, y: castPickerPos.worldY }]);
+                  setCastNodes(prev => [...prev, { id: newId, actorId: actor.id, x: castPickerPos!.worldX - CAST_W / 2, y: castPickerPos!.worldY }]);
                   setCastPickerPos(null);
+                  setDraggingNode(null);
+                  setDragging(null);
                 }}
               >
                 <img src={actor.avatar} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
@@ -1177,10 +1181,13 @@ export function StoryboardCanvas() {
               <button
                 key={name}
                 className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 transition-colors text-foreground"
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   const newId = `loc-${Date.now()}`;
-                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos.worldX, y: locationPickerPos.worldY }]);
+                  setLocationNodes(prev => [...prev, { id: newId, locationName: name, x: locationPickerPos!.worldX - LOC_W / 2, y: locationPickerPos!.worldY }]);
                   setLocationPickerPos(null);
+                  setDraggingNode(null);
+                  setDragging(null);
                 }}
               >
                 <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
