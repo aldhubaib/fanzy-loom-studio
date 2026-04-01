@@ -275,6 +275,32 @@ export function StoryboardCanvas() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const observers: ResizeObserver[] = [];
+    const nextHeights: Record<string, number> = {};
+
+    frames.forEach(frame => {
+      const el = frameRefs.current[frame.id];
+      if (!el) return;
+      nextHeights[frame.id] = el.offsetHeight;
+
+      const ro = new ResizeObserver(entries => {
+        const entry = entries[0];
+        if (!entry) return;
+        const h = entry.contentRect.height;
+        setFrameHeights(prev => (prev[frame.id] === h ? prev : { ...prev, [frame.id]: h }));
+      });
+      ro.observe(el);
+      observers.push(ro);
+    });
+
+    setFrameHeights(prev => ({ ...prev, ...nextHeights }));
+
+    return () => {
+      observers.forEach(o => o.disconnect());
+    };
+  }, [frames, connections]);
+
   // Space bar for hand tool
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.code === "Space" && !e.repeat) { setTool("hand"); e.preventDefault(); }};
