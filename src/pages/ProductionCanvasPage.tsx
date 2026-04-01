@@ -90,6 +90,15 @@ interface LocationNode {
   zoneId: string;
 }
 
+interface ScriptNode {
+  id: string;
+  heading: string;
+  body: string;
+  x: number;
+  y: number;
+  zoneId: string;
+}
+
 interface Zone {
   id: string;
   label: string;
