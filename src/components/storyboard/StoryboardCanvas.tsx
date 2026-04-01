@@ -687,9 +687,11 @@ export function StoryboardCanvas() {
                                   className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setFrames(prev => prev.map(f =>
-                                      f.id === frame.id ? { ...f, actors: f.actors.filter(a => a !== actorId) } : f
-                                    ));
+                                    const actor = actorRoster.find(a => a.id === actorId);
+                                    setActorChangePrompt({
+                                      frameId: frame.id, actorId, action: "remove",
+                                      actorName: actor?.name ?? "this actor",
+                                    });
                                   }}
                                 >
                                   <X className="w-2.5 h-2.5 text-destructive" />
