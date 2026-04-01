@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { genres, tones, settings, durations, audiences, formats } from "@/data/conceptOptions";
+import { genres, tones, settings, durations, audiences, formats, aspectRatios } from "@/data/conceptOptions";
 
 interface ConceptEditorProps {
   projectId?: string;
@@ -153,6 +153,7 @@ const mockConcept = {
   setting: "Modern City",
   audience: "Mature",
   format: "Film",
+  aspectRatio: "2.39:1",
 };
 
 export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
@@ -166,8 +167,8 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [duration, setDuration] = useState(isMockProject ? mockConcept.duration : "");
   const [setting, setSetting] = useState(isMockProject ? mockConcept.setting : "");
   const [audience, setAudience] = useState(isMockProject ? mockConcept.audience : "");
-  const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
-  
+    const [format, setFormat] = useState(isMockProject ? mockConcept.format : "");
+    const [aspectRatio, setAspectRatio] = useState(isMockProject ? mockConcept.aspectRatio : "");
 
   const [genreOpen, setGenreOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
@@ -175,6 +176,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
+  const [aspectRatioOpen, setAspectRatioOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
   const handleSurpriseMe = () => {
@@ -186,10 +188,12 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
     setSetting("Space");
     setAudience("General");
     setFormat("Film");
+    setAspectRatio("2.39:1");
   };
 
   const selectedAudience = audiences.find(a => a.label === audience);
   const selectedFormat = formats.find(f => f.label === format);
+  const selectedAspectRatio = aspectRatios.find(ar => ar.label === aspectRatio);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -243,6 +247,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => { setDurationOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !duration} />
             <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => { setAudienceOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !audience} />
             <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => { setFormatOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !format} />
+            <PickerButton label="Aspect Ratio" value={aspectRatio} emoji={selectedAspectRatio?.emoji} onClick={() => { setAspectRatioOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !aspectRatio} />
           </div>
 
           {/* Dialogs */}
@@ -252,12 +257,13 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
           <ListPickerDialog open={durationOpen} onOpenChange={setDurationOpen} title="Choose Duration" items={durations} selected={duration} onSelect={setDuration} />
           <ListPickerDialog open={audienceOpen} onOpenChange={setAudienceOpen} title="Choose Audience" items={audiences} selected={audience} onSelect={setAudience} />
           <ListPickerDialog open={formatOpen} onOpenChange={setFormatOpen} title="Choose Format" items={formats} selected={format} onSelect={setFormat} />
+          <ListPickerDialog open={aspectRatioOpen} onOpenChange={setAspectRatioOpen} title="Choose Aspect Ratio" items={aspectRatios} selected={aspectRatio} onSelect={setAspectRatio} />
 
           {/* Continue button */}
           <div className="flex items-center mt-8">
             <Button
               onClick={() => {
-                const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format);
+                const isReady = !!(idea.trim() && genre && tone && setting && duration && audience && format && aspectRatio);
                 if (!isReady) {
                   setShowErrors(true);
                   return;
@@ -266,7 +272,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
               }}
               className={cn(
                 "gap-2 px-6 h-11 text-base font-semibold",
-                (idea.trim() && genre && tone && setting && duration && audience && format)
+                (idea.trim() && genre && tone && setting && duration && audience && format && aspectRatio)
                   ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                   : "bg-primary/40 text-primary-foreground/60"
               )}
