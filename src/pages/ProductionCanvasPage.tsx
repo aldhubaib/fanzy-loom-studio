@@ -783,7 +783,6 @@ export default function ProductionCanvasPage() {
                     onMouseDown={(e) => {
                       if (e.button !== 0 || editingZoneLabel === zone.id) return;
                       e.stopPropagation();
-                      setSelected({ type: "zone", id: zone.id });
                       setDraggingZone(zone.id);
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
