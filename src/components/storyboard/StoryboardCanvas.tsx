@@ -311,13 +311,13 @@ export function StoryboardCanvas() {
   }, []);
 
   const deleteFrame = useCallback((idx: number) => {
-    setFrames(prev => {
-      const arr = prev.filter((_, i) => i !== idx);
-      const cols = 3, gapX = 340, gapY = 280;
-      return arr.map((f, i) => ({ ...f, x: 80 + (i % cols) * gapX, y: 80 + Math.floor(i / cols) * gapY }));
-    });
+    const deletedId = frames[idx]?.id;
+    setFrames(prev => prev.filter((_, i) => i !== idx));
+    if (deletedId) {
+      setConnections(prev => prev.filter(c => c.from !== deletedId && c.to !== deletedId));
+    }
     setSelectedFrame(null);
-  }, []);
+  }, [frames]);
 
   // Fit on mount
   useEffect(() => {
