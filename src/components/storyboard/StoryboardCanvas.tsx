@@ -645,8 +645,7 @@ export function StoryboardCanvas() {
                   </Popover>
                 </div>
 
-
-
+                <div className="w-full h-[150px] bg-secondary overflow-hidden rounded-t-[10px] relative">
                   {frame.image ? (
                     <img
                       src={frame.image}
