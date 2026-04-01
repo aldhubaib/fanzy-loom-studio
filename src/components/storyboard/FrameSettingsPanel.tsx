@@ -571,6 +571,9 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         items={locationOptions}
         selected={location}
         onSelect={setLocation}
+        allowCustom
+        customItems={customLocations}
+        onAddCustom={(item) => setCustomLocations(prev => [...prev, item])}
       />
       {selectedActors.map(actorId => {
         const actor = actorRoster.find(a => a.id === actorId);
@@ -583,6 +586,9 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
             items={wardrobeOptions}
             selected={actorWardrobe[actorId] || ""}
             onSelect={(v) => setActorWardrobe(prev => ({ ...prev, [actorId]: v }))}
+            allowCustom
+            customItems={customWardrobes}
+            onAddCustom={(item) => setCustomWardrobes(prev => [...prev, item])}
           />
         );
       })}
