@@ -162,6 +162,9 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
   const [tone, setTone] = useState(isMockProject ? mockConcept.tone : "");
   const [duration, setDuration] = useState(isMockProject ? mockConcept.duration : "");
   const [conceptGenerated, setConceptGenerated] = useState(isMockProject);
+  const [genreOpen, setGenreOpen] = useState(false);
+  const [toneOpen, setToneOpen] = useState(false);
+  const [durationOpen, setDurationOpen] = useState(false);
 
   const [logline, setLogline] = useState(isMockProject ? mockConcept.logline : "");
   const [synopsis, setSynopsis] = useState(isMockProject ? mockConcept.synopsis : "");
