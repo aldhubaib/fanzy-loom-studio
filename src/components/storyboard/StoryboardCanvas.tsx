@@ -75,7 +75,7 @@ const initialFrames: FrameData[] = [
   },
   {
     id: "f3", x: 760, y: 80, image: frame3, scene: "SC 2", shot: "WIDE",
-    description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"],
+    description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club",
     generatedImages: [], selectedImageId: null,
   },
   {
