@@ -215,12 +215,9 @@ export function FrameSettingsPanel({ frame, sceneNumber, actorRoster, onUpdate, 
         {/* Scene */}
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Scene</Label>
-          <Input
-            value={scene}
-            onChange={(e) => setScene(e.target.value)}
-            className="h-8 text-sm"
-            placeholder="SC 1"
-          />
+          <div className="h-8 px-3 flex items-center rounded-md bg-secondary text-sm text-foreground">
+            SC {sceneNumber}
+          </div>
         </div>
 
         {/* Prompt */}
