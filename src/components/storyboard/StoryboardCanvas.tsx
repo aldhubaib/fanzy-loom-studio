@@ -561,8 +561,18 @@ export function StoryboardCanvas() {
                           const srcFrame = frames.find(f => f.id === conn.from);
                           if (!srcFrame || !srcFrame.image) return null;
                           return (
-                            <div key={conn.from} className="w-10 h-7 rounded overflow-hidden border border-border/50 flex-shrink-0">
+                            <div key={conn.from} className="relative group/thumb w-10 h-7 rounded overflow-hidden border border-border/50 flex-shrink-0">
                               <img src={srcFrame.image} alt={srcFrame.scene} className="w-full h-full object-cover" draggable={false} />
+                              <button
+                                className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConnections(prev => prev.filter(c => !(c.from === conn.from && c.to === conn.to)));
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                              >
+                                <X className="w-3 h-3 text-destructive" />
+                              </button>
                             </div>
                           );
                         })}
