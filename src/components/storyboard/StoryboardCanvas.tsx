@@ -720,10 +720,33 @@ export function StoryboardCanvas() {
                       <Expand className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Scrollable thumbnails */}
+                    {/* Drag-to-scroll thumbnails */}
                     <div
-                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 overflow-x-auto"
-                      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 cursor-grab active:cursor-grabbing select-none"
+                      style={{ scrollbarWidth: "none", msOverflowStyle: "none", overflowX: "auto" }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        const el = e.currentTarget;
+                        const startX = e.pageX;
+                        const startScroll = el.scrollLeft;
+                        let moved = false;
+                        const onMove = (ev: MouseEvent) => {
+                          const dx = ev.pageX - startX;
+                          if (Math.abs(dx) > 3) moved = true;
+                          el.scrollLeft = startScroll - dx;
+                        };
+                        const onUp = () => {
+                          document.removeEventListener("mousemove", onMove);
+                          document.removeEventListener("mouseup", onUp);
+                          if (moved) {
+                            // Block the next click so selecting doesn't fire after drag
+                            const blocker = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault(); };
+                            el.addEventListener("click", blocker, { capture: true, once: true });
+                          }
+                        };
+                        document.addEventListener("mousemove", onMove);
+                        document.addEventListener("mouseup", onUp);
+                      }}
                     >
                       {frame.generatedImages.map(img => {
                         const isActive = frame.selectedImageId === img.id;
