@@ -802,17 +802,17 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                       <User className="w-12 h-12 text-muted-foreground/20" />
                     </div>
                   )}
-                  <div className="absolute top-2 left-2">
-                    <span className={cn(
-                      "text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md",
-                      char.role === "Protagonist" && "bg-amber-500/20 text-amber-300",
-                      char.role === "Antagonist" && "bg-red-500/20 text-red-300",
-                      char.role === "Supporting" && "bg-blue-500/20 text-blue-300",
-                      char.role === "Extra" && "bg-slate-500/20 text-slate-300",
-                    )}>
-                      {char.role}
-                    </span>
-                  </div>
+                  {(() => {
+                    const sceneCount = (characterAppearances[char.id] || []).length;
+                    if (sceneCount === 0) return null;
+                    return (
+                      <div className="absolute top-2 left-2">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md bg-black/50 text-white/90">
+                          {sceneCount} scene{sceneCount !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    );
+                  })()}
                   {/* Image count overlay */}
                   {char.generatedPortraits.length > 0 && (
                     <button
