@@ -822,11 +822,6 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
                 <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
                   {char.description || "Click to define"}
                 </p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {char.gender && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.gender}</span>}
-                  {char.ageRange && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.ageRange.split(" ")[0]}</span>}
-                  {char.bodyType && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{char.bodyType}</span>}
-                </div>
               </div>
             </motion.button>
           ))}
