@@ -12,6 +12,40 @@ import detectiveImg from "@/assets/casting/detective.jpg";
 import femmeFataleImg from "@/assets/casting/femme-fatale.jpg";
 import olderGentlemanImg from "@/assets/casting/older-gentleman.jpg";
 
+// Storyboard frames for "Appears in" section
+import frame1 from "@/assets/storyboard/frame-1.jpg";
+import frame2 from "@/assets/storyboard/frame-2.jpg";
+import frame3 from "@/assets/storyboard/frame-3.jpg";
+import frame4 from "@/assets/storyboard/frame-4.jpg";
+import frame5 from "@/assets/storyboard/frame-5.jpg";
+import frame6 from "@/assets/storyboard/frame-6.jpg";
+
+interface StoryboardAppearance {
+  frameId: string;
+  scene: string;
+  shot: string;
+  description: string;
+  thumbnail: string;
+}
+
+// Mock: which storyboard frames each character appears in
+const characterAppearances: Record<string, StoryboardAppearance[]> = {
+  "1": [ // Jack Marlowe
+    { frameId: "f1", scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", thumbnail: frame1 },
+    { frameId: "f2", scene: "SC 2", shot: "MED", description: "Vivian enters the office. Marlowe looks up.", thumbnail: frame2 },
+    { frameId: "f4", scene: "SC 3", shot: "CU", description: "Close-up on Marlowe's reaction.", thumbnail: frame4 },
+    { frameId: "f5", scene: "SC 4", shot: "OTS", description: "Marlowe and Vivian exchange files.", thumbnail: frame5 },
+  ],
+  "2": [ // Vivian Lake
+    { frameId: "f2", scene: "SC 2", shot: "MED", description: "Vivian enters the office. Marlowe looks up.", thumbnail: frame2 },
+    { frameId: "f3", scene: "SC 2", shot: "CU", description: "Close-up of Vivian at the jazz club.", thumbnail: frame3 },
+    { frameId: "f5", scene: "SC 4", shot: "OTS", description: "Marlowe and Vivian exchange files.", thumbnail: frame5 },
+  ],
+  "3": [ // Victor Kane
+    { frameId: "f6", scene: "SC 5", shot: "LOW", description: "Kane stands in his office, city skyline behind.", thumbnail: frame6 },
+  ],
+};
+
 // ─── Male images ────────────────────────────────────────────
 import buildSlim from "@/assets/casting/build-slim.jpg";
 import buildAverage from "@/assets/casting/build-average.jpg";
