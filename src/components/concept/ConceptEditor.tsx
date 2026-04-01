@@ -272,7 +272,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
               }}
               className={cn(
                 "gap-2 px-6 h-11 text-base font-semibold",
-                (idea.trim() && genre && tone && setting && duration && audience && format)
+                (idea.trim() && genre && tone && setting && duration && audience && format && aspectRatio)
                   ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                   : "bg-primary/40 text-primary-foreground/60"
               )}

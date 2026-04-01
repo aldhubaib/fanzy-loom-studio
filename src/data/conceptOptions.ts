@@ -88,3 +88,12 @@ export const formats = [
   { label: "Short", detail: "Under 10 min", emoji: "⚡" },
   { label: "Music Video", detail: "Visual + music", emoji: "🎵" },
 ];
+
+export const aspectRatios = [
+  { label: "16:9", detail: "Widescreen — YouTube, TV", emoji: "🖥️" },
+  { label: "2.39:1", detail: "Anamorphic — Cinema", emoji: "🎬" },
+  { label: "1.85:1", detail: "Flat — Theatrical", emoji: "📽️" },
+  { label: "4:3", detail: "Classic — Retro TV", emoji: "📺" },
+  { label: "9:16", detail: "Vertical — TikTok, Reels", emoji: "📱" },
+  { label: "1:1", detail: "Square — Instagram", emoji: "⬜" },
+];
