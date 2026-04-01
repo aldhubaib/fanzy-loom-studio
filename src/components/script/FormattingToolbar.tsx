@@ -25,19 +25,11 @@ type ElementTypeId = typeof elementTypes[number]["id"];
 interface FormattingToolbarProps {
   activeElement: ElementTypeId;
   onElementChange: (el: ElementTypeId) => void;
-  focusMode: boolean;
-  onFocusModeChange: (v: boolean) => void;
-  fontSize: number;
-  onFontSizeChange: (size: number) => void;
 }
 
 export function FormattingToolbar({
   activeElement,
   onElementChange,
-  focusMode,
-  onFocusModeChange,
-  fontSize,
-  onFontSizeChange,
 }: FormattingToolbarProps) {
   const [hasSelection, setHasSelection] = useState(false);
   const [selectionText, setSelectionText] = useState("");
