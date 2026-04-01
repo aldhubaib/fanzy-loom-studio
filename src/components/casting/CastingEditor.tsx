@@ -12,17 +12,79 @@ import detectiveImg from "@/assets/casting/detective.jpg";
 import femmeFataleImg from "@/assets/casting/femme-fatale.jpg";
 import olderGentlemanImg from "@/assets/casting/older-gentleman.jpg";
 
-// Attribute reference images
+// Build
 import buildSlim from "@/assets/casting/build-slim.jpg";
 import buildAverage from "@/assets/casting/build-average.jpg";
 import buildMuscular from "@/assets/casting/build-muscular.jpg";
 import buildHeavy from "@/assets/casting/build-heavy.jpg";
+// Hair style
 import hairShort from "@/assets/casting/hair-short.jpg";
 import hairLong from "@/assets/casting/hair-long.jpg";
 import hairCurly from "@/assets/casting/hair-curly.jpg";
 import hairBald from "@/assets/casting/hair-bald.jpg";
 import hairSlicked from "@/assets/casting/hair-slicked.jpg";
 import hairBraided from "@/assets/casting/hair-braided.jpg";
+// Gender
+import genderMale from "@/assets/casting/gender-male.jpg";
+import genderFemale from "@/assets/casting/gender-female.jpg";
+import genderNonbinary from "@/assets/casting/gender-nonbinary.jpg";
+// Age
+import ageChild from "@/assets/casting/age-child.jpg";
+import ageTeen from "@/assets/casting/age-teen.jpg";
+import ageYoungAdult from "@/assets/casting/age-young-adult.jpg";
+import ageMiddle from "@/assets/casting/age-middle.jpg";
+import ageSenior from "@/assets/casting/age-senior.jpg";
+// Ethnicity
+import ethCaucasian from "@/assets/casting/eth-caucasian.jpg";
+import ethAfrican from "@/assets/casting/eth-african.jpg";
+import ethEastAsian from "@/assets/casting/eth-east-asian.jpg";
+import ethSouthAsian from "@/assets/casting/eth-south-asian.jpg";
+import ethHispanic from "@/assets/casting/eth-hispanic.jpg";
+import ethMiddleEastern from "@/assets/casting/eth-middle-eastern.jpg";
+import ethMixed from "@/assets/casting/eth-mixed.jpg";
+// Height
+import heightShort from "@/assets/casting/height-short.jpg";
+import heightAverage from "@/assets/casting/height-average.jpg";
+import heightTall from "@/assets/casting/height-tall.jpg";
+import heightVeryTall from "@/assets/casting/height-very-tall.jpg";
+// Eye color
+import eyeBrown from "@/assets/casting/eye-brown.jpg";
+import eyeBlue from "@/assets/casting/eye-blue.jpg";
+import eyeGreen from "@/assets/casting/eye-green.jpg";
+import eyeHazel from "@/assets/casting/eye-hazel.jpg";
+import eyeGray from "@/assets/casting/eye-gray.jpg";
+import eyeAmber from "@/assets/casting/eye-amber.jpg";
+// Hair color
+import haircBlack from "@/assets/casting/hairc-black.jpg";
+import haircDarkBrown from "@/assets/casting/hairc-dark-brown.jpg";
+import haircLightBrown from "@/assets/casting/hairc-light-brown.jpg";
+import haircBlonde from "@/assets/casting/hairc-blonde.jpg";
+import haircRed from "@/assets/casting/hairc-red.jpg";
+import haircAuburn from "@/assets/casting/hairc-auburn.jpg";
+import haircGray from "@/assets/casting/hairc-gray.jpg";
+import haircWhite from "@/assets/casting/hairc-white.jpg";
+// Skin tone
+import skinVeryLight from "@/assets/casting/skin-very-light.jpg";
+import skinLight from "@/assets/casting/skin-light.jpg";
+import skinMediumLight from "@/assets/casting/skin-medium-light.jpg";
+import skinMedium from "@/assets/casting/skin-medium.jpg";
+import skinMediumDark from "@/assets/casting/skin-medium-dark.jpg";
+import skinDark from "@/assets/casting/skin-dark.jpg";
+// Clothing
+import outfitCasual from "@/assets/casting/outfit-casual.jpg";
+import outfitFormal from "@/assets/casting/outfit-formal.jpg";
+import outfitHighfashion from "@/assets/casting/outfit-highfashion.jpg";
+import outfitMilitary from "@/assets/casting/outfit-military.jpg";
+import outfitVintage from "@/assets/casting/outfit-vintage.jpg";
+import outfitStreetwear from "@/assets/casting/outfit-streetwear.jpg";
+import outfitBusiness from "@/assets/casting/outfit-business.jpg";
+// Details
+import detailNone from "@/assets/casting/detail-none.jpg";
+import detailScar from "@/assets/casting/detail-scar.jpg";
+import detailFreckles from "@/assets/casting/detail-freckles.jpg";
+import detailTattoos from "@/assets/casting/detail-tattoos.jpg";
+import detailGlasses from "@/assets/casting/detail-glasses.jpg";
+import detailBirthmark from "@/assets/casting/detail-birthmark.jpg";
 
 // ─── Types ──────────────────────────────────────────────────
 interface GeneratedPortrait {
@@ -54,9 +116,7 @@ interface Character {
 
 interface VisualOption {
   label: string;
-  image?: string;
-  color?: string;
-  gradient?: string;
+  image: string;
 }
 
 type AttributeKey = "gender" | "ageRange" | "ethnicity" | "bodyType" | "height" | "hairStyle" | "hairColor" | "eyeColor" | "skinTone" | "clothing" | "distinguishingFeatures";
@@ -77,25 +137,25 @@ const attributeCategories: { key: AttributeKey; label: string }[] = [
 
 const attributeOptions: Record<AttributeKey, VisualOption[]> = {
   gender: [
-    { label: "Male", gradient: "from-blue-900/60 to-blue-700/20" },
-    { label: "Female", gradient: "from-pink-900/60 to-pink-700/20" },
-    { label: "Non-binary", gradient: "from-purple-900/60 to-purple-700/20" },
+    { label: "Male", image: genderMale },
+    { label: "Female", image: genderFemale },
+    { label: "Non-binary", image: genderNonbinary },
   ],
   ageRange: [
-    { label: "Child (5-12)", gradient: "from-green-900/50 to-green-700/20" },
-    { label: "Teen (13-17)", gradient: "from-cyan-900/50 to-cyan-700/20" },
-    { label: "Young Adult (18-30)", gradient: "from-blue-900/50 to-blue-700/20" },
-    { label: "Middle Age (31-55)", gradient: "from-amber-900/50 to-amber-700/20" },
-    { label: "Senior (56+)", gradient: "from-stone-800/50 to-stone-600/20" },
+    { label: "Child (5-12)", image: ageChild },
+    { label: "Teen (13-17)", image: ageTeen },
+    { label: "Young Adult (18-30)", image: ageYoungAdult },
+    { label: "Middle Age (31-55)", image: ageMiddle },
+    { label: "Senior (56+)", image: ageSenior },
   ],
   ethnicity: [
-    { label: "Caucasian", gradient: "from-stone-800/50 to-stone-600/20" },
-    { label: "African", gradient: "from-amber-900/50 to-amber-700/20" },
-    { label: "East Asian", gradient: "from-red-900/50 to-red-700/20" },
-    { label: "South Asian", gradient: "from-orange-900/50 to-orange-700/20" },
-    { label: "Hispanic", gradient: "from-emerald-900/50 to-emerald-700/20" },
-    { label: "Middle Eastern", gradient: "from-amber-800/50 to-amber-600/20" },
-    { label: "Mixed", gradient: "from-violet-900/50 to-violet-700/20" },
+    { label: "Caucasian", image: ethCaucasian },
+    { label: "African", image: ethAfrican },
+    { label: "East Asian", image: ethEastAsian },
+    { label: "South Asian", image: ethSouthAsian },
+    { label: "Hispanic", image: ethHispanic },
+    { label: "Middle Eastern", image: ethMiddleEastern },
+    { label: "Mixed", image: ethMixed },
   ],
   bodyType: [
     { label: "Slim", image: buildSlim },
@@ -104,10 +164,10 @@ const attributeOptions: Record<AttributeKey, VisualOption[]> = {
     { label: "Heavy", image: buildHeavy },
   ],
   height: [
-    { label: "Short", gradient: "from-stone-800/50 to-stone-600/20" },
-    { label: "Average", gradient: "from-blue-900/50 to-blue-700/20" },
-    { label: "Tall", gradient: "from-emerald-900/50 to-emerald-700/20" },
-    { label: "Very Tall", gradient: "from-amber-900/50 to-amber-700/20" },
+    { label: "Short", image: heightShort },
+    { label: "Average", image: heightAverage },
+    { label: "Tall", image: heightTall },
+    { label: "Very Tall", image: heightVeryTall },
   ],
   hairStyle: [
     { label: "Short", image: hairShort },
@@ -118,47 +178,47 @@ const attributeOptions: Record<AttributeKey, VisualOption[]> = {
     { label: "Braided", image: hairBraided },
   ],
   hairColor: [
-    { label: "Black", color: "#1a1a1a" },
-    { label: "Dark Brown", color: "#3d2314" },
-    { label: "Light Brown", color: "#8b6914" },
-    { label: "Blonde", color: "#d4a843" },
-    { label: "Red", color: "#8b2500" },
-    { label: "Auburn", color: "#6b3a2a" },
-    { label: "Gray", color: "#808080" },
-    { label: "White", color: "#e0e0e0" },
+    { label: "Black", image: haircBlack },
+    { label: "Dark Brown", image: haircDarkBrown },
+    { label: "Light Brown", image: haircLightBrown },
+    { label: "Blonde", image: haircBlonde },
+    { label: "Red", image: haircRed },
+    { label: "Auburn", image: haircAuburn },
+    { label: "Gray", image: haircGray },
+    { label: "White", image: haircWhite },
   ],
   eyeColor: [
-    { label: "Brown", color: "#5c3317" },
-    { label: "Blue", color: "#3a7bd5" },
-    { label: "Green", color: "#2d6a4f" },
-    { label: "Hazel", color: "#8b7355" },
-    { label: "Gray", color: "#778899" },
-    { label: "Amber", color: "#c68e17" },
+    { label: "Brown", image: eyeBrown },
+    { label: "Blue", image: eyeBlue },
+    { label: "Green", image: eyeGreen },
+    { label: "Hazel", image: eyeHazel },
+    { label: "Gray", image: eyeGray },
+    { label: "Amber", image: eyeAmber },
   ],
   skinTone: [
-    { label: "Very Light", color: "#fde7d3" },
-    { label: "Light", color: "#f0c8a0" },
-    { label: "Medium Light", color: "#d4a06a" },
-    { label: "Medium", color: "#b07c4f" },
-    { label: "Medium Dark", color: "#8b5e3c" },
-    { label: "Dark", color: "#5c3a21" },
+    { label: "Very Light", image: skinVeryLight },
+    { label: "Light", image: skinLight },
+    { label: "Medium Light", image: skinMediumLight },
+    { label: "Medium", image: skinMedium },
+    { label: "Medium Dark", image: skinMediumDark },
+    { label: "Dark", image: skinDark },
   ],
   clothing: [
-    { label: "Casual", gradient: "from-blue-900/40 to-blue-700/20" },
-    { label: "Formal", gradient: "from-stone-900/40 to-stone-700/20" },
-    { label: "High Fashion", gradient: "from-purple-900/40 to-purple-700/20" },
-    { label: "Military", gradient: "from-green-900/40 to-green-700/20" },
-    { label: "Vintage", gradient: "from-amber-900/40 to-amber-700/20" },
-    { label: "Streetwear", gradient: "from-red-900/40 to-red-700/20" },
-    { label: "Business", gradient: "from-slate-900/40 to-slate-700/20" },
+    { label: "Casual", image: outfitCasual },
+    { label: "Formal", image: outfitFormal },
+    { label: "High Fashion", image: outfitHighfashion },
+    { label: "Military", image: outfitMilitary },
+    { label: "Vintage", image: outfitVintage },
+    { label: "Streetwear", image: outfitStreetwear },
+    { label: "Business", image: outfitBusiness },
   ],
   distinguishingFeatures: [
-    { label: "None", gradient: "from-muted to-muted/50" },
-    { label: "Facial Scar", gradient: "from-red-900/40 to-red-700/20" },
-    { label: "Freckles", gradient: "from-amber-900/40 to-amber-700/20" },
-    { label: "Tattoos", gradient: "from-indigo-900/40 to-indigo-700/20" },
-    { label: "Glasses", gradient: "from-blue-900/40 to-blue-700/20" },
-    { label: "Birthmark", gradient: "from-rose-900/40 to-rose-700/20" },
+    { label: "None", image: detailNone },
+    { label: "Facial Scar", image: detailScar },
+    { label: "Freckles", image: detailFreckles },
+    { label: "Tattoos", image: detailTattoos },
+    { label: "Glasses", image: detailGlasses },
+    { label: "Birthmark", image: detailBirthmark },
   ],
 };
 
@@ -202,7 +262,7 @@ const initialCharacters: Character[] = [
   },
 ];
 
-// ─── Attribute Picker Dialog ────────────────────────────────
+// ─── Attribute Picker Dialog (all images) ───────────────────
 function AttributePickerDialog({
   open, onOpenChange, category, options, selected, onSelect,
 }: {
@@ -217,42 +277,25 @@ function AttributePickerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl bg-card border-border">
         <DialogHeader><DialogTitle>{category}</DialogTitle></DialogHeader>
-        <div className={cn(
-          "grid gap-3 mt-4",
-          options.some(o => o.image) ? "grid-cols-3 sm:grid-cols-4" : options.some(o => o.color) ? "grid-cols-4 sm:grid-cols-6" : "grid-cols-2 sm:grid-cols-3"
-        )}>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
           {options.map(opt => {
             const isSelected = selected === opt.label;
-            const isImage = !!opt.image;
-            const isColor = !!opt.color && !opt.image;
-
             return (
               <div key={opt.label}>
                 <button
                   onClick={() => { onSelect(opt.label); onOpenChange(false); }}
                   className={cn(
-                    "relative w-full overflow-hidden transition-all duration-200",
-                    isImage && "rounded-xl aspect-[3/4]",
-                    isColor && "rounded-full aspect-square mx-auto w-16",
-                    !isImage && !isColor && "rounded-xl aspect-[4/3] bg-gradient-to-br",
-                    !isImage && !isColor && (opt.gradient || "from-muted to-muted/50"),
+                    "relative w-full overflow-hidden rounded-xl aspect-[3/4] transition-all duration-200",
                     isSelected
                       ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.03]"
                       : "hover:scale-[1.03] hover:ring-1 hover:ring-border"
                   )}
-                  style={isColor ? { backgroundColor: opt.color } : undefined}
                 >
-                  {isImage && (
-                    <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" draggable={false} />
-                  )}
-                  {!isImage && !isColor && (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-foreground/20">{opt.label.charAt(0)}</span>
-                    </div>
-                  )}
+                  <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" draggable={false} />
+                  <div className={cn("absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent", isSelected && "from-primary/30")} />
                   {isSelected && (
-                    <div className={cn("absolute flex items-center justify-center bg-primary", isColor ? "top-0 right-0 w-4 h-4 rounded-full" : "top-2 right-2 w-5 h-5 rounded-full")}>
-                      <Check className={cn("text-primary-foreground", isColor ? "w-2.5 h-2.5" : "w-3 h-3")} />
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="w-3 h-3 text-primary-foreground" />
                     </div>
                   )}
                 </button>
@@ -283,11 +326,9 @@ function AttributeRow({ label, value, options, onClick }: {
     >
       {opt?.image ? (
         <img src={opt.image} alt={value} className="w-8 h-8 rounded-lg object-cover" />
-      ) : opt?.color ? (
-        <div className="w-8 h-8 rounded-full border border-border/50" style={{ backgroundColor: opt.color }} />
       ) : (
-        <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center", opt?.gradient || "from-muted to-muted/50")}>
-          <span className="text-xs font-bold text-foreground/30">{(value || "?").charAt(0)}</span>
+        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+          <Plus className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -439,9 +480,7 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
             ) : (
               <div className="rounded-lg border-2 border-dashed border-border bg-card/30 p-6 flex flex-col items-center gap-2">
                 <Sparkles className="w-6 h-6 text-muted-foreground/30" />
-                <p className="text-xs text-muted-foreground text-center">
-                  Generate portrait options
-                </p>
+                <p className="text-xs text-muted-foreground text-center">Generate portrait options</p>
               </div>
             )}
           </div>
@@ -475,21 +514,12 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
 
       {/* Lightbox */}
       {lightboxIndex !== null && character.generatedPortraits.length > 0 && (
-        <div
-          className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
-          onClick={() => setLightboxIndex(null)}
-        >
-          <button
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            onClick={() => setLightboxIndex(null)}
-          >
+        <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center" onClick={() => setLightboxIndex(null)}>
+          <button className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={() => setLightboxIndex(null)}>
             <X className="w-5 h-5 text-white" />
           </button>
           {lightboxIndex > 0 && (
-            <button
-              className="absolute left-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
-            >
+            <button className="absolute left-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}>
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
           )}
@@ -498,16 +528,12 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
             <div className="flex items-center justify-between mt-4 px-2">
               <p className="text-sm text-white/70">{character.generatedPortraits[lightboxIndex].description}</p>
               <Button size="sm" onClick={() => { selectPortrait(character.generatedPortraits[lightboxIndex!]); setLightboxIndex(null); }} className="gap-1.5">
-                <Check className="w-3.5 h-3.5" />
-                Use This
+                <Check className="w-3.5 h-3.5" /> Use This
               </Button>
             </div>
           </div>
           {lightboxIndex < character.generatedPortraits.length - 1 && (
-            <button
-              className="absolute right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
-            >
+            <button className="absolute right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}>
               <ChevronRight className="w-5 h-5 text-white" />
             </button>
           )}
@@ -540,24 +566,10 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
 
   const addCharacter = useCallback(() => {
     const newChar: Character = {
-      id: `char-${Date.now()}`,
-      name: "New Character",
-      role: "Supporting",
-      description: "",
-      portrait: "",
-      gender: "",
-      ageRange: "",
-      ethnicity: "",
-      bodyType: "",
-      height: "",
-      hairColor: "",
-      hairStyle: "",
-      eyeColor: "",
-      skinTone: "",
-      clothing: "",
-      distinguishingFeatures: "",
-      generatedPortraits: [],
-      selectedPortraitId: null,
+      id: `char-${Date.now()}`, name: "New Character", role: "Supporting", description: "", portrait: "",
+      gender: "", ageRange: "", ethnicity: "", bodyType: "", height: "", hairColor: "", hairStyle: "",
+      eyeColor: "", skinTone: "", clothing: "", distinguishingFeatures: "",
+      generatedPortraits: [], selectedPortraitId: null,
     };
     setCharacters(prev => [...prev, newChar]);
     setSelectedCharacterId(newChar.id);
@@ -583,8 +595,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
             </p>
           </div>
           <Button onClick={addCharacter} className="gap-1.5">
-            <Plus className="w-4 h-4" />
-            Add Character
+            <Plus className="w-4 h-4" /> Add Character
           </Button>
         </div>
 
@@ -599,9 +610,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
               onClick={() => setSelectedCharacterId(char.id)}
               className={cn(
                 "group relative flex flex-col rounded-xl overflow-hidden border bg-card transition-colors text-left",
-                selectedCharacterId === char.id
-                  ? "border-primary ring-1 ring-primary"
-                  : "border-border hover:border-primary/50"
+                selectedCharacterId === char.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50"
               )}
             >
               <div className="aspect-[3/4] w-full bg-secondary overflow-hidden">
@@ -659,7 +668,6 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
         </div>
       </div>
 
-      {/* Slide drawer */}
       <AnimatePresence>
         {selectedCharacter && (
           <CharacterDrawer
