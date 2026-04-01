@@ -957,43 +957,72 @@ export default function ProductionCanvasPage() {
             const zone = canvasMenu.zoneId ? zones.find(z => z.id === canvasMenu.zoneId) : null;
             return (
               <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: canvasMenu.x, top: canvasMenu.y }} onMouseDown={e => e.stopPropagation()}>
-                {zone && (
-                  <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{zone.label} Zone</p>
-                )}
-                {(!zone || zone.type === "shots") && (
-                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                    addFrame(canvasMenu.worldX, canvasMenu.worldY, canvasMenu.zoneId || undefined);
-                    setCanvasMenu(null);
-                  }}><Camera className="w-4 h-4" /> Add Shot</button>
-                )}
-                {(!zone || zone.type === "casting") && (
-                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "casting")?.id || "z-casting";
-                    setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: targetZone });
-                    setCanvasMenu(null);
-                  }}><Users className="w-4 h-4" /> Add Cast Member</button>
-                )}
-                {(!zone || zone.type === "locations") && (
-                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "locations")?.id || "z-locations";
-                    setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: targetZone });
-                    setCanvasMenu(null);
-                  }}><MapPin className="w-4 h-4" /> Add Location</button>
-                )}
-                {(!zone || zone.type === "script") && (
-                  <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                    const targetZone = canvasMenu.zoneId || zones.find(z => z.type === "script")?.id || "z-script";
-                    const zb = zoneBounds[targetZone];
-                    setScriptNodes(prev => [...prev, {
-                      id: `sn-${Date.now()}`,
-                      heading: "INT. NEW LOCATION - DAY",
-                      body: "Description of the scene...",
-                      x: canvasMenu.worldX - SCRIPT_W / 2,
-                      y: canvasMenu.worldY,
-                      zoneId: targetZone,
-                    }]);
-                    setCanvasMenu(null);
-                  }}><FileText className="w-4 h-4" /> Add Scene</button>
+                {zone ? (
+                  <>
+                    <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{zone.label} Zone</p>
+                    {zone.type === "shots" && (
+                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                        addFrame(canvasMenu.worldX, canvasMenu.worldY, canvasMenu.zoneId || undefined);
+                        setCanvasMenu(null);
+                      }}><Camera className="w-4 h-4" /> Add Shot</button>
+                    )}
+                    {zone.type === "casting" && (
+                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                        setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: zone.id });
+                        setCanvasMenu(null);
+                      }}><Users className="w-4 h-4" /> Add Cast Member</button>
+                    )}
+                    {zone.type === "locations" && (
+                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                        setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: zone.id });
+                        setCanvasMenu(null);
+                      }}><MapPin className="w-4 h-4" /> Add Location</button>
+                    )}
+                    {zone.type === "script" && (
+                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
+                        setScriptNodes(prev => [...prev, {
+                          id: `sn-${Date.now()}`,
+                          heading: "INT. NEW LOCATION - DAY",
+                          body: "Description of the scene...",
+                          x: canvasMenu.worldX - SCRIPT_W / 2,
+                          y: canvasMenu.worldY,
+                          zoneId: zone.id,
+                        }]);
+                        setCanvasMenu(null);
+                      }}><FileText className="w-4 h-4" /> Add Scene</button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
+                    {["casting", "shots", "locations", "script"].map(type => {
+                      const exists = zones.some(z => z.type === type);
+                      const icons: Record<string, React.ReactNode> = {
+                        casting: <Users className="w-4 h-4" />,
+                        shots: <Camera className="w-4 h-4" />,
+                        locations: <MapPin className="w-4 h-4" />,
+                        script: <FileText className="w-4 h-4" />,
+                      };
+                      const labels: Record<string, string> = { casting: "Casting", shots: "Shots", locations: "Locations", script: "Script" };
+                      const colors: Record<string, string> = { casting: "190 80% 50%", shots: "220 70% 55%", locations: "150 60% 45%", script: "280 60% 55%" };
+                      return (
+                        <button key={type} className={cn("flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground", exists && "opacity-40")}
+                          disabled={exists}
+                          onClick={() => {
+                            if (exists) return;
+                            setZones(prev => [...prev, {
+                              id: `z-${type}-${Date.now()}`,
+                              label: labels[type],
+                              type: type as Zone["type"],
+                              x: canvasMenu.worldX,
+                              y: canvasMenu.worldY,
+                              color: colors[type],
+                            }]);
+                            setCanvasMenu(null);
+                          }}>{icons[type]} {exists ? `${labels[type]} (exists)` : `${labels[type]} Zone`}</button>
+                      );
+                    })}
+                  </>
                 )}
                 <div className="h-px bg-border my-1" />
                 <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
