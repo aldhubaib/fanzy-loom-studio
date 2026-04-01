@@ -247,6 +247,7 @@ export function ConceptEditor({ projectId, isNewProject }: ConceptEditorProps) {
             <PickerButton label="Duration" value={duration ? `${duration} (${durations.find(d => d.label === duration)?.detail})` : ""} onClick={() => { setDurationOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !duration} />
             <PickerButton label="Audience" value={audience} emoji={selectedAudience?.emoji} onClick={() => { setAudienceOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !audience} />
             <PickerButton label="Format" value={format} emoji={selectedFormat?.emoji} onClick={() => { setFormatOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !format} />
+            <PickerButton label="Aspect Ratio" value={aspectRatio} emoji={selectedAspectRatio?.emoji} onClick={() => { setAspectRatioOpen(true); if (showErrors) setShowErrors(false); }} hasError={showErrors && !aspectRatio} />
           </div>
 
           {/* Dialogs */}
