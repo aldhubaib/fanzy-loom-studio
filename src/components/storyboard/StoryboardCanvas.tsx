@@ -503,13 +503,15 @@ export function StoryboardCanvas() {
               >
                 {/* Left port (input) */}
                 <div
-                  className="absolute -left-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  className="absolute -left-[9px] -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  style={{ top: PORT_Y }}
                   onMouseUp={(e) => { e.stopPropagation(); endConnect(frame.id); }}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
                 {/* Right port (output) */}
                 <div
-                  className="absolute -right-[9px] top-1/2 -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  className="absolute -right-[9px] -translate-y-1/2 z-20 w-[18px] h-[18px] rounded-full border-[2.5px] border-primary/60 bg-card hover:bg-primary hover:border-primary hover:scale-110 transition-all cursor-crosshair shadow-md"
+                  style={{ top: PORT_Y }}
                   onMouseDown={(e) => { e.stopPropagation(); startConnect(e, frame.id); }}
                 />
 
