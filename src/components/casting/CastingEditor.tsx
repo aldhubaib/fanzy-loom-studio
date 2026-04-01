@@ -511,14 +511,6 @@ function CharacterDrawer({ character, onChange, onClose, onDelete }: {
             ))}
           </div>
 
-          {/* Description */}
-          <textarea
-            value={character.description}
-            onChange={e => onChange({ ...character, description: e.target.value })}
-            placeholder="Character description..."
-            className="w-full min-h-[60px] rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-          />
-
           <Separator />
 
           {/* Attribute rows */}
