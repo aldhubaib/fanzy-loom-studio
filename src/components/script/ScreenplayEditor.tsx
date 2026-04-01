@@ -359,13 +359,18 @@ export function ScreenplayEditor({ sceneRefs, focusMode, onFocusModeChange, onTo
                         <Popover>
                           <PopoverTrigger asChild>
                             <button className={cn(
-                              "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 transition-all",
+                              "w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 transition-all overflow-hidden",
                               "hover:scale-110 hover:ring-2 hover:ring-primary/50",
-                              isDefined
-                                ? `bg-gradient-to-br ${charData.color} text-foreground`
-                                : "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
+                              !isDefined && "bg-secondary text-muted-foreground border border-dashed border-muted-foreground/40 hover:border-primary/60"
                             )}>
-                              {isDefined ? charData.initials : <UserCircle className="w-3 h-3" />}
+                              {isDefined && charData.photo ? (
+                                <img src={charData.photo} alt={el.text} className="w-full h-full object-cover" />
+                              ) : isDefined ? (
+                                <span className={cn("w-full h-full flex items-center justify-center bg-gradient-to-br", charData.color)}>{charData.initials}</span>
+                              ) : (
+                                <UserCircle className="w-3 h-3" />
+                              )}
+                            </button>
                             </button>
                           </PopoverTrigger>
                           <PopoverContent side="left" align="start" className="w-56 p-3 bg-popover border-border">
