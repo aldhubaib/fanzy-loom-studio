@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3,
 } from "lucide-react";
+import { FrameContextMenu } from "./FrameContextMenu";
 
 import frame1 from "@/assets/storyboard/frame-1.jpg";
 import frame2 from "@/assets/storyboard/frame-2.jpg";
