@@ -585,6 +585,8 @@ export default function ProductionCanvasPage() {
   const handleMouseUp = useCallback(() => {
     setPanning(false);
     setDragging(null);
+    setDraggingZone(null);
+    setZoneDragStart(null);
     setConnectingFrom(null);
   }, []);
 
