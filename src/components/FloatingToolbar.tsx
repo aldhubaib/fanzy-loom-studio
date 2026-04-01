@@ -52,7 +52,7 @@ export function FloatingToolbar({ projectTitle, currentStage }: FloatingToolbarP
           <Film className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
         <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
-        <span className="text-sm font-semibold text-foreground">{projectTitle}</span>
+        <span className="sr-only">{projectTitle}</span>
         {activeStage && (
           <div className="w-px h-4 bg-border" />
         )}
