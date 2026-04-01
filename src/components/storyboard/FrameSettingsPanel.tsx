@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  X, Sparkles, Camera, Palette, Clock, UserPlus, Check,
+  X, Sparkles, Camera, Palette, Clock, Check, Images,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,13 +11,20 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-interface Actor {
+export interface Actor {
   id: string;
   name: string;
   avatar: string;
 }
 
-interface FrameData {
+export interface GeneratedImage {
+  id: string;
+  src: string;
+  description: string;
+  actors: string[];
+}
+
+export interface FrameData {
   id: string;
   x: number;
   y: number;
@@ -27,6 +34,8 @@ interface FrameData {
   description: string;
   duration: string;
   actors: string[];
+  generatedImages: GeneratedImage[];
+  selectedImageId: string | null;
 }
 
 const shotTypes = [
@@ -60,8 +69,8 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
   const [duration, setDuration] = useState(frame.duration);
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [mood, setMood] = useState("Noir");
+  const [imageCount, setImageCount] = useState(4);
 
-  // Reset when frame changes
   useEffect(() => {
     setPrompt(frame.description);
     setScene(frame.scene);
@@ -89,6 +98,29 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
   };
 
   const handleGenerate = () => {
+    // Mock generating multiple images
+    const mockImages: GeneratedImage[] = Array.from({ length: imageCount }, (_, i) => {
+      // For demo: cycle through existing images with different descriptions
+      const actorSubsets = [
+        selectedActors,
+        selectedActors.slice(0, 1),
+        selectedActors.length > 1 ? selectedActors.slice(1) : selectedActors,
+        selectedActors,
+      ];
+      const descriptions = [
+        prompt,
+        `${prompt} — alternate angle`,
+        `${prompt} — close variation`,
+        `${prompt} — wide variation`,
+      ];
+      return {
+        id: `gen-${Date.now()}-${i}`,
+        src: frame.image, // In production, AI would generate different images
+        description: descriptions[i % descriptions.length],
+        actors: actorSubsets[i % actorSubsets.length],
+      };
+    });
+
     onUpdate({
       ...frame,
       description: prompt,
@@ -96,8 +128,10 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
       shot,
       duration,
       actors: selectedActors,
+      generatedImages: [...frame.generatedImages, ...mockImages],
     });
-    toast.info("Generating image with AI...", {
+
+    toast.info(`Generating ${imageCount} images...`, {
       description: "AI image generation will be available once Lovable Cloud is enabled.",
     });
   };
@@ -227,6 +261,30 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
             placeholder="4s"
           />
         </div>
+
+        <Separator />
+
+        {/* Image count */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground flex items-center gap-1">
+            <Images className="w-3 h-3" /> Images to Generate
+          </Label>
+          <div className="flex gap-1.5">
+            {[1, 2, 4, 6, 8].map(n => (
+              <button
+                key={n}
+                onClick={() => setImageCount(n)}
+                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                  imageCount === n
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Footer actions */}
@@ -236,7 +294,7 @@ export function FrameSettingsPanel({ frame, actorRoster, onUpdate, onClose }: Fr
         </Button>
         <Button size="sm" className="flex-1" onClick={handleGenerate}>
           <Sparkles className="w-3.5 h-3.5 mr-1" />
-          Generate
+          Generate {imageCount}
         </Button>
       </div>
     </div>
