@@ -879,7 +879,7 @@ export function CastingEditor({ projectId }: { projectId?: string }) {
 
   return (
     <div className="h-full overflow-auto pt-16">
-      <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")}>
+      <div className={cn("max-w-6xl mx-auto px-8 py-8 transition-all", selectedCharacter && "mr-[400px]")} onClick={() => selectedCharacterId && setSelectedCharacterId(null)}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Cast</h1>
