@@ -2,19 +2,12 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ZoomIn, ZoomOut, Maximize, Plus, MousePointer, Hand, Grid3X3, X,
-  Settings, Sparkles, RotateCcw, Camera, Palette, Type, Clock, Replace, UserPlus, UserMinus,
+  Settings, Sparkles,
 } from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FrameContextMenu } from "./FrameContextMenu";
+import { FrameSettingsPanel } from "./FrameSettingsPanel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import {
-  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
 import actorMarlowe from "@/assets/actors/marlowe.png";
 import actorVivian from "@/assets/actors/vivian.png";
@@ -112,12 +105,7 @@ export function StoryboardCanvas() {
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
   const [frameHeights, setFrameHeights] = useState<Record<string, number>>({});
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number } | null>(null);
-  const [actorChangePrompt, setActorChangePrompt] = useState<{
-    frameId: string;
-    actorId: string;
-    action: "add" | "remove";
-    actorName: string;
-  } | null>(null);
+  const [settingsFrame, setSettingsFrame] = useState<string | null>(null);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -595,41 +583,13 @@ export function StoryboardCanvas() {
                 {/* Top-right badges */}
                 <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
                   {/* Settings button */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Settings className="w-3 h-3" />
-                      </button>
-                    </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48" side="bottom" align="end" onMouseDown={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Sparkles className="w-4 h-4 mr-2" /> AI Regenerate
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Camera className="w-4 h-4 mr-2" /> Change Angle
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Palette className="w-4 h-4 mr-2" /> Change Mood / Lighting
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Replace className="w-4 h-4 mr-2" /> Replace Image
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Type className="w-4 h-4 mr-2" /> Edit Description
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <Clock className="w-4 h-4 mr-2" /> Change Duration
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()}>
-                      <RotateCcw className="w-4 h-4 mr-2" /> Reset Frame
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                  </DropdownMenu>
+                  <button
+                    className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setSettingsFrame(frame.id); }}
+                  >
+                    <Settings className="w-3 h-3" />
+                  </button>
 
                   {/* Shot type badge */}
                   <Popover>
@@ -672,72 +632,27 @@ export function StoryboardCanvas() {
                     <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
                   </div>
 
-                  {/* Actors */}
-                  <div className="flex items-center gap-1">
-                    <TooltipProvider delayDuration={200}>
-                      {frame.actors.map(actorId => {
-                        const actor = actorRoster.find(a => a.id === actorId);
-                        if (!actor) return null;
-                        return (
-                          <Tooltip key={actor.id}>
-                            <TooltipTrigger asChild>
-                              <div className="relative group/actor w-6 h-6 rounded-full overflow-hidden border-[1.5px] border-border hover:border-primary transition-colors cursor-pointer">
-                                <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
-                                <button
-                                  className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/actor:opacity-100 transition-opacity"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const actor = actorRoster.find(a => a.id === actorId);
-                                    setActorChangePrompt({
-                                      frameId: frame.id, actorId, action: "remove",
-                                      actorName: actor?.name ?? "this actor",
-                                    });
-                                  }}
-                                >
-                                  <X className="w-2.5 h-2.5 text-destructive" />
-                                </button>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                    </TooltipProvider>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className="w-5 h-5 rounded-full border border-dashed border-muted-foreground/40 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:border-foreground/60 transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <UserPlus className="w-2.5 h-2.5" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-40 p-2" side="bottom" align="start" onMouseDown={(e) => e.stopPropagation()}>
-                        <p className="text-[10px] text-muted-foreground font-semibold mb-1.5 px-1">ASSIGN ACTOR</p>
-                        {actorRoster
-                          .filter(a => !frame.actors.includes(a.id))
-                          .map(actor => (
-                            <button
-                              key={actor.id}
-                              className="flex items-center gap-2 w-full px-1.5 py-1 rounded hover:bg-secondary/60 transition-colors text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActorChangePrompt({
-                                  frameId: frame.id, actorId: actor.id, action: "add",
-                                  actorName: actor.name,
-                                });
-                              }}
-                            >
-                              <img src={actor.avatar} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
-                              <span>{actor.name}</span>
-                            </button>
-                          ))}
-                        {actorRoster.filter(a => !frame.actors.includes(a.id)).length === 0 && (
-                          <p className="text-[10px] text-muted-foreground px-1 py-1">All actors assigned</p>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  {/* Actors (read-only) */}
+                  {frame.actors.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <TooltipProvider delayDuration={200}>
+                        {frame.actors.map(actorId => {
+                          const actor = actorRoster.find(a => a.id === actorId);
+                          if (!actor) return null;
+                          return (
+                            <Tooltip key={actor.id}>
+                              <TooltipTrigger asChild>
+                                <div className="w-6 h-6 rounded-full overflow-hidden border-[1.5px] border-border">
+                                  <img src={actor.avatar} alt={actor.name} className="w-full h-full object-cover" draggable={false} />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="text-xs">{actor.name}</TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </TooltipProvider>
+                    </div>
+                  )}
 
                   <p className="text-[11px] text-foreground/80 leading-tight line-clamp-2">
                     {frame.description}
@@ -862,59 +777,22 @@ export function StoryboardCanvas() {
         </div>
       </div>
 
-      {/* Actor change confirmation dialog */}
-      <AlertDialog open={!!actorChangePrompt} onOpenChange={(open) => { if (!open) setActorChangePrompt(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {actorChangePrompt?.action === "add" ? "Add Actor" : "Remove Actor"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {actorChangePrompt?.action === "add"
-                ? `Adding ${actorChangePrompt?.actorName} to this frame. Would you like to regenerate the image to include them?`
-                : `Removing ${actorChangePrompt?.actorName} from this frame. Would you like to regenerate the image without them?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex gap-2 sm:gap-0">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              onClick={() => {
-                if (!actorChangePrompt) return;
-                const { frameId, actorId, action } = actorChangePrompt;
-                setFrames(prev => prev.map(f => {
-                  if (f.id !== frameId) return f;
-                  return action === "add"
-                    ? { ...f, actors: [...f.actors, actorId] }
-                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
-                }));
-                setActorChangePrompt(null);
-              }}
-            >
-              {actorChangePrompt?.action === "add" ? "Add Only" : "Remove Only"}
-            </AlertDialogAction>
-            <AlertDialogAction
-              onClick={() => {
-                if (!actorChangePrompt) return;
-                const { frameId, actorId, action, actorName } = actorChangePrompt;
-                setFrames(prev => prev.map(f => {
-                  if (f.id !== frameId) return f;
-                  return action === "add"
-                    ? { ...f, actors: [...f.actors, actorId] }
-                    : { ...f, actors: f.actors.filter(a => a !== actorId) };
-                }));
-                toast.info(`Regenerating image ${action === "add" ? "with" : "without"} ${actorName}...`, {
-                  description: "AI image regeneration will be available soon.",
-                });
-                setActorChangePrompt(null);
-              }}
-            >
-              <Sparkles className="w-4 h-4 mr-1" />
-              {actorChangePrompt?.action === "add" ? "Add & Regenerate" : "Remove & Regenerate"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Frame Settings Panel */}
+      {settingsFrame && (() => {
+        const frame = frames.find(f => f.id === settingsFrame);
+        if (!frame) return null;
+        return (
+          <FrameSettingsPanel
+            frame={frame}
+            actorRoster={actorRoster}
+            onUpdate={(updated) => {
+              setFrames(prev => prev.map(f => f.id === updated.id ? updated : f));
+            }}
+            onClose={() => setSettingsFrame(null)}
+          />
+        );
+      })()}
+
     </div>
   );
 }
