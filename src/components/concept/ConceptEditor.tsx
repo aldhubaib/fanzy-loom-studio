@@ -57,7 +57,7 @@ function PickerButton({ label, value, selectedImg, emoji, onClick, hasError }: {
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all",
         hasError
-          ? "bg-card border-destructive/60 text-destructive animate-[shake_0.3s_ease-in-out]"
+          ? "bg-card border-destructive/60 text-destructive animate-shake"
           : value
             ? "bg-card border-primary/30 text-foreground"
             : "bg-card border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
