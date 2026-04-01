@@ -687,16 +687,16 @@ export function StoryboardCanvas() {
                   )}
                 </div>
 
-                {/* Expandable gallery — horizontal scroll strip */}
+                {/* Expandable gallery strip */}
                 {galleryOpen === frame.id && frame.generatedImages.length > 0 && (
                   <div
-                    className="bg-secondary/80 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-hide"
+                    className="bg-secondary/90 relative flex items-stretch"
                     onMouseDown={(e) => e.stopPropagation()}
-                    style={{ maxWidth: FRAME_W - 4, scrollbarWidth: "none", msOverflowStyle: "none" }}
+                    style={{ maxWidth: FRAME_W }}
                   >
-                    {/* Open gallery lightbox button */}
+                    {/* Fixed gallery button */}
                     <button
-                      className="flex-shrink-0 w-7 h-12 rounded bg-background/60 hover:bg-background/90 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex-shrink-0 w-9 flex items-center justify-center bg-card/80 hover:bg-card border-r border-border text-muted-foreground hover:text-foreground transition-colors z-10"
                       onClick={(e) => {
                         e.stopPropagation();
                         const activeIdx = frame.generatedImages.findIndex(img => img.id === frame.selectedImageId);
@@ -707,32 +707,38 @@ export function StoryboardCanvas() {
                       <Expand className="w-3.5 h-3.5" />
                     </button>
 
-                    {frame.generatedImages.map(img => {
-                      const isActive = frame.selectedImageId === img.id;
-                      return (
-                        <button
-                          key={img.id}
-                          className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-16 h-12 bg-card/40 ${
-                            isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setFrames(prev => prev.map(f =>
-                              f.id === frame.id
-                                ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
-                                : f
-                            ));
-                          }}
-                        >
-                          <img src={img.src} alt={img.description} className="w-full h-full object-contain bg-secondary/70 p-0.5" draggable={false} />
-                          {isActive && (
-                            <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
-                              <Check className="w-2 h-2 text-primary-foreground" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
+                    {/* Scrollable thumbnails */}
+                    <div
+                      className="flex-1 flex items-center gap-1 px-1.5 py-1.5 overflow-x-auto"
+                      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                    >
+                      {frame.generatedImages.map(img => {
+                        const isActive = frame.selectedImageId === img.id;
+                        return (
+                          <button
+                            key={img.id}
+                            className={`relative rounded overflow-hidden border-2 transition-all flex-shrink-0 w-14 h-10 ${
+                              isActive ? "border-primary" : "border-transparent hover:border-muted-foreground/40"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFrames(prev => prev.map(f =>
+                                f.id === frame.id
+                                  ? { ...f, image: img.src, description: img.description, actors: img.actors, selectedImageId: img.id }
+                                  : f
+                              ));
+                            }}
+                          >
+                            <img src={img.src} alt={img.description} className="w-full h-full object-cover" draggable={false} />
+                            {isActive && (
+                              <div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-1.5 h-1.5 text-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
