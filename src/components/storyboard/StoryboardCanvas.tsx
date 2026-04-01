@@ -176,6 +176,7 @@ export function StoryboardCanvas() {
   const [galleryOpen, setGalleryOpen] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ frameId: string; index: number } | null>(null);
   const [locationGallery, setLocationGallery] = useState<{ frameId: string; index: number } | null>(null);
+  const [showLocations, setShowLocations] = useState(false);
 
   const getFrameHeight = useCallback((frameId: string) => {
     return frameHeights[frameId] ?? FRAME_H_BASE;
@@ -516,6 +517,19 @@ export function StoryboardCanvas() {
           <Maximize className="w-4 h-4" />
         </button>
 
+        <div className="w-6 h-px bg-border my-0.5" />
+
+        <button
+          onClick={() => setShowLocations(v => !v)}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+            showLocations ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+          )}
+          title={showLocations ? "Showing locations" : "Showing shots"}
+        >
+          <MapPin className="w-4 h-4" />
+        </button>
+
       </div>
 
       {/* Canvas */}
@@ -692,19 +706,24 @@ export function StoryboardCanvas() {
                 </div>
 
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: IMAGE_H }}>
-                  {frame.image ? (
-                    <img
-                      src={frame.image}
-                      alt={frame.description}
-                      className="w-full h-full object-cover"
-                      draggable={false}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                      <Plus className="w-8 h-8" />
-                    </div>
-                  )}
+                  {(() => {
+                    const displayImage = showLocations
+                      ? (frame.location ? locationImages[frame.location] : undefined)
+                      : frame.image;
+                    return displayImage ? (
+                      <img
+                        src={displayImage}
+                        alt={showLocations ? (frame.location ?? "No location") : frame.description}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                        {showLocations ? <MapPin className="w-8 h-8" /> : <Plus className="w-8 h-8" />}
+                      </div>
+                    );
+                  })()}
                   {/* Image count overlay */}
                   {frame.generatedImages.length > 0 && (
                     <button
