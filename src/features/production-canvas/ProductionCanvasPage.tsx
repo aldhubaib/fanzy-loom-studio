@@ -306,7 +306,6 @@ function ProductionCanvasPageInner() {
                     color: ZONE_COLORS[type],
                   }];
                 });
-                // Auto-add a timeline node inside new production zones
                 if (type === "production") {
                   cs.setTimelineNodes((prev) => [...prev, {
                     id: `tn-${Date.now()}`,
@@ -315,6 +314,17 @@ function ProductionCanvasPageInner() {
                     zoneId,
                   }]);
                 }
+                cs.setCanvasMenu(null);
+              }}
+              onDeleteZone={(zoneId) => {
+                cs.setZones((prev) => prev.filter((z) => z.id !== zoneId));
+                cs.setFrames((prev) => prev.filter((f) => f.zoneId !== zoneId));
+                cs.setCastNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
+                if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
                 cs.setCanvasMenu(null);
               }}
               onFitToScreen={() => { cs.fitToScreen(); cs.setCanvasMenu(null); }}

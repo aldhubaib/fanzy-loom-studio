@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Film, Maximize } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2 } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
 import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
 
@@ -12,6 +12,7 @@ interface CanvasContextMenuProps {
   onAddScriptNode: () => void;
   onAddTimeline: () => void;
   onAddZone: (type: ZoneType) => void;
+  onDeleteZone: (zoneId: string) => void;
   onFitToScreen: () => void;
   onClose: () => void;
 }
@@ -26,7 +27,7 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
   menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
-  onAddScriptNode, onAddTimeline, onAddZone, onFitToScreen, onClose,
+  onAddScriptNode, onAddTimeline, onAddZone, onDeleteZone, onFitToScreen, onClose,
 }: CanvasContextMenuProps) {
   const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
 
@@ -66,6 +67,10 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
               <Film className="w-4 h-4" /> Add Timeline
             </button>
           )}
+          <div className="h-px bg-border my-1" />
+          <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-destructive/20 text-destructive" onClick={() => onDeleteZone(zone.id)}>
+            <Trash2 className="w-4 h-4" /> Delete Zone
+          </button>
         </>
       ) : (
         <>
