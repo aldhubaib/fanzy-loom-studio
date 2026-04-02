@@ -194,6 +194,30 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           </div>
         </div>
       , document.body)}
+
+      {/* Location image lightbox */}
+      {locationLightbox && frame.location && locationImages[frame.location] && typeof document !== "undefined" && document.body && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center"
+          onClick={() => setLocationLightbox(false)}
+        >
+          <button
+            onClick={() => setLocationLightbox(false)}
+            className="absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="p-8" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={locationImages[frame.location]}
+              alt={frame.location}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              draggable={false}
+            />
+            <p className="text-center text-sm text-foreground/70 mt-3">{frame.location}</p>
+          </div>
+        </div>
+      , document.body)}
     </>
   );
 });
