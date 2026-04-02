@@ -131,7 +131,7 @@ export const ZoneBackground = memo(function ZoneBackground({
       })}
 
       {/* Label + Zone tools */}
-      <div className="absolute -top-8 left-4 flex items-center gap-2 pointer-events-auto">
+      <div className="absolute top-1 left-4 flex items-center gap-2 pointer-events-auto">
         <div
           className="px-3 py-1 cursor-grab active:cursor-grabbing select-none"
           onMouseDown={onZoneDragStart}
