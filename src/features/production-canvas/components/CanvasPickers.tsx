@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { X, Plus } from "lucide-react";
 import type { Actor, PickerPosition } from "../types";
 import { CAST_W, LOC_W, locationImages } from "../constants";
