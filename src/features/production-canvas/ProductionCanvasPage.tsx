@@ -351,7 +351,7 @@ function ProductionCanvasPageInner() {
             {/* Location nodes */}
             {(() => {
               const sorted = [...cs.locationNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-              return sorted.map((node, idx) => {
+              return sorted.map((node) => {
                 const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
                 return (
                   <LocationNodeCard
@@ -359,12 +359,8 @@ function ProductionCanvasPageInner() {
                     node={node}
                     isSelected={cs.selected?.id === node.id}
                     shotCount={shotCount}
-                    isFirst={idx === 0}
-                    isLast={idx === sorted.length - 1}
-                    onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "location", id: node.id }); }}
+                    onMouseDown={(e) => { cs.setSelected({ type: "location", id: node.id }); cs.startDrag(e, node); }}
                     onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
-                    onMoveLeft={() => cs.reorderNode(node.id, "left", "location")}
-                    onMoveRight={() => cs.reorderNode(node.id, "right", "location")}
                     onDelete={() => {
                       const doDelete = () => {
                         cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
