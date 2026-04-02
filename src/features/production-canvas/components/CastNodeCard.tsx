@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Settings, X } from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Actor, CastNode } from "../types";
 import { CAST_W } from "../constants";
