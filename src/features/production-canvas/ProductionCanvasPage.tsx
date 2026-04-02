@@ -420,7 +420,7 @@ function ProductionCanvasPageInner() {
                 if (zone) {
                   cs.setScriptNodes((prev) => [...prev, {
                     id: `sn-${Date.now()}`,
-                    heading: "INT. NEW LOCATION - DAY",
+                    heading: "New Scene",
                     body: "Description of the scene...",
                     x: cs.canvasMenu!.worldX - SCRIPT_W / 2,
                     y: cs.canvasMenu!.worldY,
