@@ -1,12 +1,43 @@
-import { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import type { Zone, ZoneBounds, ZoneConnectorConfig } from "../types";
+import type { Zone, ZoneBounds, ZoneType } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
 import { makeZonePortId } from "../utils";
 
-const GRID_ZONE_TYPES = new Set(["casting", "locations", "script", "shots"]);
+// ─── Zone Tool Definition ───────────────────────────────────
+// Shared and zone-specific tools are declared here.
+// To add a new tool: add it to SHARED_ZONE_TOOLS or ZONE_SPECIFIC_TOOLS.
+
+export interface ZoneToolDef {
+  key: string;
+  icon: LucideIcon;
+  label: string;
+}
+
+/** Tools available to all (or most) zone types */
+const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [
+  {
+    tool: { key: "autoGrid", icon: LayoutGrid, label: "Auto Grid" },
+    zones: ["casting", "locations", "script", "shots"],
+  },
+];
+
+/** Tools unique to a specific zone type */
+const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {
+  // Example: shots: [{ key: "sortByScene", icon: ArrowUpDown, label: "Sort by Scene" }],
+};
+
+function getToolsForZone(type: ZoneType): ZoneToolDef[] {
+  const shared = SHARED_ZONE_TOOLS
+    .filter((s) => s.zones.includes(type))
+    .map((s) => s.tool);
+  const specific = ZONE_SPECIFIC_TOOLS[type] ?? [];
+  return [...shared, ...specific];
+}
+
+// ─── Component ──────────────────────────────────────────────
 
 interface ZoneBackgroundProps {
   zone: Zone;
@@ -19,17 +50,24 @@ interface ZoneBackgroundProps {
   onLabelEditCancel: () => void;
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
-  onAutoGrid?: () => void;
+  /** Handler map: tool key → callback. Only tools with a handler are rendered. */
+  onToolAction?: Record<string, () => void>;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect, onAutoGrid,
+  onStartConnect, onEndConnect, onToolAction,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
   const [hovered, setHovered] = useState(false);
+
+  const tools = useMemo(() => {
+    const all = getToolsForZone(zone.type);
+    if (!onToolAction) return [];
+    return all.filter((t) => onToolAction[t.key]);
+  }, [zone.type, onToolAction]);
 
   return (
     <div
@@ -89,9 +127,7 @@ export const ZoneBackground = memo(function ZoneBackground({
       })}
 
       {/* Label + Zone tools */}
-      <div
-        className="absolute -top-8 left-4 flex items-center gap-2 pointer-events-auto"
-      >
+      <div className="absolute -top-8 left-4 flex items-center gap-2 pointer-events-auto">
         <div
           className="px-3 py-1 cursor-grab active:cursor-grabbing select-none"
           onMouseDown={onZoneDragStart}
@@ -122,25 +158,28 @@ export const ZoneBackground = memo(function ZoneBackground({
         </div>
 
         {/* Zone tools — visible on hover */}
-        {GRID_ZONE_TYPES.has(zone.type) && onAutoGrid && hovered && (
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="flex items-center justify-center w-6 h-6 rounded-md opacity-60 hover:opacity-100 transition-opacity"
-                  style={{ color: `hsl(${zone.color} / 0.8)` }}
-                  onClick={(e) => { e.stopPropagation(); onAutoGrid(); }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
-                Auto Grid
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        {hovered && tools.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <TooltipProvider key={tool.key} delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="flex items-center justify-center w-6 h-6 rounded-md opacity-60 hover:opacity-100 transition-opacity"
+                    style={{ color: `hsl(${zone.color} / 0.8)` }}
+                    onClick={(e) => { e.stopPropagation(); onToolAction?.[tool.key]?.(); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
+                  {tool.label}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        })}
       </div>
     </div>
   );
