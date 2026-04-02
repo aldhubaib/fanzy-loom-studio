@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Settings, Images, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
