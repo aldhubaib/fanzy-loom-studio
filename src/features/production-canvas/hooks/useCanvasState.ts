@@ -467,8 +467,8 @@ export function useCanvasState(projectId: string | undefined) {
 
       const positions = nodes.map((n, i) => ({
         id: n.id,
-        x: startX + (i % cols) * (size.w + GAP),
-        y: startY + Math.floor(i / cols) * (size.h + GAP),
+        x: startX + (i % cols) * (effectiveSize.w + GAP),
+        y: startY + Math.floor(i / cols) * (effectiveSize.h + GAP),
       }));
 
       const applyPositions = <T extends { id: string; x: number; y: number }>(
