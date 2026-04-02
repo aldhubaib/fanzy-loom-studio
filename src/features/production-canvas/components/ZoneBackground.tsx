@@ -82,33 +82,58 @@ export const ZoneBackground = memo(function ZoneBackground({
         );
       })}
 
-      {/* Label */}
+      {/* Label + Zone tools */}
       <div
-        className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
-        onMouseDown={onZoneDragStart}
-        onDoubleClick={(e) => { e.stopPropagation(); onLabelDoubleClick(); }}
+        className="absolute -top-8 left-4 flex items-center gap-2 pointer-events-auto"
       >
-        {isEditingLabel ? (
-          <input
-            autoFocus
-            className="text-lg font-bold bg-transparent border-b border-current outline-none"
-            style={{ color: `hsl(${zone.color} / 0.7)` }}
-            defaultValue={zone.label}
-            onBlur={(e) => {
-              const val = e.target.value.trim();
-              if (val) onLabelRename(val);
-              onLabelEditCancel();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-              if (e.key === "Escape") onLabelEditCancel();
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>
-            {zone.label}
-          </span>
+        <div
+          className="px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={onZoneDragStart}
+          onDoubleClick={(e) => { e.stopPropagation(); onLabelDoubleClick(); }}
+        >
+          {isEditingLabel ? (
+            <input
+              autoFocus
+              className="text-lg font-bold bg-transparent border-b border-current outline-none"
+              style={{ color: `hsl(${zone.color} / 0.7)` }}
+              defaultValue={zone.label}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                if (val) onLabelRename(val);
+                onLabelEditCancel();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                if (e.key === "Escape") onLabelEditCancel();
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>
+              {zone.label}
+            </span>
+          )}
+        </div>
+
+        {/* Zone tools */}
+        {GRID_ZONE_TYPES.has(zone.type) && onAutoGrid && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex items-center justify-center w-7 h-7 rounded-md border border-border/40 bg-card/80 backdrop-blur-sm hover:bg-secondary/80 transition-colors"
+                  style={{ color: `hsl(${zone.color} / 0.7)` }}
+                  onClick={(e) => { e.stopPropagation(); onAutoGrid(); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
+                Auto Grid
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
     </div>

@@ -178,6 +178,7 @@ function ProductionCanvasPageInner() {
                   onLabelEditCancel={() => cs.setEditingZoneLabel(null)}
                   onStartConnect={(e, portId) => cs.startConnect(e, portId)}
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
+                  onAutoGrid={() => cs.autoGridZone(zone.id)}
                 />
               );
             })}
