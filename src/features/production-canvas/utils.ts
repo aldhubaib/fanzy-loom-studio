@@ -64,6 +64,11 @@ export function computeZoneBounds(
     .filter((n: any) => n.zoneId === zone.id)
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
 
+  // Preview nodes can live in any zone (typically production)
+  previewNodes
+    .filter((n) => n.zoneId === zone.id)
+    .forEach((n) => children.push({ x: n.x, y: n.y, w: PREVIEW_MON_W, h: PREVIEW_MON_H }));
+
   if (children.length === 0) {
     return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
   }
