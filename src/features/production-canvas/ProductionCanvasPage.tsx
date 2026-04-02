@@ -311,43 +311,50 @@ function ProductionCanvasPageInner() {
             })()}
 
             {/* Cast nodes */}
-            {cs.castNodes.map((node) => {
-              const actor = cs.actors.find((a) => a.id === node.actorId);
-              if (!actor) return null;
-              const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
-              return (
-                <CastNodeCard
-                  key={node.id}
-                  node={node}
-                  actor={actor}
-                  sceneCount={sceneCount}
-                  isSelected={cs.selected?.id === node.id}
-                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
-                  onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
-                  onDelete={() => {
-                    const doDelete = () => {
-                      cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
-                      if (cs.selected?.id === node.id) cs.setSelected(null);
-                    };
-                    if (sceneCount > 0) {
-                      setPendingDelete({
-                        severity: "destructive",
-                        title: "Delete Cast Node",
-                        description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
-                        onConfirm: doDelete,
-                      });
-                    } else {
-                      setPendingDelete({
-                        severity: "warning",
-                        title: "Delete Cast Node",
-                        description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
-                        onConfirm: doDelete,
-                      });
-                    }
-                  }}
-                />
-              );
-            })}
+            {(() => {
+              const sorted = [...cs.castNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              return sorted.map((node, idx) => {
+                const actor = cs.actors.find((a) => a.id === node.actorId);
+                if (!actor) return null;
+                const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
+                return (
+                  <CastNodeCard
+                    key={node.id}
+                    node={node}
+                    actor={actor}
+                    sceneCount={sceneCount}
+                    isSelected={cs.selected?.id === node.id}
+                    isFirst={idx === 0}
+                    isLast={idx === sorted.length - 1}
+                    onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
+                    onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
+                    onMoveLeft={() => cs.reorderNode(node.id, "left", "cast")}
+                    onMoveRight={() => cs.reorderNode(node.id, "right", "cast")}
+                    onDelete={() => {
+                      const doDelete = () => {
+                        cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
+                        if (cs.selected?.id === node.id) cs.setSelected(null);
+                      };
+                      if (sceneCount > 0) {
+                        setPendingDelete({
+                          severity: "destructive",
+                          title: "Delete Cast Node",
+                          description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
+                          onConfirm: doDelete,
+                        });
+                      } else {
+                        setPendingDelete({
+                          severity: "warning",
+                          title: "Delete Cast Node",
+                          description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
+                          onConfirm: doDelete,
+                        });
+                      }
+                    }}
+                  />
+                );
+              });
+            })()}
 
             {/* Location nodes */}
             {cs.locationNodes.map((node) => {
