@@ -246,12 +246,26 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
   );
 
   const handleMouseUp = useCallback(() => {
+    // Sync script node order from y-positions after drag
+    if (dragging && scriptNodes.some((n) => n.id === dragging)) {
+      setScriptNodes((prev) => {
+        const draggedNode = prev.find((n) => n.id === dragging);
+        if (!draggedNode) return prev;
+        const zoneId = draggedNode.zoneId;
+        const zoneNodes = prev.filter((n) => n.zoneId === zoneId).sort((a, b) => a.y - b.y);
+        const orderMap = new Map(zoneNodes.map((n, i) => [n.id, i]));
+        return prev.map((n) => {
+          const newOrder = orderMap.get(n.id);
+          return newOrder !== undefined ? { ...n, order: newOrder } : n;
+        });
+      });
+    }
     setPanning(false);
     setDragging(null);
     setDraggingZone(null);
     setZoneDragStart(null);
     setConnectingFrom(null);
-  }, []);
+  }, [dragging, scriptNodes]);
 
   // ── Drag start ────────────────────────────────────────
   const startDrag = useCallback(

@@ -162,6 +162,13 @@ export function loadCanvasState(key: string): CanvasState | null {
       localStorage.removeItem(key);
       return null;
     }
+    // Migrate: add order to script nodes if missing
+    if (Array.isArray(parsed.scriptNodes)) {
+      parsed.scriptNodes = parsed.scriptNodes.map((n: any, i: number) => ({
+        ...n,
+        order: n.order ?? i,
+      }));
+    }
     return parsed as CanvasState;
   } catch (err) {
     console.error("[Canvas] Failed to load saved state:", err);

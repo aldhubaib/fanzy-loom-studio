@@ -108,9 +108,11 @@ export const ScriptPageView = memo(function ScriptPageView({
     setToolbarPos(null);
     if (!editorRef.current) return;
     const sections = editorRef.current.querySelectorAll("[data-section-id]");
+    const sectionIds: string[] = [];
     sections.forEach((section) => {
       const id = section.getAttribute("data-section-id");
       if (!id) return;
+      sectionIds.push(id);
       const headingEl = section.querySelector("h1, h2, h3, .section-heading");
       const bodyEl = section.querySelector(".section-body");
       const heading = headingEl?.textContent?.trim() || "";
@@ -118,6 +120,13 @@ export const ScriptPageView = memo(function ScriptPageView({
       const node = nodes.find((n) => n.id === id);
       if (node && (heading !== node.heading || body !== node.body)) {
         onUpdateNode(id, { heading, body });
+      }
+    });
+    // Sync order from DOM order
+    sectionIds.forEach((id, index) => {
+      const node = nodes.find((n) => n.id === id);
+      if (node && (node.order ?? 0) !== index) {
+        onUpdateNode(id, { order: index });
       }
     });
   }, [nodes, onUpdateNode]);

@@ -299,9 +299,9 @@ function ProductionCanvasPageInner() {
 
             {/* Script nodes — card view or page view per zone */}
             {(() => {
-              // Group script nodes by zone
+              // Group script nodes by zone, sorted by order
               const scriptByZone = new Map<string, typeof cs.scriptNodes>();
-              cs.scriptNodes.forEach((node) => {
+              [...cs.scriptNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).forEach((node) => {
                 const arr = scriptByZone.get(node.zoneId) || [];
                 arr.push(node);
                 scriptByZone.set(node.zoneId, arr);
@@ -418,6 +418,7 @@ function ProductionCanvasPageInner() {
               onAddScriptNode={() => {
                 const zone = cs.zones.find((z) => z.id === cs.canvasMenu!.zoneId);
                 if (zone) {
+                  const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
                   cs.setScriptNodes((prev) => [...prev, {
                     id: `sn-${Date.now()}`,
                     heading: "New Scene",
@@ -425,6 +426,7 @@ function ProductionCanvasPageInner() {
                     x: cs.canvasMenu!.worldX - SCRIPT_W / 2,
                     y: cs.canvasMenu!.worldY,
                     zoneId: zone.id,
+                    order: maxOrder + 1,
                   }]);
                 }
                 cs.setCanvasMenu(null);
