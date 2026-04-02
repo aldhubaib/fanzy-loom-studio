@@ -102,7 +102,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
             className="text-[10px] font-bold text-purple-400 uppercase tracking-wider outline-none cursor-text select-text min-w-[20px]"
             onMouseDown={stopDrag}
             onBlur={handleHeadingBlur}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); headingRef.current?.blur(); } }}
+            onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") { e.preventDefault(); headingRef.current?.blur(); } }}
           >
             {node.heading}
           </div>
