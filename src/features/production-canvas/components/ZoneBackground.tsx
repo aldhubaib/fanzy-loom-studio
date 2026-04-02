@@ -72,21 +72,25 @@ export const ZoneBackground = memo(function ZoneBackground({
   return (
     <div
       className="absolute pointer-events-none"
-      style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+      style={{ left: b.x, top: b.y - 40, width: b.w, height: b.h + 40 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Dashed border */}
       <div
         className={cn(
-          "absolute inset-0 rounded-2xl border-[3px] border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto",
+          "absolute rounded-2xl border-[3px] border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto",
           isSelected && "border-opacity-80",
         )}
         style={{
+          left: 0,
+          top: 40,
+          width: b.w,
+          height: b.h,
           borderColor: `hsl(${zone.color} / ${isSelected || hovered ? 0.55 : 0.25})`,
           background: "hsl(var(--background))",
         }}
         onMouseDown={onZoneDragStart}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       />
 
       {/* Zone-level connectors */}
