@@ -538,83 +538,85 @@ function ProductionCanvasPageInner() {
       </div>
 
       {/* Side drawer */}
-      <CanvasDrawer
-        selected={cs.selected}
-        frames={cs.frames}
-        actors={cs.actors}
-        castNodes={cs.castNodes}
-        locationNodes={cs.locationNodes}
-        scriptNodes={cs.scriptNodes}
-        zones={cs.zones}
-        connectedActorsForFrame={connectedActorsForFrame}
-        onClose={() => cs.setSelected(null)}
-        onUpdateFrame={(updated) => cs.setFrames((prev) => prev.map((f) => (f.id === updated.id ? updated : f)))}
-        onDeleteFrame={(id) => {
-          const frame = cs.frames.find((f) => f.id === id);
-          const doDelete = () => {
-            cs.setFrames((prev) => prev.filter((f) => f.id !== id));
-            cs.setConnections((prev) => prev.filter((c) => c.from !== id && c.to !== id));
-            cs.setSelected(null);
-          };
-          setPendingDelete({
-            severity: (frame?.actors.length ?? 0) > 0 ? "destructive" : "warning",
-            title: "Delete Shot",
-            description: (frame?.actors.length ?? 0) > 0
-              ? `This shot has ${frame!.actors.length} actor${frame!.actors.length > 1 ? "s" : ""} assigned. Deleting it will remove all assignments.`
-              : "Are you sure you want to delete this shot?",
-            onConfirm: doDelete,
-          });
-        }}
-        onUpdateActor={(updated) => cs.setActors((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
-        onDeleteCastNode={(actorId) => {
-          const actor = cs.actors.find((a) => a.id === actorId);
-          const usedInShots = cs.frames.filter((f) => f.actors.includes(actorId)).length;
-          const doDelete = () => {
-            cs.setCastNodes((prev) => prev.filter((n) => n.actorId !== actorId));
-            cs.setSelected(null);
-          };
-          if (usedInShots > 0) {
+      {showDrawer && (
+        <CanvasDrawer
+          selected={cs.selected}
+          frames={cs.frames}
+          actors={cs.actors}
+          castNodes={cs.castNodes}
+          locationNodes={cs.locationNodes}
+          scriptNodes={cs.scriptNodes}
+          zones={cs.zones}
+          connectedActorsForFrame={connectedActorsForFrame}
+          onClose={() => cs.setSelected(null)}
+          onUpdateFrame={(updated) => cs.setFrames((prev) => prev.map((f) => (f.id === updated.id ? updated : f)))}
+          onDeleteFrame={(id) => {
+            const frame = cs.frames.find((f) => f.id === id);
+            const doDelete = () => {
+              cs.setFrames((prev) => prev.filter((f) => f.id !== id));
+              cs.setConnections((prev) => prev.filter((c) => c.from !== id && c.to !== id));
+              cs.setSelected(null);
+            };
             setPendingDelete({
-              severity: "destructive",
-              title: "Delete Cast Node",
-              description: `"${actor?.name || "This actor"}" is in ${usedInShots} shot${usedInShots > 1 ? "s" : ""}. Deleting will remove the actor from all shots.`,
+              severity: (frame?.actors.length ?? 0) > 0 ? "destructive" : "warning",
+              title: "Delete Shot",
+              description: (frame?.actors.length ?? 0) > 0
+                ? `This shot has ${frame!.actors.length} actor${frame!.actors.length > 1 ? "s" : ""} assigned. Deleting it will remove all assignments.`
+                : "Are you sure you want to delete this shot?",
               onConfirm: doDelete,
             });
-          } else {
-            setPendingDelete({
-              severity: "warning",
-              title: "Delete Cast Node",
-              description: `Are you sure you want to delete "${actor?.name || "this actor"}"?`,
-              onConfirm: doDelete,
-            });
-          }
-        }}
-        onUpdateScriptNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-        onDeleteScriptNode={(id) => {
-          const node = cs.scriptNodes.find((n) => n.id === id);
-          const linkedFrames = node ? cs.frames.filter((f) => f.zoneId === node.zoneId).length : 0;
-          const doDelete = () => {
-            cs.setScriptNodes((prev) => prev.filter((n) => n.id !== id));
-            cs.setSelected(null);
-          };
-          if (linkedFrames > 0) {
-            setPendingDelete({
-              severity: "destructive",
-              title: "Delete Script Node",
-              description: `This script block is in a zone with ${linkedFrames} shot${linkedFrames > 1 ? "s" : ""}. Deleting it may break scene continuity.`,
-              onConfirm: doDelete,
-            });
-          } else {
-            setPendingDelete({
-              severity: "warning",
-              title: "Delete Script Node",
-              description: "Are you sure you want to delete this script block?",
-              onConfirm: doDelete,
-            });
-          }
-        }}
-        onDeleteConnection={handleDeleteConnection}
-      />
+          }}
+          onUpdateActor={(updated) => cs.setActors((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
+          onDeleteCastNode={(actorId) => {
+            const actor = cs.actors.find((a) => a.id === actorId);
+            const usedInShots = cs.frames.filter((f) => f.actors.includes(actorId)).length;
+            const doDelete = () => {
+              cs.setCastNodes((prev) => prev.filter((n) => n.actorId !== actorId));
+              cs.setSelected(null);
+            };
+            if (usedInShots > 0) {
+              setPendingDelete({
+                severity: "destructive",
+                title: "Delete Cast Node",
+                description: `"${actor?.name || "This actor"}" is in ${usedInShots} shot${usedInShots > 1 ? "s" : ""}. Deleting will remove the actor from all shots.`,
+                onConfirm: doDelete,
+              });
+            } else {
+              setPendingDelete({
+                severity: "warning",
+                title: "Delete Cast Node",
+                description: `Are you sure you want to delete "${actor?.name || "this actor"}"?`,
+                onConfirm: doDelete,
+              });
+            }
+          }}
+          onUpdateScriptNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+          onDeleteScriptNode={(id) => {
+            const node = cs.scriptNodes.find((n) => n.id === id);
+            const linkedFrames = node ? cs.frames.filter((f) => f.zoneId === node.zoneId).length : 0;
+            const doDelete = () => {
+              cs.setScriptNodes((prev) => prev.filter((n) => n.id !== id));
+              cs.setSelected(null);
+            };
+            if (linkedFrames > 0) {
+              setPendingDelete({
+                severity: "destructive",
+                title: "Delete Script Node",
+                description: `This script block is in a zone with ${linkedFrames} shot${linkedFrames > 1 ? "s" : ""}. Deleting it may break scene continuity.`,
+                onConfirm: doDelete,
+              });
+            } else {
+              setPendingDelete({
+                severity: "warning",
+                title: "Delete Script Node",
+                description: "Are you sure you want to delete this script block?",
+                onConfirm: doDelete,
+              });
+            }
+          }}
+          onDeleteConnection={handleDeleteConnection}
+        />
+      )}
 
       {/* Delete confirmation dialog */}
       <DeleteConfirmDialog
