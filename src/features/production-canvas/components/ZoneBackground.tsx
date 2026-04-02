@@ -25,7 +25,7 @@ interface ZoneBackgroundProps {
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect,
+  onStartConnect, onEndConnect, onAutoGrid,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
