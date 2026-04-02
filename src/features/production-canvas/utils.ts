@@ -89,6 +89,7 @@ export function getPortPosition(
   castNodes: CastNode[],
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[],
+  timelineNodes: TimelineNodeData[] = [],
 ): { x: number; y: number } {
   const baseId = getConnectionBaseId(nodeId);
   const portKey = getConnectionPortKey(nodeId);
