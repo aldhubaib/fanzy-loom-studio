@@ -42,7 +42,7 @@ export const CanvasDrawer = memo(function CanvasDrawer({
   connectedActorsForFrame, onClose,
   onUpdateFrame, onDeleteFrame, onUpdateActor, onDeleteCastNode,
   onUpdateLocation, onDeleteLocationNode,
-  onUpdateScriptNode, onDeleteScriptNode, onDeleteConnection,
+  onUpdateScriptNode, onDeleteScriptNode, onDeleteConnection, onApproveShot,
 }: CanvasDrawerProps) {
   const selectedFrame = selected?.type === "frame" ? frames.find((f) => f.id === selected.id) : null;
   const selectedCast = selected?.type === "cast" ? castNodes.find((n) => n.id === selected.id) : null;
