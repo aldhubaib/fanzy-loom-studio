@@ -79,7 +79,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, zoom, pan, SAVE_KEY]);
+  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, shotAspectRatio, zoom, pan, SAVE_KEY]);
 
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
