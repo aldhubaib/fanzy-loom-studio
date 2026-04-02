@@ -4,6 +4,7 @@ import type {
   ZoneBounds, ZoneConnectorConfig, CanvasState,
 } from "./types";
 import type { TimelineNodeData } from "./components/TimelineNode";
+import type { PreviewNodeData } from "./components/PreviewMonitorNode";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
   SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H, TIMELINE_TRACK_H, TIMELINE_HEADER_H, TIMELINE_RULER_H,
