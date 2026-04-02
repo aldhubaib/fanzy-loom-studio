@@ -405,6 +405,7 @@ function ProductionCanvasPageInner() {
                         node={node}
                         sceneNumber={idx + 1}
                         isSelected={cs.selected?.id === node.id}
+                        isStackView={isStack}
                         onMouseDown={(e) => cs.startDrag(e, node)}
                         onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
                         onDelete={() => {

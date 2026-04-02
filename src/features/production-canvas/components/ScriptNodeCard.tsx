@@ -42,7 +42,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
           ? "border-purple-500 shadow-lg shadow-purple-500/20"
           : "border-border hover:border-purple-500/40",
       )}
-      style={{ left: node.x, top: node.y, width: SCRIPT_W }}
+      style={{ left: node.x, top: node.y, width: isStackView ? SCRIPT_W * 3 : SCRIPT_W }}
       onMouseDown={onMouseDown}
     >
       <button
