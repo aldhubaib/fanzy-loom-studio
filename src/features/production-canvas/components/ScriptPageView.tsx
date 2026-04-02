@@ -50,10 +50,12 @@ interface SectionProps {
   onDragEnd: () => void;
   isDragOver: boolean;
   isDragging: boolean;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
 }
 
 const ScriptSection = memo(function ScriptSection({
-  node, sceneNumber, onUpdateNode, onDragStart, onDragOver, onDragEnd, isDragOver, isDragging,
+  node, sceneNumber, onUpdateNode, onDragStart, onDragOver, onDragEnd, isDragOver, isDragging, isSelected, onSelect,
 }: SectionProps) {
   const headingRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ const ScriptSection = memo(function ScriptSection({
   return (
     <div
       data-section-id={node.id}
-      draggable
+      draggable={isSelected}
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = "move";
         onDragStart(node.id);
@@ -80,7 +82,8 @@ const ScriptSection = memo(function ScriptSection({
         onDragOver(node.id);
       }}
       onDragEnd={onDragEnd}
-      className={`group relative transition-opacity ${isDragging ? "opacity-30" : ""}`}
+      onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
+      className={`group relative transition-opacity ${isDragging ? "opacity-30" : ""} ${isSelected ? "ring-1 ring-purple-500/30 rounded-md" : ""}`}
     >
       {/* Drop indicator line */}
       {isDragOver && (
@@ -88,9 +91,9 @@ const ScriptSection = memo(function ScriptSection({
       )}
 
       <div className="flex gap-2">
-        {/* Drag handle */}
+        {/* Drag handle — only visible when selected */}
         <div
-          className="shrink-0 pt-5 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100 transition-opacity"
+          className={`shrink-0 pt-5 cursor-grab transition-opacity ${isSelected ? "opacity-50 hover:opacity-100" : "opacity-0 pointer-events-none"}`}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <GripVertical className="w-4 h-4 text-muted-foreground" />
@@ -212,6 +215,12 @@ export const ScriptPageView = memo(function ScriptPageView({
     };
   }, [updateToolbarPos]);
 
+  /* ── Section selection ── */
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const handleSelectSection = useCallback((id: string) => {
+    setSelectedSection((prev) => (prev === id ? null : id));
+  }, []);
+
   /* ── Drag & drop reorder ── */
   const handleDragStart = useCallback((id: string) => setDragId(id), []);
   const handleDragOver = useCallback((id: string) => setDragOverId(id), []);
@@ -278,6 +287,7 @@ export const ScriptPageView = memo(function ScriptPageView({
           ref={editorRef}
           className="p-8 min-h-full"
           onMouseDown={(e) => e.stopPropagation()}
+          onClick={() => setSelectedSection(null)}
         >
           {nodes.length > 0 ? (
             nodes.map((n, i) => (
@@ -291,6 +301,8 @@ export const ScriptPageView = memo(function ScriptPageView({
                 onDragEnd={handleDragEnd}
                 isDragOver={dragOverId === n.id && dragId !== n.id}
                 isDragging={dragId === n.id}
+                isSelected={selectedSection === n.id}
+                onSelect={handleSelectSection}
               />
             ))
           ) : (
