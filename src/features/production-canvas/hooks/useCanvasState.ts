@@ -307,7 +307,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     setDraggingZone(null);
     setZoneDragStart(null);
     setConnectingFrom(null);
-  }, [dragging, castNodes, locationNodes, frames, scriptNodes, autoGridZone]);
+  }, [dragging, castNodes, locationNodes, frames, scriptNodes]);
 
   // ── Drag start ────────────────────────────────────────
   const startDrag = useCallback(
