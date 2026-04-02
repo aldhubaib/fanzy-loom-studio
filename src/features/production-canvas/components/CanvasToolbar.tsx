@@ -60,7 +60,7 @@ export const CanvasToolbar = memo(function CanvasToolbar({
               if (e.key === "Enter") commitEdit();
               if (e.key === "Escape") setEditing(false);
             }}
-            className="text-xs font-semibold text-foreground bg-transparent border-b border-primary outline-none w-32"
+            className="text-xs font-semibold text-foreground bg-transparent outline-none w-32"
           />
         ) : (
           <span
