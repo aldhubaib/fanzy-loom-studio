@@ -394,7 +394,7 @@ function ProductionCanvasPageInner() {
                             isStackView
                             isFirst={idx === 0}
                             isLast={idx === nodes.length - 1}
-                            onMouseDown={(e) => cs.startDrag(e, node)}
+                            onMouseDown={(e) => { cs.setSelected({ type: "script", id: node.id }); cs.startDrag(e, node); }}
                             onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
                             onMoveUp={() => {
                               if (idx === 0) return;
