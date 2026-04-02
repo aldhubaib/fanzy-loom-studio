@@ -199,8 +199,8 @@ function ProductionCanvasPageInner() {
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
                   onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
                   onToolAction={{
-                    autoGrid: () => cs.autoGridZone(zone.id),
-                    ...(zone.type === "script" ? { pageView: () => togglePageView(zone.id) } : {}),
+                    autoGrid: () => cs.autoGridZone(zone.id, stackViewZones.has(zone.id) ? 1 : 3),
+                    ...(zone.type === "script" ? { stackView: () => toggleStackView(zone.id) } : {}),
                   }}
                 />
               );
