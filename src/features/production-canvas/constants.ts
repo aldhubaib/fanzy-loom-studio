@@ -93,7 +93,7 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
     { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
     { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
-    { key: "production", color: "30 90% 55%", label: "Production", side: "right", yFrac: 0.5 },
+    { key: "production", color: "350 75% 55%", label: "Production", side: "right", yFrac: 0.5 },
   ],
   locations: [
     { key: "locations", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
@@ -102,7 +102,7 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   production: [
-    { key: "production", color: "30 90% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
+    { key: "production", color: "350 75% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
   ],
 } satisfies Record<ZoneType, ZoneConnectorConfig[]>;
 
@@ -168,7 +168,7 @@ export const initialZones: Zone[] = [
   { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
   { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
   { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
-  { id: "z-production", label: "Production", type: "production", x: 1200, y: 600, color: "30 90% 55%" },
+  { id: "z-production", label: "Production", type: "production", x: 1200, y: 600, color: "350 75% 55%" },
 ];
 
 export const initialFrames: FrameData[] = [
