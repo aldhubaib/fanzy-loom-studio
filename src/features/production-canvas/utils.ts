@@ -37,6 +37,7 @@ export function computeZoneBounds(
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
+  previewNodes: PreviewNodeData[] = [],
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
