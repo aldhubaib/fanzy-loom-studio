@@ -227,6 +227,7 @@ export function useCanvasState(projectId: string | undefined) {
         setLocationNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setTimelineNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
+        setPreviewNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
       }
       if (dragging) {
         const rect = containerRef.current?.getBoundingClientRect();
