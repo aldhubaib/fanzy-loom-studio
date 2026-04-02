@@ -188,8 +188,8 @@ export const ScriptPageView = memo(function ScriptPageView({
             __html: nodes.length > 0
               ? nodes
                   .map(
-                    (n) =>
-                      `<div data-section-id="${n.id}"><h1 class="section-heading">${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
+                    (n, i) =>
+                      `<div data-section-id="${n.id}"><h1 class="section-heading"><span contenteditable="false" style="user-select:none;pointer-events:none;margin-right:8px;opacity:0.5;font-size:0.75em;">SC ${i + 1}</span>${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
                   )
                   .join("")
               : `<p style="color: rgba(255,255,255,0.3)">Start writing your script...</p>`,
