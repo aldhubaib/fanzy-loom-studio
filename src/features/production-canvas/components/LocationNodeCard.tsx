@@ -42,7 +42,11 @@ export const LocationNodeCard = memo(function LocationNodeCard({
       >
         <Settings className="w-3 h-3" />
       </button>
-      <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
+      {img ? (
+        <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
+      ) : (
+        <div className="w-full aspect-video bg-muted flex items-center justify-center text-muted-foreground text-xs">No Image</div>
+      )}
       <div className="p-2">
         <p className="text-xs font-bold text-foreground">{node.locationName}</p>
       </div>
