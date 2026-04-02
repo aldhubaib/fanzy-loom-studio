@@ -299,9 +299,9 @@ function ProductionCanvasPageInner() {
 
             {/* Script nodes — card view or page view per zone */}
             {(() => {
-              // Group script nodes by zone
+              // Group script nodes by zone, sorted by order
               const scriptByZone = new Map<string, typeof cs.scriptNodes>();
-              cs.scriptNodes.forEach((node) => {
+              [...cs.scriptNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).forEach((node) => {
                 const arr = scriptByZone.get(node.zoneId) || [];
                 arr.push(node);
                 scriptByZone.set(node.zoneId, arr);
