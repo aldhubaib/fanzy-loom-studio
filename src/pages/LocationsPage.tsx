@@ -6,7 +6,7 @@ import { MapPin, Film, Camera } from "lucide-react";
 import { mockProjects } from "@/data/mockProjects";
 import { motion } from "framer-motion";
 import { locationDetailOptions } from "@/features/production-canvas/constants";
-import type { CanvasState } from "@/features/production-canvas/types";
+import type { CanvasState, LocationData } from "@/features/production-canvas/types";
 import type { FrameData, LocationNode } from "@/features/production-canvas/types";
 
 interface LocationWithStats {
