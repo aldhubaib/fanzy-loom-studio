@@ -145,6 +145,7 @@ export const ZoneBackground = memo(function ZoneBackground({
                 onLabelEditCancel();
               }}
               onKeyDown={(e) => {
+                e.stopPropagation();
                 if (e.key === "Enter") (e.target as HTMLInputElement).blur();
                 if (e.key === "Escape") onLabelEditCancel();
               }}
