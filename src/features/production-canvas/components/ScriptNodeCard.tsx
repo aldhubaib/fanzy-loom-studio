@@ -15,7 +15,7 @@ interface ScriptNodeCardProps {
 }
 
 export const ScriptNodeCard = memo(function ScriptNodeCard({
-  node, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
+  node, sceneNumber, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
 }: ScriptNodeCardProps) {
   const headingRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
