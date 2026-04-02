@@ -109,6 +109,7 @@ function ProductionCanvasPageInner() {
     (e: React.MouseEvent) => {
       e.preventDefault();
       if ((e.target as HTMLElement).closest("[data-node]")) return;
+      // Allow context menu on page-view containers (they have data-node but should show zone menu)
       const rect = cs.containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       const worldX = (e.clientX - rect.left - cs.pan.x) / cs.zoom;
