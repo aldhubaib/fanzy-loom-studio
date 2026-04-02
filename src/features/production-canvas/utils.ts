@@ -3,9 +3,11 @@ import type {
   Zone, FrameData, CastNode, LocationNode, ScriptNode,
   ZoneBounds, ZoneConnectorConfig, CanvasState,
 } from "./types";
+import type { TimelineNodeData } from "./components/TimelineNode";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
-  SCRIPT_W, SCRIPT_H, ZONE_PAD, ZONE_LABEL_H,
+  SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H, TIMELINE_TRACK_H, TIMELINE_HEADER_H, TIMELINE_RULER_H,
+  ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
   ZONE_CONNECTOR_CONFIGS,
 } from "./constants";
