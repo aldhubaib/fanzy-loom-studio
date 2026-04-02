@@ -34,6 +34,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
 
   // ── Core state ──────────────────────────────────────────
   const [actors, setActors] = useState<Actor[]>(saved?.actors ?? actorRoster);
+  const [locations, setLocations] = useState<LocationData[]>(saved?.locations ?? locationRoster);
   const [zones, setZones] = useState<Zone[]>(saved?.zones ?? initialZones);
   const [frames, setFrames] = useState<FrameData[]>(saved?.frames ?? initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(saved?.castNodes ?? initialCastNodes);
