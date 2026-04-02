@@ -1,9 +1,12 @@
 import { memo } from "react";
 import { cn } from "@/lib/utils";
+import { LayoutGrid } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { Zone, ZoneBounds, ZoneConnectorConfig } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
 import { makeZonePortId } from "../utils";
+
+const GRID_ZONE_TYPES = new Set(["casting", "locations", "script"]);
 
 interface ZoneBackgroundProps {
   zone: Zone;
@@ -16,12 +19,13 @@ interface ZoneBackgroundProps {
   onLabelEditCancel: () => void;
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
+  onAutoGrid?: () => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect,
+  onStartConnect, onEndConnect, onAutoGrid,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
