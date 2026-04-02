@@ -168,7 +168,7 @@ export const initialZones: Zone[] = [
   { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
   { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
   { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
-  { id: "z-production", label: "Production", type: "production", x: 1200, y: 600, color: "30 90% 55%" },
+  { id: "z-production", label: "Production", type: "production", x: 1200, y: 600, color: "350 75% 55%" },
 ];
 
 export const initialFrames: FrameData[] = [
