@@ -136,7 +136,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 
           {/* Right-side thumbnail strip */}
           <div
-            className="w-20 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
+            className="w-40 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
             onClick={(e) => e.stopPropagation()}
           >
             {frame.generatedImages?.map((img, i) => {
