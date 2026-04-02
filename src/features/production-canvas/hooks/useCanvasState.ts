@@ -66,8 +66,9 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   const [castPickerPos, setCastPickerPos] = useState<PickerPosition | null>(null);
   const [locationPickerPos, setLocationPickerPos] = useState<PickerPosition | null>(null);
 
-  // ── Auto-save (debounced) ─────────────────────────────
+  // ── Refs ────────────────────────────────────────────────
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const autoGridZoneRef = useRef<(zoneId: string, overrideCols?: number) => void>(() => {});
   useEffect(() => {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
