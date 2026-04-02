@@ -2,7 +2,7 @@
 // Composed from isolated sub-components. All constants, types,
 // and logic are extracted — this file is purely composition.
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
