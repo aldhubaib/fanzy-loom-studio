@@ -168,8 +168,8 @@ export const ZoneBackground = memo(function ZoneBackground({
         {(hovered || isSelected) && tools.map((tool) => {
           // Swap icon & label for the stack/grid toggle
           const isStackToggle = tool.key === "stackView";
-          const Icon = isStackToggle ? (isPageView ? LayoutGrid : FileText) : tool.icon;
-          const label = isStackToggle ? (isPageView ? "Grid View" : "Stack View") : tool.label;
+          const Icon = isStackToggle ? (isStackView ? LayoutGrid : FileText) : tool.icon;
+          const label = isStackToggle ? (isStackView ? "Grid View" : "Stack View") : tool.label;
           return (
             <TooltipProvider key={tool.key} delayDuration={200}>
               <Tooltip>
