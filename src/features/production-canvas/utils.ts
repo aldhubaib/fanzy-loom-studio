@@ -60,6 +60,27 @@ export function computeZoneBounds(
   const nodes = nodeMap[zone.type] ?? [];
   const size = sizeMap[zone.type] ?? { w: FRAME_W, h: FRAME_H };
 
+  // For script zones (always stacked), compute bounds as a single column
+  if (zone.type === "script") {
+    const zoneNodes = (scriptNodes as any[]).filter((n: any) => n.zoneId === zone.id);
+    if (zoneNodes.length === 0) {
+      return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
+    }
+    // Use the first node's position as anchor; total height = count * estimated card height
+    const firstNode = zoneNodes[0];
+    const cardH = SCRIPT_H;
+    const gap = 8;
+    const totalH = zoneNodes.length * cardH + (zoneNodes.length - 1) * gap;
+    const x = firstNode.x - ZONE_PAD;
+    const y = firstNode.y - ZONE_PAD - ZONE_LABEL_H;
+    return {
+      x,
+      y,
+      w: Math.max(MIN_ZONE_W, SCRIPT_W * 3 + ZONE_PAD * 2),
+      h: Math.max(MIN_ZONE_H, totalH + ZONE_PAD * 2 + ZONE_LABEL_H),
+    };
+  }
+
   nodes
     .filter((n: any) => n.zoneId === zone.id)
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
