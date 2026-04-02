@@ -218,8 +218,25 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => cs.startDrag(e, node)}
                   onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
                   onDelete={() => {
-                    cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
-                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                    const doDelete = () => {
+                      cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
+                      if (cs.selected?.id === node.id) cs.setSelected(null);
+                    };
+                    if (shotCount > 0) {
+                      setPendingDelete({
+                        severity: "destructive",
+                        title: "Delete Location Node",
+                        description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
+                        onConfirm: doDelete,
+                      });
+                    } else {
+                      setPendingDelete({
+                        severity: "warning",
+                        title: "Delete Location Node",
+                        description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
+                        onConfirm: doDelete,
+                      });
+                    }
                   }}
                 />
               );
