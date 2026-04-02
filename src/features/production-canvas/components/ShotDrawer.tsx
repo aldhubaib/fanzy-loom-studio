@@ -66,6 +66,19 @@ export const ShotDrawer = memo(function ShotDrawer({
 
   return (
     <div className="space-y-4">
+      {/* Approve / Status at top */}
+      {frame.image && (!frame.shotStatus || frame.shotStatus === "empty" || frame.shotStatus === "preview") && onApprove && (
+        <Button size="sm" variant="outline" className="w-full gap-1.5 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300" onClick={() => { onApprove(frame.id); toast.success("Shot approved"); }}>
+          <CheckCircle className="w-3.5 h-3.5" /> Approve Shot
+        </Button>
+      )}
+
+      {frame.shotStatus === "approved" && (
+        <div className="flex items-center gap-1.5 text-xs text-emerald-400 justify-center py-1">
+          <CheckCircle className="w-3.5 h-3.5" /> Approved
+        </div>
+      )}
+
       {frame.image && (
         <div className="rounded-lg overflow-hidden border border-border">
           <img src={frame.image} alt={frame.description} className="w-full object-cover max-h-[180px]" />
