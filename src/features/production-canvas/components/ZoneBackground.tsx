@@ -227,6 +227,33 @@ export const ZoneBackground = memo(function ZoneBackground({
             </TooltipProvider>
           );
         })}
+
+        {/* Mini column slider */}
+        {onColsChange && zone.type !== "script" && (hovered || isSelected) && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 ml-1">
+                  <Columns className="w-3.5 h-3.5 opacity-50" style={{ color: `hsl(${zone.color} / 0.8)` }} />
+                  <input
+                    type="range"
+                    min={3}
+                    max={8}
+                    value={zoneCols ?? 3}
+                    onChange={(e) => { e.stopPropagation(); onColsChange(Number(e.target.value)); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="w-14 h-1 accent-primary cursor-pointer"
+                    style={{ accentColor: `hsl(${zone.color})` }}
+                  />
+                  <span className="text-[10px] font-bold min-w-[12px]" style={{ color: `hsl(${zone.color} / 0.7)` }}>
+                    {zoneCols ?? 3}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">Columns</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   );
