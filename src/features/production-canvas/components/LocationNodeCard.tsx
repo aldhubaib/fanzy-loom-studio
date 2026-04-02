@@ -26,7 +26,7 @@ export const LocationNodeCard = memo(function LocationNodeCard({
         "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
         isSelected
           ? "border-emerald-500 shadow-lg shadow-emerald-500/20"
-          : "border-border hover:border-muted-foreground/40",
+          : "border-border hover:border-emerald-500/40",
       )}
       style={{ left: node.x, top: node.y, width: LOC_W }}
       onMouseDown={onMouseDown}
