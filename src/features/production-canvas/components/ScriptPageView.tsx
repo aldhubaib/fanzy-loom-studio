@@ -1,5 +1,5 @@
 import { memo, useRef, useCallback, useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { createPortal } from "react-dom";
 import { Heading1, Heading2, Heading3, Pilcrow, Minus } from "lucide-react";
 import type { ScriptNode } from "../types";
 import type { ZoneBounds } from "../types";
@@ -26,12 +26,58 @@ interface ToolbarPos {
   y: number;
 }
 
+const TOOLBAR_GAP = 12;
+const TOOLBAR_HEIGHT = 44;
+const TOOLBAR_HALF_WIDTH = 120;
+const VIEWPORT_MARGIN = 16;
+
 export const ScriptPageView = memo(function ScriptPageView({
   zoneId, nodes, bounds, onUpdateNode,
 }: ScriptPageViewProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [toolbarPos, setToolbarPos] = useState<ToolbarPos | null>(null);
+
+  const updateToolbarPos = useCallback(() => {
+    const sel = window.getSelection();
+    const editor = editorRef.current;
+
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !editor) {
+      setToolbarPos(null);
+      return;
+    }
+
+    if (
+      !sel.anchorNode ||
+      !sel.focusNode ||
+      !editor.contains(sel.anchorNode) ||
+      !editor.contains(sel.focusNode)
+    ) {
+      setToolbarPos(null);
+      return;
+    }
+
+    const range = sel.getRangeAt(0);
+    let rect = range.getBoundingClientRect();
+
+    if (!rect.width && !rect.height) {
+      const rects = range.getClientRects();
+      if (!rects.length) {
+        setToolbarPos(null);
+        return;
+      }
+      rect = rects[0];
+    }
+
+    const centeredX = rect.left + rect.width / 2;
+    const minX = VIEWPORT_MARGIN + TOOLBAR_HALF_WIDTH;
+    const maxX = window.innerWidth - VIEWPORT_MARGIN - TOOLBAR_HALF_WIDTH;
+    const yAbove = rect.top - TOOLBAR_HEIGHT - TOOLBAR_GAP;
+
+    setToolbarPos({
+      x: Math.min(Math.max(centeredX, minX), Math.max(minX, maxX)),
+      y: yAbove >= VIEWPORT_MARGIN ? yAbove : rect.bottom + TOOLBAR_GAP,
+    });
+  }, []);
 
   const execFormat = useCallback((cmd: FormatCmd) => {
     editorRef.current?.focus();
@@ -40,37 +86,25 @@ export const ScriptPageView = memo(function ScriptPageView({
     } else {
       document.execCommand("formatBlock", false, `<${cmd}>`);
     }
-  }, []);
+    requestAnimationFrame(updateToolbarPos);
+  }, [updateToolbarPos]);
 
   // Track text selection to position toolbar
   useEffect(() => {
-    const checkSelection = () => {
-      const sel = window.getSelection();
-      if (!sel || sel.isCollapsed || !editorRef.current || !containerRef.current) {
-        setToolbarPos(null);
-        return;
-      }
-      // Ensure selection is within our editor
-      if (!editorRef.current.contains(sel.anchorNode)) {
-        setToolbarPos(null);
-        return;
-      }
-      const range = sel.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
-      setToolbarPos({
-        x: rect.left + rect.width / 2 - containerRect.left,
-        y: rect.top - containerRect.top - 40,
-      });
-    };
+    document.addEventListener("selectionchange", updateToolbarPos);
+    window.addEventListener("resize", updateToolbarPos);
+    window.addEventListener("scroll", updateToolbarPos, true);
 
-    document.addEventListener("selectionchange", checkSelection);
-    return () => document.removeEventListener("selectionchange", checkSelection);
-  }, []);
+    return () => {
+      document.removeEventListener("selectionchange", updateToolbarPos);
+      window.removeEventListener("resize", updateToolbarPos);
+      window.removeEventListener("scroll", updateToolbarPos, true);
+    };
+  }, [updateToolbarPos]);
 
   const handleBlur = useCallback((e: React.FocusEvent) => {
-    // Don't dismiss if clicking toolbar
-    if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+    const nextTarget = e.relatedTarget as HTMLElement | null;
+    if (nextTarget?.closest("[data-script-toolbar]")) return;
     setToolbarPos(null);
     if (!editorRef.current) return;
     const sections = editorRef.current.querySelectorAll("[data-section-id]");
@@ -92,7 +126,6 @@ export const ScriptPageView = memo(function ScriptPageView({
 
   return (
     <div
-      ref={containerRef}
       data-node
       className="absolute pointer-events-auto"
       style={{
@@ -103,9 +136,10 @@ export const ScriptPageView = memo(function ScriptPageView({
       }}
     >
       {/* Bubble toolbar near selection */}
-      {toolbarPos && (
+      {toolbarPos && typeof document !== "undefined" && createPortal(
         <div
-          className="absolute flex items-center gap-1 px-2 py-1 rounded-lg bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg z-20"
+          data-script-toolbar
+          className="fixed flex items-center gap-1 px-2 py-1 rounded-lg bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg z-[60]"
           style={{ left: toolbarPos.x, top: toolbarPos.y, transform: "translateX(-50%)" }}
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
         >
@@ -120,7 +154,8 @@ export const ScriptPageView = memo(function ScriptPageView({
               {btn.icon}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* A4-style page */}
