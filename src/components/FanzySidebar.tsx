@@ -69,23 +69,34 @@ export function FanzySidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!isInsideProject && !collapsed && (
+        {!collapsed && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider">
-              Recent Projects
-            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {recentProjects.map((project) => (
-                  <SidebarMenuItem key={project.name}>
-                    <SidebarMenuButton asChild className="hover:bg-sidebar-accent/50 cursor-pointer">
-                      <Link to={`/project/${project.id}/canvas`}>
-                        <div className={`w-5 h-5 rounded bg-gradient-to-br ${project.color} flex-shrink-0`} />
-                        <span className="text-sm truncate">{project.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/cast" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Cast</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/locations" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      <span>Locations</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/gallery" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                      <Image className="mr-2 h-4 w-4" />
+                      <span>Gallery</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
