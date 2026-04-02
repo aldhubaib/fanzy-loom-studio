@@ -218,6 +218,8 @@ function ProductionCanvasPageInner() {
                     cs.setZoneCols((prev) => ({ ...prev, [zone.id]: cols }));
                     cs.autoGridZone(zone.id, zone.type === "script" ? 1 : cols);
                   }}
+                  shotAspectRatio={cs.shotAspectRatio}
+                  onAspectRatioChange={(ratio) => cs.setShotAspectRatio(ratio)}
                   onToolAction={{
                     autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
