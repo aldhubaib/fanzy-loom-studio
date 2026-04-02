@@ -121,18 +121,18 @@ export const ZoneBackground = memo(function ZoneBackground({
           )}
         </div>
 
-        {/* Zone tools */}
-        {GRID_ZONE_TYPES.has(zone.type) && onAutoGrid && (
+        {/* Zone tools — visible on hover */}
+        {GRID_ZONE_TYPES.has(zone.type) && onAutoGrid && hovered && (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  className="flex items-center justify-center w-7 h-7 rounded-md border border-border/40 bg-card/80 backdrop-blur-sm hover:bg-secondary/80 transition-colors"
-                  style={{ color: `hsl(${zone.color} / 0.7)` }}
+                  className="flex items-center justify-center w-6 h-6 rounded-md opacity-60 hover:opacity-100 transition-opacity"
+                  style={{ color: `hsl(${zone.color} / 0.8)` }}
                   onClick={(e) => { e.stopPropagation(); onAutoGrid(); }}
                   onMouseDown={(e) => e.stopPropagation()}
                 >
-                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
