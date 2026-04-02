@@ -127,6 +127,7 @@ export const ScriptPageView = memo(function ScriptPageView({
   return (
     <div
       data-node
+      data-page-view
       className="absolute pointer-events-auto"
       style={{
         left: bounds.x + PAD,
