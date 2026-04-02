@@ -155,6 +155,7 @@ function ProductionCanvasPageInner() {
         <CanvasToolbar
            projectId={projectId}
            projectName={projectName}
+           onProjectNameChange={setProjectName}
           tool={cs.tool}
           zoom={cs.zoom}
           onSetTool={cs.setTool}
