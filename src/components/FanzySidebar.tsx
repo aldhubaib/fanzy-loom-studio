@@ -1,6 +1,6 @@
 import {
   Sparkles, Film,
-  Search, Settings, FolderOpen, ArrowLeft
+  Search, Settings, FolderOpen, Users, MapPin, Image
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useParams, Link } from "react-router-dom";
