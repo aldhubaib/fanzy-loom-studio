@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown, PanelLeft } from "lucide-react";
+import { memo, useState, useRef, useEffect } from "react";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { Tool } from "../types";
@@ -8,6 +8,7 @@ import { ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from "../constants";
 interface CanvasToolbarProps {
   projectId: string | undefined;
   projectName?: string;
+  onProjectNameChange?: (name: string) => void;
   tool: Tool;
   zoom: number;
   onSetTool: (t: Tool) => void;
@@ -19,23 +20,57 @@ interface CanvasToolbarProps {
 }
 
 export const CanvasToolbar = memo(function CanvasToolbar({
-  projectId, projectName, tool, zoom,
+  projectId, projectName, onProjectNameChange, tool, zoom,
   onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
 }: CanvasToolbarProps) {
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(projectName || "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      setEditValue(projectName || "");
+      setTimeout(() => inputRef.current?.select(), 0);
+    }
+  }, [editing, projectName]);
+
+  const commitEdit = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== projectName) {
+      onProjectNameChange?.(trimmed);
+    }
+    setEditing(false);
+  };
+
   return (
     <>
       {/* Logo + Project Name */}
-      <Link
-        to={`/project/${projectId}/storyboard`}
-        className="absolute top-3 left-3 z-30 flex items-center gap-3 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm hover:bg-card transition-colors"
-      >
-        <div className="flex items-center gap-1.5">
+      <div className="absolute top-3 left-3 z-30 flex items-center gap-3 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm">
+        <Link to={`/project/${projectId}/storyboard`} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
           <Film className="w-4 h-4 text-primary" />
           <ChevronDown className="w-3 h-3 text-muted-foreground" />
-        </div>
-        <span className="text-xs font-semibold text-foreground">{projectName || "Untitled"}</span>
-        
-      </Link>
+        </Link>
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+              if (e.key === "Escape") setEditing(false);
+            }}
+            className="text-xs font-semibold text-foreground bg-transparent border-b border-primary outline-none w-32"
+          />
+        ) : (
+          <span
+            className="text-xs font-semibold text-foreground cursor-text hover:text-primary transition-colors"
+            onClick={() => setEditing(true)}
+          >
+            {projectName || "Untitled"}
+          </span>
+        )}
+      </div>
 
 
       {/* Tool buttons */}
