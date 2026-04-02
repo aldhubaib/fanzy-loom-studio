@@ -2,7 +2,7 @@
 // Composed from isolated sub-components. All constants, types,
 // and logic are extracted — this file is purely composition.
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
@@ -23,12 +23,22 @@ import { CastNodeCard } from "./components/CastNodeCard";
 import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
+import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
+
+interface PendingDelete {
+  severity: DeleteSeverity;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
   const cs = useCanvasState(projectId);
 
   // ── Derived values ────────────────────────────────────
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+
   const showDrawer = !!cs.selected;
 
   const selectedFrame = cs.selected?.type === "frame"
@@ -42,9 +52,27 @@ function ProductionCanvasPageInner() {
   // ── Callbacks ─────────────────────────────────────────
   const handleDeleteConnection = useCallback(
     (from: string, to: string) => {
-      cs.setConnections((prev) => prev.filter((c) => !(c.from === from && c.to === to)));
+      // Check if this is a zone-level connection (data flows through it)
+      const isZoneConn = from.includes("::") || to.includes("::");
+      const fromZone = cs.zones.find((z) => from.startsWith(z.id));
+      const toZone = cs.zones.find((z) => to.startsWith(z.id));
+
+      const doDelete = () => {
+        cs.setConnections((prev) => prev.filter((c) => !(c.from === from && c.to === to)));
+      };
+
+      if (isZoneConn && fromZone && toZone) {
+        setPendingDelete({
+          severity: "destructive",
+          title: "Delete Connection",
+          description: `Disconnecting "${fromZone.label}" from "${toZone.label}" will break the data flow between these zones. All linked shots, actors, and locations will be unlinked.`,
+          onConfirm: doDelete,
+        });
+      } else {
+        doDelete();
+      }
     },
-    [cs.setConnections],
+    [cs.setConnections, cs.zones],
   );
 
   const handleContextMenu = useCallback(
@@ -172,8 +200,25 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => cs.startDrag(e, node)}
                   onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
                   onDelete={() => {
-                    cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
-                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                    const doDelete = () => {
+                      cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
+                      if (cs.selected?.id === node.id) cs.setSelected(null);
+                    };
+                    if (sceneCount > 0) {
+                      setPendingDelete({
+                        severity: "destructive",
+                        title: "Delete Cast Node",
+                        description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
+                        onConfirm: doDelete,
+                      });
+                    } else {
+                      setPendingDelete({
+                        severity: "warning",
+                        title: "Delete Cast Node",
+                        description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
+                        onConfirm: doDelete,
+                      });
+                    }
                   }}
                 />
               );
@@ -191,8 +236,25 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => cs.startDrag(e, node)}
                   onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
                   onDelete={() => {
-                    cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
-                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                    const doDelete = () => {
+                      cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
+                      if (cs.selected?.id === node.id) cs.setSelected(null);
+                    };
+                    if (shotCount > 0) {
+                      setPendingDelete({
+                        severity: "destructive",
+                        title: "Delete Location Node",
+                        description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
+                        onConfirm: doDelete,
+                      });
+                    } else {
+                      setPendingDelete({
+                        severity: "warning",
+                        title: "Delete Location Node",
+                        description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
+                        onConfirm: doDelete,
+                      });
+                    }
                   }}
                 />
               );
@@ -207,8 +269,26 @@ function ProductionCanvasPageInner() {
                 onMouseDown={(e) => cs.startDrag(e, node)}
                 onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
                 onDelete={() => {
-                  cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
-                  if (cs.selected?.id === node.id) cs.setSelected(null);
+                  const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
+                  const doDelete = () => {
+                    cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                  };
+                  if (linkedFrames.length > 0) {
+                    setPendingDelete({
+                      severity: "destructive",
+                      title: "Delete Script Node",
+                      description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
+                      onConfirm: doDelete,
+                    });
+                  } else {
+                    setPendingDelete({
+                      severity: "warning",
+                      title: "Delete Script Node",
+                      description: `Are you sure you want to delete this script block?`,
+                      onConfirm: doDelete,
+                    });
+                  }
                 }}
                 onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
               />
@@ -317,16 +397,42 @@ function ProductionCanvasPageInner() {
                 cs.setCanvasMenu(null);
               }}
               onDeleteZone={(zoneId) => {
-                cs.setZones((prev) => prev.filter((z) => z.id !== zoneId));
-                cs.setFrames((prev) => prev.filter((f) => f.zoneId !== zoneId));
-                cs.setCastNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setPreviewNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
-                if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
+                const zone = cs.zones.find((z) => z.id === zoneId);
+                const zoneFrames = cs.frames.filter((f) => f.zoneId === zoneId);
+                const zoneCast = cs.castNodes.filter((n) => n.zoneId === zoneId);
+                const zoneLoc = cs.locationNodes.filter((n) => n.zoneId === zoneId);
+                const zoneScripts = cs.scriptNodes.filter((n) => n.zoneId === zoneId);
+                const totalNodes = zoneFrames.length + zoneCast.length + zoneLoc.length + zoneScripts.length;
+
+                const doDelete = () => {
+                  cs.setZones((prev) => prev.filter((z) => z.id !== zoneId));
+                  cs.setFrames((prev) => prev.filter((f) => f.zoneId !== zoneId));
+                  cs.setCastNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setPreviewNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
+                  if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
+                };
+
                 cs.setCanvasMenu(null);
+
+                if (totalNodes > 0) {
+                  setPendingDelete({
+                    severity: "destructive",
+                    title: `Delete "${zone?.label || "Zone"}"`,
+                    description: `This zone contains ${totalNodes} node${totalNodes > 1 ? "s" : ""} (${zoneFrames.length} shots, ${zoneCast.length} cast, ${zoneLoc.length} locations, ${zoneScripts.length} scripts). All contents will be permanently deleted.`,
+                    onConfirm: doDelete,
+                  });
+                } else {
+                  setPendingDelete({
+                    severity: "warning",
+                    title: `Delete "${zone?.label || "Zone"}"`,
+                    description: `Are you sure you want to delete this empty zone?`,
+                    onConfirm: doDelete,
+                  });
+                }
               }}
               onFitToScreen={() => { cs.fitToScreen(); cs.setCanvasMenu(null); }}
               onClose={() => cs.setCanvasMenu(null)}
@@ -395,21 +501,83 @@ function ProductionCanvasPageInner() {
         onClose={() => cs.setSelected(null)}
         onUpdateFrame={(updated) => cs.setFrames((prev) => prev.map((f) => (f.id === updated.id ? updated : f)))}
         onDeleteFrame={(id) => {
-          cs.setFrames((prev) => prev.filter((f) => f.id !== id));
-          cs.setConnections((prev) => prev.filter((c) => c.from !== id && c.to !== id));
-          cs.setSelected(null);
+          const frame = cs.frames.find((f) => f.id === id);
+          const doDelete = () => {
+            cs.setFrames((prev) => prev.filter((f) => f.id !== id));
+            cs.setConnections((prev) => prev.filter((c) => c.from !== id && c.to !== id));
+            cs.setSelected(null);
+          };
+          setPendingDelete({
+            severity: (frame?.actors.length ?? 0) > 0 ? "destructive" : "warning",
+            title: "Delete Shot",
+            description: (frame?.actors.length ?? 0) > 0
+              ? `This shot has ${frame!.actors.length} actor${frame!.actors.length > 1 ? "s" : ""} assigned. Deleting it will remove all assignments.`
+              : "Are you sure you want to delete this shot?",
+            onConfirm: doDelete,
+          });
         }}
         onUpdateActor={(updated) => cs.setActors((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
         onDeleteCastNode={(actorId) => {
-          cs.setCastNodes((prev) => prev.filter((n) => n.actorId !== actorId));
-          cs.setSelected(null);
+          const actor = cs.actors.find((a) => a.id === actorId);
+          const usedInShots = cs.frames.filter((f) => f.actors.includes(actorId)).length;
+          const doDelete = () => {
+            cs.setCastNodes((prev) => prev.filter((n) => n.actorId !== actorId));
+            cs.setSelected(null);
+          };
+          if (usedInShots > 0) {
+            setPendingDelete({
+              severity: "destructive",
+              title: "Delete Cast Node",
+              description: `"${actor?.name || "This actor"}" is in ${usedInShots} shot${usedInShots > 1 ? "s" : ""}. Deleting will remove the actor from all shots.`,
+              onConfirm: doDelete,
+            });
+          } else {
+            setPendingDelete({
+              severity: "warning",
+              title: "Delete Cast Node",
+              description: `Are you sure you want to delete "${actor?.name || "this actor"}"?`,
+              onConfirm: doDelete,
+            });
+          }
         }}
         onUpdateScriptNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
         onDeleteScriptNode={(id) => {
-          cs.setScriptNodes((prev) => prev.filter((n) => n.id !== id));
-          cs.setSelected(null);
+          const node = cs.scriptNodes.find((n) => n.id === id);
+          const linkedFrames = node ? cs.frames.filter((f) => f.zoneId === node.zoneId).length : 0;
+          const doDelete = () => {
+            cs.setScriptNodes((prev) => prev.filter((n) => n.id !== id));
+            cs.setSelected(null);
+          };
+          if (linkedFrames > 0) {
+            setPendingDelete({
+              severity: "destructive",
+              title: "Delete Script Node",
+              description: `This script block is in a zone with ${linkedFrames} shot${linkedFrames > 1 ? "s" : ""}. Deleting it may break scene continuity.`,
+              onConfirm: doDelete,
+            });
+          } else {
+            setPendingDelete({
+              severity: "warning",
+              title: "Delete Script Node",
+              description: "Are you sure you want to delete this script block?",
+              onConfirm: doDelete,
+            });
+          }
         }}
         onDeleteConnection={handleDeleteConnection}
+      />
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        open={!!pendingDelete}
+        severity={pendingDelete?.severity ?? "warning"}
+        title={pendingDelete?.title ?? ""}
+        description={pendingDelete?.description ?? ""}
+        onConfirm={() => {
+          pendingDelete?.onConfirm();
+          setPendingDelete(null);
+        }}
+        onCancel={() => setPendingDelete(null)}
       />
     </div>
   );
