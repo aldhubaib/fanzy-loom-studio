@@ -517,7 +517,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },
         script: { w: SCRIPT_W * 3, h: SCRIPT_H },
-        shots: { w: FRAME_W, h: FRAME_H },
+        shots: { w: FRAME_W, h: getFrameHForAspect(shotAspectRatio) },
       };
       const size = sizeMap[zone.type];
       if (!size) return;
