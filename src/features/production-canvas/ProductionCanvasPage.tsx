@@ -174,6 +174,15 @@ function ProductionCanvasPageInner() {
           canRedo={false}
         />
 
+        <CollabPresence
+          onOpenComments={() => { setCommentsOpen(true); setActivityOpen(false); }}
+          onOpenActivity={() => { setActivityOpen(true); setCommentsOpen(false); }}
+          onOpenShare={() => setShareOpen(true)}
+        />
+        <CommentsPanel open={commentsOpen} onClose={() => setCommentsOpen(false)} />
+        <ActivityFeed open={activityOpen} onClose={() => setActivityOpen(false)} />
+        <ShareDialog open={shareOpen} onClose={() => setShareOpen(false)} />
+
         {/* Canvas surface */}
         <div
           ref={cs.containerRef}
