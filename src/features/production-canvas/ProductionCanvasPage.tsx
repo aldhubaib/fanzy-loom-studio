@@ -35,10 +35,10 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const cs = useCanvasState(projectId);
+  const [scriptStackHeights, setScriptStackHeights] = useState<Record<string, number>>({});
+  const cs = useCanvasState(projectId, scriptStackHeights);
 
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [scriptStackHeights, setScriptStackHeights] = useState<Record<string, number>>({});
   const stackRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const stackObservers = useRef<Record<string, ResizeObserver>>({});
 
