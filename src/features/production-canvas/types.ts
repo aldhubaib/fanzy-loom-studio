@@ -16,6 +16,7 @@ export interface FrameData {
   actors: string[];
   location?: string;
   zoneId: string;
+  order?: number;
 }
 
 export interface CastNode {
@@ -24,6 +25,7 @@ export interface CastNode {
   x: number;
   y: number;
   zoneId: string;
+  order?: number;
 }
 
 export interface LocationNode {
@@ -32,6 +34,7 @@ export interface LocationNode {
   x: number;
   y: number;
   zoneId: string;
+  order?: number;
 }
 
 export interface ScriptNode {
