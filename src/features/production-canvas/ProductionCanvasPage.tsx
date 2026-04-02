@@ -37,6 +37,8 @@ function ProductionCanvasPageInner() {
   const cs = useCanvasState(projectId);
 
   // ── Derived values ────────────────────────────────────
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+
   const showDrawer = !!cs.selected;
 
   const selectedFrame = cs.selected?.type === "frame"
