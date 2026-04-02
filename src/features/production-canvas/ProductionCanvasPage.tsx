@@ -680,12 +680,22 @@ function ProductionCanvasPageInner() {
                   .map((n) => n.locationName)
               }
               onSelect={(name) => {
+                const zoneId = cs.locationPickerPos!.zoneId;
+                const b = cs.zoneBounds[zoneId];
+                const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
+                const cols = 3;
+                const gap = 20;
+                const idx = existing.length;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const startX = b ? b.x + ZONE_PAD : cs.locationPickerPos!.worldX;
+                const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.locationPickerPos!.worldY;
                 cs.setLocationNodes((prev) => [...prev, {
                   id: `ln-${Date.now()}`,
                   locationName: name,
-                  x: cs.locationPickerPos!.worldX - LOC_W / 2,
-                  y: cs.locationPickerPos!.worldY,
-                  zoneId: cs.locationPickerPos!.zoneId,
+                  x: startX + col * (LOC_W + gap),
+                  y: startY + row * (LOC_H + gap),
+                  zoneId,
                 }]);
                 cs.setLocationPickerPos(null);
               }}
