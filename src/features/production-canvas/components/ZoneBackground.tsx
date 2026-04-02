@@ -134,6 +134,46 @@ export const ZoneBackground = memo(function ZoneBackground({
         );
       })}
 
+      {/* Top-right action buttons — visible on hover */}
+      {(hovered || isSelected) && (
+        <div className="absolute flex items-center gap-1 pointer-events-auto" style={{ right: 8, top: 48 }}>
+          {onAddItem && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="flex items-center justify-center w-7 h-7 rounded-md bg-card/80 border border-border/40 opacity-70 hover:opacity-100 transition-opacity"
+                    style={{ color: `hsl(${zone.color} / 0.8)` }}
+                    onClick={(e) => { e.stopPropagation(); onAddItem(); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">Add</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {onDuplicateZone && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="flex items-center justify-center w-7 h-7 rounded-md bg-card/80 border border-border/40 opacity-70 hover:opacity-100 transition-opacity"
+                    style={{ color: `hsl(${zone.color} / 0.8)` }}
+                    onClick={(e) => { e.stopPropagation(); onDuplicateZone(); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">Duplicate</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      )}
+
       {/* Label + Zone tools */}
       <div className="absolute top-0 left-4 h-10 flex items-center gap-1.5 pointer-events-auto">
         <div
