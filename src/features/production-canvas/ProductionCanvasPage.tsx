@@ -291,18 +291,30 @@ function ProductionCanvasPageInner() {
                 cs.setCanvasMenu(null);
               }}
               onAddZone={(type) => {
+                const zoneId = `z-${type}-${Date.now()}`;
+                const wx = cs.canvasMenu!.worldX;
+                const wy = cs.canvasMenu!.worldY;
                 cs.setZones((prev) => {
                   const count = prev.filter((z) => z.type === type).length;
                   const label = count > 0 ? `${ZONE_LABELS[type]} #${count + 1}` : ZONE_LABELS[type];
                   return [...prev, {
-                    id: `z-${type}-${Date.now()}`,
+                    id: zoneId,
                     label,
                     type,
-                    x: cs.canvasMenu!.worldX,
-                    y: cs.canvasMenu!.worldY,
+                    x: wx,
+                    y: wy,
                     color: ZONE_COLORS[type],
                   }];
                 });
+                // Auto-add a timeline node inside new production zones
+                if (type === "production") {
+                  cs.setTimelineNodes((prev) => [...prev, {
+                    id: `tn-${Date.now()}`,
+                    x: wx + 40,
+                    y: wy + 40,
+                    zoneId,
+                  }]);
+                }
                 cs.setCanvasMenu(null);
               }}
               onFitToScreen={() => { cs.fitToScreen(); cs.setCanvasMenu(null); }}
