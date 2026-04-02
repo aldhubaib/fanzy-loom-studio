@@ -54,13 +54,15 @@ interface ZoneBackgroundProps {
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
   onSelect?: () => void;
-  /** Handler map: tool key → callback. Only tools with a handler are rendered. */
   onToolAction?: Record<string, () => void>;
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
   onColsChange?: (cols: number) => void;
   shotAspectRatio?: string;
   onAspectRatioChange?: (ratio: string) => void;
+  /** Shot stats for shots zone header */
+  shotStats?: { total: number; approved: number; drafts: number; animatable: number };
+  onAnimateAll?: () => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
