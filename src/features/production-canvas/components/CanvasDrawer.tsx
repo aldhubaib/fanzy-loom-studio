@@ -103,6 +103,7 @@ export const CanvasDrawer = memo(function CanvasDrawer({
                 connectedActors={connectedActorsForFrame}
                 onUpdate={onUpdateFrame}
                 onDelete={() => onDeleteFrame(selectedFrame.id)}
+                onApprove={onApproveShot}
               />
             )}
             {selectedActor && (
