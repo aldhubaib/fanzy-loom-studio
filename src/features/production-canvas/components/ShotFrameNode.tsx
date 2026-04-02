@@ -156,14 +156,20 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 
         {/* Animate button for approved shots */}
         {status === "approved" && onAnimate && (
-          <div className="px-2.5 pt-1.5" onMouseDown={(e) => e.stopPropagation()}>
-            <button
-              onClick={(e) => { e.stopPropagation(); onAnimate(frame.id); }}
-              className="w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
-            >
-              <Zap className="w-3 h-3" />
-              Animate
-            </button>
+          <div className="absolute top-2 right-2 z-10" onMouseDown={(e) => e.stopPropagation()}>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onAnimate(frame.id); }}
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-md"
+                  >
+                    <Zap className="w-3 h-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs">Animate</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
 
