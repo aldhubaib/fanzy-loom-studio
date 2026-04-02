@@ -91,7 +91,7 @@ export const ZoneBackground = memo(function ZoneBackground({
           borderColor: `hsl(${zone.color} / ${isSelected || hovered ? 0.55 : 0.25})`,
           background: "hsl(var(--background))",
         }}
-        onMouseDown={onZoneDragStart}
+        onMouseDown={(e) => { onSelect?.(); onZoneDragStart(e); }}
       />
 
       {/* Zone-level connectors */}
