@@ -85,6 +85,22 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 
         {/* Top right controls */}
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+          {status === "approved" && onAnimate && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="w-5 h-5 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-md"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); onAnimate(frame.id); }}
+                  >
+                    <Zap className="w-3 h-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">Animate</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <button
             className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors"
             onMouseDown={(e) => e.stopPropagation()}
@@ -151,24 +167,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           )}
         </div>
 
-        {/* Animate button for approved shots */}
-        {status === "approved" && onAnimate && (
-          <div className="absolute top-2 right-2 z-10" onMouseDown={(e) => e.stopPropagation()}>
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onAnimate(frame.id); }}
-                    className="w-6 h-6 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-md"
-                  >
-                    <Zap className="w-3 h-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="text-xs">Animate</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
 
         <div className="p-2.5 space-y-1 rounded-b-[10px]" onMouseDown={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between">
