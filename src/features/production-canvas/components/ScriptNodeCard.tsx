@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Settings, X, FileText } from "lucide-react";
+import { Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScriptNode, SelectedItem } from "../types";
 import { SCRIPT_W } from "../constants";
@@ -28,20 +28,13 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       onMouseDown={onMouseDown}
     >
       <button
-        className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
+        className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onSettingsClick(); }}
         aria-label="Open scene settings"
         title="Open scene settings"
       >
         <Settings className="w-3 h-3" />
-      </button>
-      <button
-        className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-      >
-        <X className="w-3 h-3" />
       </button>
       <div className="p-3 space-y-1.5">
         <div className="flex items-center gap-1.5">
