@@ -224,6 +224,7 @@ export function useCanvasState(projectId: string | undefined) {
         setCastNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setLocationNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
+        setTimelineNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
       }
       if (dragging) {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -234,6 +235,7 @@ export function useCanvasState(projectId: string | undefined) {
         setCastNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setLocationNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
+        setTimelineNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
       }
     },
     [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart],
