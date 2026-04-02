@@ -121,6 +121,9 @@ export function getPortPosition(
   const sn = scriptNodes.find((n) => n.id === baseId);
   if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
 
+  const tn = timelineNodes.find((n) => n.id === baseId);
+  if (tn) return { x: side === "right" ? tn.x + TIMELINE_W : tn.x, y: tn.y + TIMELINE_H / 2 };
+
   return { x: 0, y: 0 };
 }
 
