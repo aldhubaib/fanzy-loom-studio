@@ -618,6 +618,17 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     [castNodes, locationNodes, frames, autoGridZone],
   );
 
+  // Re-grid shots zones when aspect ratio changes
+  useEffect(() => {
+    const shotsZones = zones.filter((z) => z.type === "shots");
+    if (shotsZones.length === 0) return;
+    const t = setTimeout(() => {
+      shotsZones.forEach((zone) => {
+        autoGridZoneRef.current(zone.id, zoneCols[zone.id] ?? 3);
+      });
+    }, 0);
+    return () => clearTimeout(t);
+  }, [shotAspectRatio]);
 
   const resetCanvas = useCallback(() => {
     localStorage.removeItem(SAVE_KEY);
