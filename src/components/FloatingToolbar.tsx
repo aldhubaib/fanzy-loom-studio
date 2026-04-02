@@ -7,12 +7,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const pipelineStages = [
-  { title: "Concept", slug: "concept", icon: Lightbulb },
-  { title: "Script", slug: "script", icon: FileText },
-  { title: "Shots", slug: "storyboard", icon: LayoutGrid },
-  { title: "Casting", slug: "casting", icon: Users },
-  { title: "Production", slug: "production", icon: Film },
-  { title: "Canvas", slug: "canvas", icon: Sparkles, isCanvas: true },
+  { title: "Canvas", slug: "canvas", icon: Sparkles },
 ];
 
 interface FloatingToolbarProps {
