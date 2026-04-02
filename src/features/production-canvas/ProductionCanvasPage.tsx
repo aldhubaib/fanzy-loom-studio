@@ -643,7 +643,12 @@ function ProductionCanvasPageInner() {
             <CastPicker
               position={cs.castPickerPos}
               actors={cs.actors}
+              existingActorIds={cs.castNodes.filter((n) => n.zoneId === cs.castPickerPos!.zoneId).map((n) => n.actorId)}
               onSelect={(actor) => {
+                // If it's a brand-new actor, add to the roster
+                if (!cs.actors.find((a) => a.id === actor.id)) {
+                  cs.setActors((prev) => [...prev, actor]);
+                }
                 cs.setCastNodes((prev) => [...prev, {
                   id: `cn-${Date.now()}`,
                   actorId: actor.id,
