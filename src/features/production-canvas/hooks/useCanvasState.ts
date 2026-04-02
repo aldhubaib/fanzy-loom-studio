@@ -89,7 +89,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     const filteredCast = dragging ? castNodes.filter((n) => n.id !== dragging) : castNodes;
     const filteredLoc = dragging ? locationNodes.filter((n) => n.id !== dragging) : locationNodes;
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights);
+      map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights, shotAspectRatio);
     });
     // Freeze the dragged zone's bounds so configured columns stay visually fixed while dragging
     if (frozenDragZoneBounds) {
