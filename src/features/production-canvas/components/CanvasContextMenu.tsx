@@ -67,6 +67,10 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
               <Film className="w-4 h-4" /> Add Timeline
             </button>
           )}
+          <div className="h-px bg-border my-1" />
+          <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-destructive/20 text-destructive" onClick={() => onDeleteZone(zone.id)}>
+            <Trash2 className="w-4 h-4" /> Delete Zone
+          </button>
         </>
       ) : (
         <>
