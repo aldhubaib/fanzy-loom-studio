@@ -7,10 +7,10 @@ import type { TimelineNodeData } from "./components/TimelineNode";
 import type { PreviewNodeData } from "./components/PreviewMonitorNode";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
-  SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H, TIMELINE_TRACK_H, TIMELINE_HEADER_H, TIMELINE_RULER_H,
+  SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H,
   ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
-  ZONE_CONNECTOR_CONFIGS, PREVIEW_MON_W, PREVIEW_MON_H,
+  ZONE_CONNECTOR_CONFIGS,
 } from "./constants";
 
 // ─── Connection Helpers ─────────────────────────────────────
