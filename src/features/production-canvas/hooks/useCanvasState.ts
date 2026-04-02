@@ -22,7 +22,7 @@ import type { PreviewNodeData } from "../components/PreviewMonitorNode";
 import {
   computeZoneBounds, loadCanvasState, saveCanvasState,
   makeZonePortId, getConnectionBaseId, getConnectionPortKey,
-  getPortPosition, getZoneColor as resolveZoneColor,
+  getPortPosition, getZoneColor as resolveZoneColor, getFrameHForAspect,
 } from "../utils";
 
 export function useCanvasState(projectId: string | undefined, scriptStackHeights: Record<string, number> = {}) {
