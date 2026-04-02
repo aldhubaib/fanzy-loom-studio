@@ -4,7 +4,12 @@ import { Plus, Settings, Images, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { Actor, FrameData } from "../types";
-import { FRAME_W, IMAGE_H, locationImages } from "../constants";
+import { FRAME_W, locationImages } from "../constants";
+
+function parseAspectRatio(ratio: string): number {
+  const [w, h] = ratio.split(":").map(Number);
+  return (w && h) ? w / h : 16 / 9;
+}
 
 interface ShotFrameNodeProps {
   frame: FrameData;
