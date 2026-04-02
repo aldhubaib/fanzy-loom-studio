@@ -422,7 +422,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
           zoneId: targetZone,
         },
       ]);
-      setSelected({ type: "frame", id });
+      // Don't auto-select (which opens the drawer) when adding via button
     },
     [frames, zones, zoneBounds],
   );

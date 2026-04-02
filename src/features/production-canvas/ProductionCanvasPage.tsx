@@ -213,10 +213,16 @@ function ProductionCanvasPageInner() {
                   onAddItem={() => {
                     const b2 = cs.zoneBounds[zone.id];
                     if (!b2) return;
-                    const wx = b2.x + b2.w / 2;
-                    const wy = b2.y + b2.h / 2;
                     if (zone.type === "shots") {
-                      cs.addFrame(wx, wy, zone.id);
+                      const existing = cs.frames.filter((f) => f.zoneId === zone.id);
+                      const cols = 3;
+                      const gap = 20;
+                      const idx = existing.length;
+                      const col = idx % cols;
+                      const row = Math.floor(idx / cols);
+                      const startX = b2.x + ZONE_PAD;
+                      const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
+                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (FRAME_H + gap), zone.id);
                     } else if (zone.type === "casting") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
