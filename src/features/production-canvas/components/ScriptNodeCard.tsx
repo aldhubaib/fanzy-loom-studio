@@ -60,6 +60,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       <div className="p-3 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          <span className="text-[10px] font-bold text-purple-300/70 uppercase tracking-wider shrink-0">SC {sceneNumber}</span>
           <div
             ref={headingRef}
             contentEditable
