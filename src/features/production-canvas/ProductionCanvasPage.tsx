@@ -52,7 +52,6 @@ function ProductionCanvasPageInner() {
   // ── Callbacks ─────────────────────────────────────────
   const handleDeleteConnection = useCallback(
     (from: string, to: string) => {
-      // Check if this is a zone-level connection (data flows through it)
       const isZoneConn = from.includes("::") || to.includes("::");
       const fromZone = cs.zones.find((z) => from.startsWith(z.id));
       const toZone = cs.zones.find((z) => to.startsWith(z.id));
@@ -62,17 +61,37 @@ function ProductionCanvasPageInner() {
       };
 
       if (isZoneConn && fromZone && toZone) {
+        // Find which zone types are involved to give a specific warning
+        const zoneTypes = [fromZone.type, toZone.type];
+        const otherZone = fromZone.type === "shots" ? toZone : toZone.type === "shots" ? fromZone : toZone;
+
+        let description = "";
+        if (zoneTypes.includes("casting")) {
+          const castCount = cs.castNodes.filter((n) => n.zoneId === otherZone.id || n.zoneId === fromZone.id || n.zoneId === toZone.id).length;
+          description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will unlink all cast members. ${castCount > 0 ? `${castCount} actor${castCount > 1 ? "s" : ""} will be removed from connected shots.` : ""}`;
+        } else if (zoneTypes.includes("locations")) {
+          const locCount = cs.locationNodes.filter((n) => n.zoneId === otherZone.id || n.zoneId === fromZone.id || n.zoneId === toZone.id).length;
+          description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will unlink all locations. ${locCount > 0 ? `${locCount} location${locCount > 1 ? "s" : ""} will be removed from connected shots.` : ""}`;
+        } else if (zoneTypes.includes("scripting")) {
+          const scriptCount = cs.scriptNodes.filter((n) => n.zoneId === otherZone.id || n.zoneId === fromZone.id || n.zoneId === toZone.id).length;
+          description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will unlink all scripts. ${scriptCount > 0 ? `${scriptCount} script block${scriptCount > 1 ? "s" : ""} will lose their shot references.` : ""}`;
+        } else if (zoneTypes.includes("production")) {
+          description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will remove shots from the production timeline.`;
+        } else {
+          description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will break the data flow between these zones.`;
+        }
+
         setPendingDelete({
           severity: "destructive",
-          title: "Delete Connection",
-          description: `Disconnecting "${fromZone.label}" from "${toZone.label}" will break the data flow between these zones. All linked shots, actors, and locations will be unlinked.`,
+          title: `Disconnect ${fromZone.label}`,
+          description,
           onConfirm: doDelete,
         });
       } else {
         doDelete();
       }
     },
-    [cs.setConnections, cs.zones],
+    [cs.setConnections, cs.zones, cs.castNodes, cs.locationNodes, cs.scriptNodes],
   );
 
   const handleContextMenu = useCallback(
