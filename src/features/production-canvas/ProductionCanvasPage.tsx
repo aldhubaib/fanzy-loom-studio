@@ -728,12 +728,17 @@ function ProductionCanvasPageInner() {
 {cs.locationPickerPos && (
             <LocationPicker
               position={cs.locationPickerPos}
-              existingLocationNames={
+              locations={cs.locations}
+              existingLocationIds={
                 cs.locationNodes
                   .filter((n) => n.zoneId === cs.locationPickerPos!.zoneId)
-                  .map((n) => n.locationName)
+                  .map((n) => n.locationId)
               }
-              onSelect={(name) => {
+              onSelect={(loc) => {
+                // If it's a brand-new location, add to the roster
+                if (!cs.locations.find((l) => l.id === loc.id)) {
+                  cs.setLocations((prev) => [...prev, loc]);
+                }
                 const zoneId = cs.locationPickerPos!.zoneId;
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
@@ -746,7 +751,7 @@ function ProductionCanvasPageInner() {
                 const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.locationPickerPos!.worldY;
                 cs.setLocationNodes((prev) => [...prev, {
                   id: `ln-${Date.now()}`,
-                  locationName: name,
+                  locationId: loc.id,
                   x: startX + col * (LOC_W + gap),
                   y: startY + row * (LOC_H + gap),
                   zoneId,
