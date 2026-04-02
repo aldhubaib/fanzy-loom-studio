@@ -22,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/cast" element={<CastPage />} />
           <Route path="/locations" element={<LocationsPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/project/:projectId/canvas" element={<ProductionCanvasPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
