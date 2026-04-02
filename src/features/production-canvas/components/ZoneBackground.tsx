@@ -1,6 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, type LucideIcon } from "lucide-react";
+import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, Zap, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
