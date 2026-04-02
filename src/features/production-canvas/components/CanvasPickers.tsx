@@ -77,13 +77,23 @@ export const CastPicker = memo(function CastPicker({
 
 interface LocationPickerProps {
   position: PickerPosition;
+  existingLocationNames?: string[];
   onSelect: (name: string) => void;
   onClose: () => void;
 }
 
 export const LocationPicker = memo(function LocationPicker({
-  position, onSelect, onClose,
+  position, existingLocationNames = [], onSelect, onClose,
 }: LocationPickerProps) {
+  const availableLocations = Object.entries(locationImages).filter(
+    ([name]) => !existingLocationNames.includes(name)
+  );
+
+  const handleCreateNew = () => {
+    const newName = `Location ${Date.now()}`;
+    onSelect(newName);
+  };
+
   return (
     <div
       className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
@@ -91,7 +101,10 @@ export const LocationPicker = memo(function LocationPicker({
       onMouseDown={(e) => e.stopPropagation()}
     >
       <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Location</p>
-      {Object.entries(locationImages).map(([name, img]) => (
+      {availableLocations.length === 0 && (
+        <p className="px-3 py-2 text-xs text-muted-foreground/60 italic">All locations already added</p>
+      )}
+      {availableLocations.map(([name, img]) => (
         <button
           key={name}
           className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground"
@@ -103,6 +116,12 @@ export const LocationPicker = memo(function LocationPicker({
         </button>
       ))}
       <div className="h-px bg-border my-1" />
+      <button
+        className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
+        onClick={handleCreateNew}
+      >
+        <Plus className="w-4 h-4" /> Create New
+      </button>
       <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-muted-foreground" onClick={onClose}>
         <X className="w-4 h-4" /> Cancel
       </button>
