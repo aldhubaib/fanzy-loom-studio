@@ -8,6 +8,7 @@ import { mockProjects } from "@/data/mockProjects";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
 import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, FRAME_W, FRAME_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
+import { getFrameHForAspect } from "./utils";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
