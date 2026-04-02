@@ -121,6 +121,7 @@ export interface CanvasState {
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
   timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
+  previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
   zoom: number;
   pan: { x: number; y: number };
