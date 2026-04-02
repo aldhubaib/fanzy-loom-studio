@@ -25,7 +25,7 @@ import {
   getPortPosition, getZoneColor as resolveZoneColor,
 } from "../utils";
 
-export function useCanvasState(projectId: string | undefined) {
+export function useCanvasState(projectId: string | undefined, pageViewZones?: Set<string>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
@@ -81,10 +81,10 @@ export function useCanvasState(projectId: string | undefined) {
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, pageViewZones);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, pageViewZones]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {

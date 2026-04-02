@@ -70,6 +70,10 @@ export const ZONE_LABEL_H = 40;
 export const MIN_ZONE_W = 300;
 export const MIN_ZONE_H = 200;
 
+// A4 page dimensions for script page view (210mm × 297mm ratio)
+export const A4_PAGE_W = 680;
+export const A4_PAGE_H = 960;
+
 // ─── Canvas Interaction ─────────────────────────────────────
 export const ZOOM_MIN = 0.15;
 export const ZOOM_MAX = 3;

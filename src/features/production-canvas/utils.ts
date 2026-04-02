@@ -10,6 +10,7 @@ import {
   SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H,
   ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
+  A4_PAGE_W, A4_PAGE_H,
   ZONE_CONNECTOR_CONFIGS,
 } from "./constants";
 
@@ -38,7 +39,18 @@ export function computeZoneBounds(
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
   previewNodes: PreviewNodeData[] = [],
+  pageViewZones?: Set<string>,
 ): ZoneBounds {
+  // If this is a script zone in page view, use A4 dimensions
+  if (zone.type === "script" && pageViewZones?.has(zone.id)) {
+    return {
+      x: zone.x,
+      y: zone.y,
+      w: A4_PAGE_W + ZONE_PAD * 2,
+      h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H,
+    };
+  }
+
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
   const sizeMap: Record<string, { w: number; h: number }> = {
