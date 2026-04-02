@@ -454,11 +454,11 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const effectiveSize = size;
 
       // Collect nodes for this zone, sorted by logical order when available
-      const getNodes = (): { x: number; y: number; id: string }[] => {
-        if (zone.type === "casting") return castNodes.filter((n) => n.zoneId === zoneId);
-        if (zone.type === "locations") return locationNodes.filter((n) => n.zoneId === zoneId);
+      const getNodes = (): { x: number; y: number; id: string; order?: number }[] => {
+        if (zone.type === "casting") return [...castNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        if (zone.type === "locations") return [...locationNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (zone.type === "script") return [...scriptNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        if (zone.type === "shots") return frames.filter((f) => f.zoneId === zoneId);
+        if (zone.type === "shots") return [...frames.filter((f) => f.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         return [];
       };
 
@@ -495,7 +495,47 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
   );
 
-  // ── Reset canvas ──────────────────────────────────────
+  // ── Reorder node within zone ───────────────────────────
+  const reorderNode = useCallback(
+    (nodeId: string, direction: "left" | "right", nodeType: "cast" | "location" | "frame") => {
+      const swap = <T extends { id: string; zoneId: string; order?: number }>(
+        prev: T[],
+      ): T[] => {
+        const node = prev.find((n) => n.id === nodeId);
+        if (!node) return prev;
+        const zoneNodes = [...prev.filter((n) => n.zoneId === node.zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const idx = zoneNodes.findIndex((n) => n.id === nodeId);
+        const swapIdx = direction === "left" ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= zoneNodes.length) return prev;
+        const curOrder = zoneNodes[idx].order ?? idx;
+        const swapOrder = zoneNodes[swapIdx].order ?? swapIdx;
+        return prev.map((n) => {
+          if (n.id === zoneNodes[idx].id) return { ...n, order: swapOrder };
+          if (n.id === zoneNodes[swapIdx].id) return { ...n, order: curOrder };
+          return n;
+        });
+      };
+
+      if (nodeType === "cast") setCastNodes(swap);
+      else if (nodeType === "location") setLocationNodes(swap);
+      else if (nodeType === "frame") setFrames(swap);
+
+      // Find zone and re-grid after reorder
+      const findZoneId = () => {
+        if (nodeType === "cast") return castNodes.find((n) => n.id === nodeId)?.zoneId;
+        if (nodeType === "location") return locationNodes.find((n) => n.id === nodeId)?.zoneId;
+        if (nodeType === "frame") return frames.find((f) => f.id === nodeId)?.zoneId;
+      };
+      const zId = findZoneId();
+      if (zId) {
+        // Defer auto-grid to after state update
+        setTimeout(() => autoGridZone(zId), 0);
+      }
+    },
+    [castNodes, locationNodes, frames, autoGridZone],
+  );
+
+
   const resetCanvas = useCallback(() => {
     localStorage.removeItem(SAVE_KEY);
     setActors(actorRoster);
@@ -582,7 +622,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     // Callbacks
     handleWheel, handleMouseDown, handleMouseMove, handleMouseUp,
     startDrag, startConnect, endConnect, startZoneDrag,
-    fitToScreen, addFrame, resetCanvas, autoGridZone,
+    fitToScreen, addFrame, resetCanvas, autoGridZone, reorderNode,
     getConnectedActors, findZoneAt, getPortPos,
   };
 }

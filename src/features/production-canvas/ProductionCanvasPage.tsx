@@ -291,92 +291,113 @@ function ProductionCanvasPageInner() {
             />
 
             {/* Shot frames */}
-            {cs.frames.map((frame, idx) => (
-              <ShotFrameNode
-                key={frame.id}
-                frame={frame}
-                index={idx}
-                actors={cs.actors}
-                isSelected={cs.selected?.id === frame.id}
-                onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
-                onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
-              />
-            ))}
+            {(() => {
+              const sorted = [...cs.frames].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              return sorted.map((frame, idx) => (
+                <ShotFrameNode
+                  key={frame.id}
+                  frame={frame}
+                  index={idx}
+                  actors={cs.actors}
+                  isSelected={cs.selected?.id === frame.id}
+                  isFirst={idx === 0}
+                  isLast={idx === sorted.length - 1}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
+                  onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
+                  onMoveLeft={() => cs.reorderNode(frame.id, "left", "frame")}
+                  onMoveRight={() => cs.reorderNode(frame.id, "right", "frame")}
+                />
+              ));
+            })()}
 
             {/* Cast nodes */}
-            {cs.castNodes.map((node) => {
-              const actor = cs.actors.find((a) => a.id === node.actorId);
-              if (!actor) return null;
-              const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
-              return (
-                <CastNodeCard
-                  key={node.id}
-                  node={node}
-                  actor={actor}
-                  sceneCount={sceneCount}
-                  isSelected={cs.selected?.id === node.id}
-                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
-                  onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
-                  onDelete={() => {
-                    const doDelete = () => {
-                      cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
-                      if (cs.selected?.id === node.id) cs.setSelected(null);
-                    };
-                    if (sceneCount > 0) {
-                      setPendingDelete({
-                        severity: "destructive",
-                        title: "Delete Cast Node",
-                        description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
-                        onConfirm: doDelete,
-                      });
-                    } else {
-                      setPendingDelete({
-                        severity: "warning",
-                        title: "Delete Cast Node",
-                        description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
-                        onConfirm: doDelete,
-                      });
-                    }
-                  }}
-                />
-              );
-            })}
+            {(() => {
+              const sorted = [...cs.castNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              return sorted.map((node, idx) => {
+                const actor = cs.actors.find((a) => a.id === node.actorId);
+                if (!actor) return null;
+                const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
+                return (
+                  <CastNodeCard
+                    key={node.id}
+                    node={node}
+                    actor={actor}
+                    sceneCount={sceneCount}
+                    isSelected={cs.selected?.id === node.id}
+                    isFirst={idx === 0}
+                    isLast={idx === sorted.length - 1}
+                    onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
+                    onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
+                    onMoveLeft={() => cs.reorderNode(node.id, "left", "cast")}
+                    onMoveRight={() => cs.reorderNode(node.id, "right", "cast")}
+                    onDelete={() => {
+                      const doDelete = () => {
+                        cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
+                        if (cs.selected?.id === node.id) cs.setSelected(null);
+                      };
+                      if (sceneCount > 0) {
+                        setPendingDelete({
+                          severity: "destructive",
+                          title: "Delete Cast Node",
+                          description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
+                          onConfirm: doDelete,
+                        });
+                      } else {
+                        setPendingDelete({
+                          severity: "warning",
+                          title: "Delete Cast Node",
+                          description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
+                          onConfirm: doDelete,
+                        });
+                      }
+                    }}
+                  />
+                );
+              });
+            })()}
 
             {/* Location nodes */}
-            {cs.locationNodes.map((node) => {
-              const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
-              return (
-                <LocationNodeCard
-                  key={node.id}
-                  node={node}
-                  isSelected={cs.selected?.id === node.id}
-                  shotCount={shotCount}
-                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "location", id: node.id }); }}
-                  onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
-                  onDelete={() => {
-                    const doDelete = () => {
-                      cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
-                      if (cs.selected?.id === node.id) cs.setSelected(null);
-                    };
-                    if (shotCount > 0) {
-                      setPendingDelete({
-                        severity: "destructive",
-                        title: "Delete Location Node",
-                        description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
-                        onConfirm: doDelete,
-                      });
-                    } else {
-                      setPendingDelete({
-                        severity: "warning",
-                        title: "Delete Location Node",
-                        description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
-                        onConfirm: doDelete,
-                      });
-                    }
-                  }}
-                />
-              );
-            })}
+            {(() => {
+              const sorted = [...cs.locationNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              return sorted.map((node, idx) => {
+                const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
+                return (
+                  <LocationNodeCard
+                    key={node.id}
+                    node={node}
+                    isSelected={cs.selected?.id === node.id}
+                    shotCount={shotCount}
+                    isFirst={idx === 0}
+                    isLast={idx === sorted.length - 1}
+                    onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "location", id: node.id }); }}
+                    onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
+                    onMoveLeft={() => cs.reorderNode(node.id, "left", "location")}
+                    onMoveRight={() => cs.reorderNode(node.id, "right", "location")}
+                    onDelete={() => {
+                      const doDelete = () => {
+                        cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
+                        if (cs.selected?.id === node.id) cs.setSelected(null);
+                      };
+                      if (shotCount > 0) {
+                        setPendingDelete({
+                          severity: "destructive",
+                          title: "Delete Location Node",
+                          description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
+                          onConfirm: doDelete,
+                        });
+                      } else {
+                        setPendingDelete({
+                          severity: "warning",
+                          title: "Delete Location Node",
+                          description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
+                          onConfirm: doDelete,
+                        });
+                      }
+                    }}
+                  />
+                );
+              });
+            })()}
 
             {/* Script nodes — card view or page view per zone */}
             {(() => {
