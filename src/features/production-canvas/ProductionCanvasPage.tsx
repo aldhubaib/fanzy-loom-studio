@@ -241,13 +241,16 @@ function ProductionCanvasPageInner() {
                       const sy = btnY * cs.zoom + cs.pan.y;
                       cs.setLocationPickerPos({ x: sx, y: sy, worldX: btnX, worldY: btnY, zoneId: zone.id });
                     } else if (zone.type === "script") {
-                      const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
+                      const zoneScripts = cs.scriptNodes.filter((n) => n.zoneId === zone.id);
+                      const maxOrder = zoneScripts.reduce((max, n) => Math.max(max, n.order ?? 0), -1);
+                      const startX = b2.x + ZONE_PAD;
+                      const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
                       cs.setScriptNodes((prev) => [...prev, {
                         id: `sn-${Date.now()}`,
                         heading: "New Scene",
                         body: "Description of the scene...",
-                        x: wx - SCRIPT_W / 2,
-                        y: wy,
+                        x: startX,
+                        y: startY + zoneScripts.length * (160 + 8),
                         zoneId: zone.id,
                         order: maxOrder + 1,
                       }]);
