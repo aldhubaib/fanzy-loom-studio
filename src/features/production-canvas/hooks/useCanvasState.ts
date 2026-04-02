@@ -25,7 +25,7 @@ import {
   getPortPosition, getZoneColor as resolveZoneColor,
 } from "../utils";
 
-export function useCanvasState(projectId: string | undefined) {
+export function useCanvasState(projectId: string | undefined, scriptStackHeights: Record<string, number> = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
