@@ -19,15 +19,17 @@ interface ShotFrameNodeProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onSelectImage?: (frameId: string, image: string) => void;
+  aspectRatio?: string;
 }
 
 export const ShotFrameNode = memo(function ShotFrameNode({
-  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage,
+  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage, aspectRatio = "16:9",
 }: ShotFrameNodeProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState(0);
   const [locationLightbox, setLocationLightbox] = useState(false);
   const imageCount = frame.generatedImages?.length ?? 0;
+  const imageH = Math.round(FRAME_W / parseAspectRatio(aspectRatio));
 
   return (
     <>
