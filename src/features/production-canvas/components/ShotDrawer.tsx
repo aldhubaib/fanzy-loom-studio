@@ -1,13 +1,19 @@
 import { useState, useEffect, memo } from "react";
-import { Check, Sparkles, Trash2 } from "lucide-react";
+import { Check, Sparkles, Trash2, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Actor, FrameData } from "../types";
-import { shotTypes, locationDetailOptions, DURATION_OPTIONS, locationImages } from "../constants";
+import { shotTypes, locationDetailOptions, DURATION_OPTIONS } from "../constants";
 
 interface ShotDrawerProps {
   frame: FrameData;
@@ -25,6 +31,7 @@ export const ShotDrawer = memo(function ShotDrawer({
   const [duration, setDuration] = useState(frame.duration);
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [location, setLocation] = useState(frame.location || "");
+  const [shotModalOpen, setShotModalOpen] = useState(false);
 
   useEffect(() => {
     setPrompt(frame.description);
@@ -53,6 +60,7 @@ export const ShotDrawer = memo(function ShotDrawer({
   };
 
   const availableActors = connectedActors.length > 0 ? connectedActors : actors;
+  const currentShotType = shotTypes.find((s) => s.value === shot);
 
   return (
     <div className="space-y-4">
@@ -77,17 +85,56 @@ export const ShotDrawer = memo(function ShotDrawer({
 
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Shot Type</Label>
-        <div className="grid grid-cols-5 gap-1.5">
-          {shotTypes.map((st) => (
-            <button key={st.value} onClick={() => setShot(st.value)}
-              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", shot === st.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
-              <img src={st.img} alt={st.label} className="w-full h-full object-cover" />
-              {shot === st.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
-            </button>
-          ))}
-        </div>
-        <p className="text-[10px] text-muted-foreground text-center">{shotTypes.find((s) => s.value === shot)?.label}</p>
+        <button
+          onClick={() => setShotModalOpen(true)}
+          className={cn(
+            "w-full rounded-lg border border-border hover:border-muted-foreground/60 transition-all overflow-hidden",
+            currentShotType ? "p-0" : "p-4 flex items-center justify-center gap-2 text-muted-foreground"
+          )}
+        >
+          {currentShotType ? (
+            <div className="flex items-center gap-3 p-2">
+              <img src={currentShotType.img} alt={currentShotType.label} className="w-16 h-12 rounded-md object-cover" />
+              <span className="text-sm font-medium text-foreground">{currentShotType.label}</span>
+            </div>
+          ) : (
+            <>
+              <Camera className="w-4 h-4" />
+              <span className="text-xs">Select shot type</span>
+            </>
+          )}
+        </button>
       </div>
+
+      <Dialog open={shotModalOpen} onOpenChange={setShotModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Select Shot Type</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            {shotTypes.map((st) => (
+              <button
+                key={st.value}
+                onClick={() => { setShot(st.value); setShotModalOpen(false); }}
+                className={cn(
+                  "relative rounded-lg overflow-hidden aspect-[4/3] transition-all",
+                  shot === st.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground"
+                )}
+              >
+                <img src={st.img} alt={st.label} className="w-full h-full object-cover" />
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 px-1.5 py-1">
+                  <span className="text-[10px] text-white font-medium">{st.label}</span>
+                </div>
+                {shot === st.value && (
+                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Separator />
 
