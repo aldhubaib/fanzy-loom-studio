@@ -1,11 +1,12 @@
 import { memo } from "react";
 import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { LocationNode } from "../types";
-import { LOC_W, locationImages } from "../constants";
+import type { LocationNode, LocationData } from "../types";
+import { LOC_W } from "../constants";
 
 interface LocationNodeCardProps {
   node: LocationNode;
+  location: LocationData;
   isSelected: boolean;
   shotCount: number;
   onMouseDown: (e: React.MouseEvent) => void;
@@ -14,9 +15,9 @@ interface LocationNodeCardProps {
 }
 
 export const LocationNodeCard = memo(function LocationNodeCard({
-  node, isSelected, shotCount, onMouseDown, onSettingsClick, onDelete,
+  node, location, isSelected, shotCount, onMouseDown, onSettingsClick, onDelete,
 }: LocationNodeCardProps) {
-  const img = locationImages[node.locationName];
+  const hasFinal = !!location.selectedImageId;
 
   return (
     <div
@@ -30,8 +31,18 @@ export const LocationNodeCard = memo(function LocationNodeCard({
       style={{ left: node.x, top: node.y, width: LOC_W }}
       onMouseDown={onMouseDown}
     >
-      <div className="absolute top-2 left-2 z-10 bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-        {shotCount} shots
+      <div className="absolute top-2 left-2 z-10 flex gap-1">
+        <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+          {shotCount} shots
+        </span>
+        <span className={cn(
+          "backdrop-blur-sm text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+          hasFinal
+            ? "bg-emerald-500/30 text-emerald-200"
+            : "bg-amber-500/20 text-amber-300"
+        )}>
+          {hasFinal ? "FINAL" : "DRAFT"}
+        </span>
       </div>
       <button
         className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
@@ -41,13 +52,13 @@ export const LocationNodeCard = memo(function LocationNodeCard({
       >
         <Settings className="w-3 h-3" />
       </button>
-      {img ? (
-        <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
+      {location.portrait ? (
+        <img src={location.portrait} alt={location.name} className="w-full aspect-video object-cover" draggable={false} />
       ) : (
         <div className="w-full aspect-video bg-muted flex items-center justify-center text-muted-foreground text-xs">No Image</div>
       )}
       <div className="p-2">
-        <p className="text-xs font-bold text-foreground">{node.locationName}</p>
+        <p className="text-xs font-bold text-foreground">{location.name}</p>
       </div>
     </div>
   );
