@@ -165,7 +165,6 @@ export function loadCanvasState(key: string): CanvasState | null {
       localStorage.removeItem(key);
       return null;
     }
-    const parsed = JSON.parse(raw);
     // Basic shape validation
     if (
       !parsed ||
