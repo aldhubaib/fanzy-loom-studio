@@ -102,7 +102,7 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   production: [
-    { key: "production", color: "30 90% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
+    { key: "production", color: "350 75% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
   ],
 } satisfies Record<ZoneType, ZoneConnectorConfig[]>;
 
