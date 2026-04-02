@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
-import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W } from "./constants";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W, TIMELINE_W } from "./constants";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
