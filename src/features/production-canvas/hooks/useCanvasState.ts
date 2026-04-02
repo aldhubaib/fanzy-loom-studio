@@ -510,13 +510,15 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const nodes = getNodes();
       if (nodes.length === 0) return;
 
-      // Always use 3 columns
-      const cols = overrideCols ?? 3;
+      // Use stored zone cols, then override, then default 3
+      const cols = overrideCols ?? zoneCols[zoneId] ?? 3;
       
-      // Use current zone bounds as starting point to avoid shifting
-      const b = zoneBounds[zoneId];
-      const startX = b ? b.x + ZONE_PAD : zone.x + ZONE_PAD;
-      const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : zone.y + ZONE_PAD + ZONE_LABEL_H;
+      // Use the top-left node (excluding dragged) as anchor to prevent drift
+      // Find the minimum x and y among non-dragged nodes to use as anchor
+      const anchorX = Math.min(...nodes.map((n) => n.x));
+      const anchorY = Math.min(...nodes.map((n) => n.y));
+      const startX = anchorX;
+      const startY = anchorY;
 
       const positions = nodes.map((n, i) => ({
         id: n.id,
@@ -537,7 +539,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       else if (zone.type === "script") setScriptNodes(applyPositions);
       else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
+    [zones, frames, castNodes, locationNodes, scriptNodes, zoneCols],
   );
   autoGridZoneRef.current = autoGridZone;
 
