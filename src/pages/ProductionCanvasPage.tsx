@@ -695,7 +695,7 @@ export default function ProductionCanvasPage() {
     setConnectingFrom(null);
   }, []);
 
-  const startDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }, sel: SelectedItem) => {
+  const startDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
     if (tool !== "select" || e.button !== 0) return;
     e.stopPropagation();
     const rect = containerRef.current?.getBoundingClientRect();
@@ -704,7 +704,7 @@ export default function ProductionCanvasPage() {
     const my = (e.clientY - rect.top - pan.y) / zoom;
     setDragOffset({ x: mx - node.x, y: my - node.y });
     setDragging(node.id);
-    setSelected(sel);
+    setSelected(null);
   }, [tool, pan, zoom]);
 
   const startConnect = useCallback((e: React.MouseEvent, id: string) => {
@@ -1074,9 +1074,20 @@ export default function ProductionCanvasPage() {
                 className={cn("absolute rounded-xl border-2 bg-card select-none group transition-shadow",
                   selected?.id === frame.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: frame.x, top: frame.y, width: FRAME_W }}
-                onMouseDown={(e) => startDrag(e, frame, { type: "frame", id: frame.id })}>
+                onMouseDown={(e) => startDrag(e, frame)}>
                 <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{idx + 1}</div>
-                <div className="absolute top-2 right-2 z-10 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
+                <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+                  <button
+                    className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors"
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "frame", id: frame.id }); }}
+                    aria-label="Open shot settings"
+                    title="Open shot settings"
+                  >
+                    <Settings className="w-3 h-3" />
+                  </button>
+                  <div className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
+                </div>
                 <div className="w-full bg-secondary overflow-hidden rounded-t-[10px]" style={{ height: IMAGE_H }}>
                   {frame.image ? <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
                     : <div className="w-full h-full flex items-center justify-center text-muted-foreground/30"><Plus className="w-8 h-8" /></div>}
@@ -1120,11 +1131,20 @@ export default function ProductionCanvasPage() {
                   className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
                     selected?.id === node.id ? "border-cyan-500 shadow-lg shadow-cyan-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: CAST_W }}
-                  onMouseDown={(e) => startDrag(e, node, { type: "cast", id: node.id })}>
+                  onMouseDown={(e) => startDrag(e, node)}>
                   <div className="absolute top-2 left-2 z-10 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{sceneCount} shots</div>
+                  <button
+                    className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "cast", id: node.id }); }}
+                    aria-label="Open cast settings"
+                    title="Open cast settings"
+                  >
+                    <Settings className="w-3 h-3" />
+                  </button>
                   <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => { setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                    onClick={(e) => { e.stopPropagation(); setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
                     <X className="w-3 h-3" />
                   </button>
                   <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
@@ -1146,11 +1166,20 @@ export default function ProductionCanvasPage() {
                   className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
                     selected?.id === node.id ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-border hover:border-muted-foreground/40")}
                   style={{ left: node.x, top: node.y, width: LOC_W }}
-                  onMouseDown={(e) => startDrag(e, node, { type: "location", id: node.id })}>
+                  onMouseDown={(e) => startDrag(e, node)}>
                   <div className="absolute top-2 left-2 z-10 bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{shotCount} shots</div>
+                  <button
+                    className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "location", id: node.id }); }}
+                    aria-label="Open location settings"
+                    title="Open location settings"
+                  >
+                    <Settings className="w-3 h-3" />
+                  </button>
                   <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => { setLocationNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                    onClick={(e) => { e.stopPropagation(); setLocationNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
                     <X className="w-3 h-3" />
                   </button>
                   <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
@@ -1165,10 +1194,19 @@ export default function ProductionCanvasPage() {
                 className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
                   selected?.id === node.id ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-border hover:border-muted-foreground/40")}
                 style={{ left: node.x, top: node.y, width: SCRIPT_W }}
-                onMouseDown={(e) => startDrag(e, node, { type: "script", id: node.id })}>
+                onMouseDown={(e) => startDrag(e, node)}>
+                <button
+                  className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); setSelected({ type: "script", id: node.id }); }}
+                  aria-label="Open scene settings"
+                  title="Open scene settings"
+                >
+                  <Settings className="w-3 h-3" />
+                </button>
                 <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
                   onMouseDown={e => e.stopPropagation()}
-                  onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
+                  onClick={(e) => { e.stopPropagation(); setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
                   <X className="w-3 h-3" />
                 </button>
                 <div className="p-3 space-y-1.5">
