@@ -175,6 +175,13 @@ export function loadCanvasState(key: string): CanvasState | null {
         order: n.order ?? i,
       }));
     }
+    // Migrate: ensure frames have generatedImages (use current image as fallback)
+    if (Array.isArray(parsed.frames)) {
+      parsed.frames = parsed.frames.map((f: any) => ({
+        ...f,
+        generatedImages: f.generatedImages ?? (f.image ? [f.image] : []),
+      }));
+    }
     return parsed as CanvasState;
   } catch (err) {
     console.error("[Canvas] Failed to load saved state:", err);
