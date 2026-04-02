@@ -1,21 +1,26 @@
-import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { FanzySidebar } from "@/components/FanzySidebar";
 import { TopBar } from "@/components/TopBar";
 import { ProjectCard } from "@/components/ProjectCard";
 import { NewProjectCard } from "@/components/NewProjectCard";
-import { NewProjectModal } from "@/components/NewProjectModal";
 import { mockProjects } from "@/data/mockProjects";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNewProject = () => {
+    // Generate a simple new project ID
+    const newId = `new-${Date.now()}`;
+    navigate(`/project/${newId}/canvas`);
+  };
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <FanzySidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <TopBar onNewProject={() => setModalOpen(true)} />
+          <TopBar onNewProject={handleNewProject} />
           <main className="flex-1 p-6 lg:p-8 overflow-auto">
             <div className="max-w-6xl mx-auto">
               <div className="mb-8">
@@ -26,7 +31,7 @@ const Index = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                <NewProjectCard onClick={() => setModalOpen(true)} />
+                <NewProjectCard onClick={handleNewProject} />
                 {mockProjects.map((project, i) => (
                   <ProjectCard key={project.id} project={project} index={i + 1} />
                 ))}
@@ -35,8 +40,6 @@ const Index = () => {
           </main>
         </div>
       </div>
-
-      <NewProjectModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </SidebarProvider>
   );
 };
