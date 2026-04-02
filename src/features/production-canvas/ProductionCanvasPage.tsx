@@ -384,7 +384,6 @@ function ProductionCanvasPageInner() {
                       />
                     );
                   });
-                }
               });
 
               return elements;
