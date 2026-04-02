@@ -366,16 +366,23 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
 
   const connectors: ConnectorData[] = useMemo(
     () =>
-      connections.map((c) => {
-        const fromId = getConnectionBaseId(c.from);
-        const toId = getConnectionBaseId(c.to);
-        const p1 = getPortPos(c.from, "right");
-        const p2 = getPortPos(c.to, "left");
-        const isZoneConn = zones.some((z) => z.id === fromId) || zones.some((z) => z.id === toId);
-        const color = getNodeZoneColor(c.from);
-        return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
-      }),
-    [connections, getPortPos, getNodeZoneColor, zones],
+      connections
+        .filter((c) => {
+          // Remove frame-to-frame connectors (shot cards)
+          const fromIsFrame = frames.some((f) => c.from.startsWith(f.id));
+          const toIsFrame = frames.some((f) => c.to.startsWith(f.id));
+          return !(fromIsFrame && toIsFrame);
+        })
+        .map((c) => {
+          const fromId = getConnectionBaseId(c.from);
+          const toId = getConnectionBaseId(c.to);
+          const p1 = getPortPos(c.from, "right");
+          const p2 = getPortPos(c.to, "left");
+          const isZoneConn = zones.some((z) => z.id === fromId) || zones.some((z) => z.id === toId);
+          const color = getNodeZoneColor(c.from);
+          return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
+        }),
+    [connections, getPortPos, getNodeZoneColor, zones, frames],
   );
 
   // ── Fit to screen ─────────────────────────────────────
