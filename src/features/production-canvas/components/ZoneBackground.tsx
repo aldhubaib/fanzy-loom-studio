@@ -31,7 +31,7 @@ export const ZoneBackground = memo(function ZoneBackground({
       {/* Dashed border */}
       <div
         className={cn(
-          "absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto",
+          "absolute inset-0 rounded-2xl border-[3px] border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto",
           isSelected && "border-opacity-80",
         )}
         style={{
