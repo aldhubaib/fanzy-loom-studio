@@ -56,7 +56,8 @@ export const SCRIPT_W = 280;
 export const SCRIPT_H = 160;
 export const DRAWER_W = 360;
 export const TIMELINE_W = 800;
-export const TIMELINE_H = 300;
+export const TIMELINE_H = 560;
+export const TIMELINE_PREVIEW_H = 260;
 export const TIMELINE_TRACK_H = 44;
 export const TIMELINE_HEADER_H = 36;
 export const TIMELINE_RULER_H = 24;
@@ -211,6 +212,4 @@ export const initialTimelineNodes: import("./components/TimelineNode").TimelineN
   { id: "tn1", x: 1240, y: 640, zoneId: "z-production" },
 ];
 
-export const initialPreviewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[] = [
-  { id: "pv1", x: 1240, y: 1000, zoneId: "z-production" },
-];
+export const initialPreviewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[] = [];

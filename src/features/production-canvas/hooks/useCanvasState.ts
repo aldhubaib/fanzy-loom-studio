@@ -40,7 +40,7 @@ export function useCanvasState(projectId: string | undefined) {
   const [locationNodes, setLocationNodes] = useState<LocationNode[]>(saved?.locationNodes ?? initialLocationNodes);
   const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(saved?.scriptNodes ?? initialScriptNodes);
   const [timelineNodes, setTimelineNodes] = useState<TimelineNodeData[]>(saved?.timelineNodes ?? initialTimelineNodes);
-  const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>(saved?.previewNodes ?? initialPreviewNodes);
+  const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>([]);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
 
   // ── Viewport ────────────────────────────────────────────

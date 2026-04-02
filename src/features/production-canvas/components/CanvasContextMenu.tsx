@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2, Monitor } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2 } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
-import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
+import { ZONE_LABELS } from "../constants";
 
 interface CanvasContextMenuProps {
   menu: CanvasMenuState;
@@ -11,7 +11,6 @@ interface CanvasContextMenuProps {
   onAddLocationPicker: () => void;
   onAddScriptNode: () => void;
   onAddTimeline: () => void;
-  onAddPreview: () => void;
   onAddZone: (type: ZoneType) => void;
   onDeleteZone: (zoneId: string) => void;
   onFitToScreen: () => void;
@@ -28,13 +27,13 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
   menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
-  onAddScriptNode, onAddTimeline, onAddPreview, onAddZone, onDeleteZone, onFitToScreen, onClose,
+  onAddScriptNode, onAddTimeline, onAddZone, onDeleteZone, onFitToScreen, onClose,
 }: CanvasContextMenuProps) {
   const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
 
   return (
     <div
-      className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+      className="absolute z-50 min-w-[200px] rounded-lg border border-border bg-popover py-1 text-sm shadow-xl"
       style={{ left: menu.x, top: menu.y }}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -44,37 +43,32 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
             {zone.label} Zone
           </p>
           {zone.type === "shots" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddFrame}>
+            <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onAddFrame}>
               <Camera className="w-4 h-4" /> Add Shot
             </button>
           )}
           {zone.type === "casting" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddCastPicker}>
+            <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onAddCastPicker}>
               <Users className="w-4 h-4" /> Add Cast Member
             </button>
           )}
           {zone.type === "locations" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddLocationPicker}>
+            <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onAddLocationPicker}>
               <MapPin className="w-4 h-4" /> Add Location
             </button>
           )}
           {zone.type === "script" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddScriptNode}>
+            <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onAddScriptNode}>
               <FileText className="w-4 h-4" /> Add Scene
             </button>
           )}
           {zone.type === "production" && (
-            <>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
-                <Film className="w-4 h-4" /> Add Timeline
-              </button>
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddPreview}>
-                <Monitor className="w-4 h-4" /> Add Preview Monitor
-              </button>
-            </>
+            <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onAddTimeline}>
+              <Film className="w-4 h-4" /> Add Timeline
+            </button>
           )}
-          <div className="h-px bg-border my-1" />
-          <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-destructive/20 text-destructive" onClick={() => onDeleteZone(zone.id)}>
+          <div className="my-1 h-px bg-border" />
+          <button className="flex w-full items-center gap-2 px-3 py-1.5 text-destructive hover:bg-destructive/20" onClick={() => onDeleteZone(zone.id)}>
             <Trash2 className="w-4 h-4" /> Delete Zone
           </button>
         </>
@@ -84,7 +78,7 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
           {(["casting", "shots", "locations", "script", "production"] as ZoneType[]).map((type) => (
             <button
               key={type}
-              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60"
               onClick={() => onAddZone(type)}
             >
               {zoneTypeIcons[type]} {ZONE_LABELS[type]} Zone
@@ -92,8 +86,8 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
           ))}
         </>
       )}
-      <div className="h-px bg-border my-1" />
-      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onFitToScreen}>
+      <div className="my-1 h-px bg-border" />
+      <button className="flex w-full items-center gap-2 px-3 py-1.5 text-foreground hover:bg-secondary/60" onClick={onFitToScreen}>
         <Maximize className="w-4 h-4" /> Fit to Screen
       </button>
     </div>
