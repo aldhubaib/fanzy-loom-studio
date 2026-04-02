@@ -12,7 +12,7 @@ export function NewProjectCard({ onClick }: NewProjectCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       onClick={onClick}
-      className="card-lift rounded-lg border-2 border-dashed border-primary/30 hover:border-primary/60 bg-card/50 overflow-hidden cursor-pointer flex flex-col items-center justify-center aspect-[4/3] transition-colors group"
+      className="card-lift rounded-lg border-2 border-dashed border-primary/30 hover:border-primary/60 bg-card/50 overflow-hidden cursor-pointer flex flex-col items-center justify-center transition-colors group h-full"
     >
       <div className="w-14 h-14 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors mb-3">
         <Plus className="w-7 h-7 text-primary" />
