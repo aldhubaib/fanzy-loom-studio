@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback, useState } from "react";
+import { memo, useRef, useCallback, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Heading1, Heading2, Heading3, Pilcrow, Minus } from "lucide-react";
 import type { ScriptNode } from "../types";
@@ -21,11 +21,17 @@ const formatButtons: { cmd: FormatCmd; icon: React.ReactNode; label: string }[] 
   { cmd: "hr", icon: <Minus className="w-3.5 h-3.5" />, label: "Section Divider" },
 ];
 
+interface ToolbarPos {
+  x: number;
+  y: number;
+}
+
 export const ScriptPageView = memo(function ScriptPageView({
   zoneId, nodes, bounds, onUpdateNode,
 }: ScriptPageViewProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [toolbarPos, setToolbarPos] = useState<ToolbarPos | null>(null);
 
   const execFormat = useCallback((cmd: FormatCmd) => {
     editorRef.current?.focus();
@@ -36,8 +42,36 @@ export const ScriptPageView = memo(function ScriptPageView({
     }
   }, []);
 
-  const handleBlur = useCallback(() => {
-    setIsFocused(false);
+  // Track text selection to position toolbar
+  useEffect(() => {
+    const checkSelection = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !editorRef.current || !containerRef.current) {
+        setToolbarPos(null);
+        return;
+      }
+      // Ensure selection is within our editor
+      if (!editorRef.current.contains(sel.anchorNode)) {
+        setToolbarPos(null);
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+      setToolbarPos({
+        x: rect.left + rect.width / 2 - containerRect.left,
+        y: rect.top - containerRect.top - 40,
+      });
+    };
+
+    document.addEventListener("selectionchange", checkSelection);
+    return () => document.removeEventListener("selectionchange", checkSelection);
+  }, []);
+
+  const handleBlur = useCallback((e: React.FocusEvent) => {
+    // Don't dismiss if clicking toolbar
+    if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+    setToolbarPos(null);
     if (!editorRef.current) return;
     const sections = editorRef.current.querySelectorAll("[data-section-id]");
     sections.forEach((section) => {
@@ -54,11 +88,11 @@ export const ScriptPageView = memo(function ScriptPageView({
     });
   }, [nodes, onUpdateNode]);
 
-  // Render inside the zone bounds with some padding
   const PAD = 20;
 
   return (
     <div
+      ref={containerRef}
       data-node
       className="absolute pointer-events-auto"
       style={{
@@ -68,31 +102,29 @@ export const ScriptPageView = memo(function ScriptPageView({
         height: bounds.h - PAD * 2,
       }}
     >
-      {/* Floating format toolbar */}
-      <div
-        className={cn(
-          "absolute -top-9 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-sm border border-border/50 transition-opacity z-10",
-          isFocused ? "opacity-100" : "opacity-0 pointer-events-none",
-        )}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        {formatButtons.map((btn) => (
-          <button
-            key={btn.cmd}
-            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-            title={btn.label}
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onClick={() => execFormat(btn.cmd)}
-          >
-            {btn.icon}
-          </button>
-        ))}
-      </div>
+      {/* Bubble toolbar near selection */}
+      {toolbarPos && (
+        <div
+          className="absolute flex items-center gap-1 px-2 py-1 rounded-lg bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg z-20"
+          style={{ left: toolbarPos.x, top: toolbarPos.y, transform: "translateX(-50%)" }}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          {formatButtons.map((btn) => (
+            <button
+              key={btn.cmd}
+              className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+              title={btn.label}
+              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={() => execFormat(btn.cmd)}
+            >
+              {btn.icon}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* A4-style page */}
-      <div
-        className="rounded-lg border border-border/40 bg-card/95 shadow-xl overflow-auto h-full"
-      >
+      <div className="rounded-lg border border-border/40 bg-card/95 shadow-xl overflow-auto h-full">
         <div
           ref={editorRef}
           contentEditable
@@ -104,7 +136,6 @@ export const ScriptPageView = memo(function ScriptPageView({
             [&_h3]:text-base [&_h3]:font-medium [&_h3]:text-purple-200 [&_h3]:mb-1.5 [&_h3]:mt-2.5
             [&_p]:text-muted-foreground [&_p]:mb-2
             [&_hr]:border-purple-500/30 [&_hr]:my-6"
-          onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
           onMouseDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
