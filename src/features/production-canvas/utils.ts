@@ -50,8 +50,9 @@ export function computeZoneBounds(
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
+  const dynamicFrameH = getFrameHForAspect(shotAspectRatio);
   const sizeMap: Record<string, { w: number; h: number }> = {
-    shots: { w: FRAME_W, h: FRAME_H },
+    shots: { w: FRAME_W, h: dynamicFrameH },
     casting: { w: CAST_W, h: CAST_H },
     locations: { w: LOC_W, h: LOC_H },
     script: { w: SCRIPT_W * 3, h: SCRIPT_H },
