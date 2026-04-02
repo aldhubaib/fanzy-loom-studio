@@ -18,6 +18,7 @@ import {
   initialTimelineNodes,
 } from "../constants";
 import type { TimelineNodeData } from "../components/TimelineNode";
+import type { PreviewNodeData } from "../components/PreviewMonitorNode";
 import {
   computeZoneBounds, loadCanvasState, saveCanvasState,
   makeZonePortId, getConnectionBaseId, getConnectionPortKey,
@@ -39,6 +40,7 @@ export function useCanvasState(projectId: string | undefined) {
   const [locationNodes, setLocationNodes] = useState<LocationNode[]>(saved?.locationNodes ?? initialLocationNodes);
   const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(saved?.scriptNodes ?? initialScriptNodes);
   const [timelineNodes, setTimelineNodes] = useState<TimelineNodeData[]>(saved?.timelineNodes ?? initialTimelineNodes);
+  const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>(saved?.previewNodes ?? []);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
 
   // ── Viewport ────────────────────────────────────────────
@@ -69,20 +71,20 @@ export function useCanvasState(projectId: string | undefined) {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveCanvasState(SAVE_KEY, {
-        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, connections, zoom, pan,
+        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan,
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, connections, zoom, pan, SAVE_KEY]);
+  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan, SAVE_KEY]);
 
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
@@ -225,6 +227,7 @@ export function useCanvasState(projectId: string | undefined) {
         setLocationNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
         setTimelineNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
+        setPreviewNodes((prev) => prev.map((n) => (n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n)));
       }
       if (dragging) {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -236,6 +239,7 @@ export function useCanvasState(projectId: string | undefined) {
         setLocationNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setTimelineNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
+        setPreviewNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
       }
     },
     [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart],
@@ -419,6 +423,7 @@ export function useCanvasState(projectId: string | undefined) {
     setLocationNodes(initialLocationNodes);
     setScriptNodes(initialScriptNodes);
     setTimelineNodes(initialTimelineNodes);
+    setPreviewNodes([]);
     setConnections(initialConnections);
     setZoom(1);
     setPan({ x: 0, y: 0 });
@@ -477,6 +482,7 @@ export function useCanvasState(projectId: string | undefined) {
     locationNodes, setLocationNodes,
     scriptNodes, setScriptNodes,
     timelineNodes, setTimelineNodes,
+    previewNodes, setPreviewNodes,
     connections, setConnections,
     // Viewport
     zoom, setZoom, pan, setPan, tool, setTool,

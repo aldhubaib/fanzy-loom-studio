@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2 } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2, Monitor } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
 import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
 
@@ -11,6 +11,7 @@ interface CanvasContextMenuProps {
   onAddLocationPicker: () => void;
   onAddScriptNode: () => void;
   onAddTimeline: () => void;
+  onAddPreview: () => void;
   onAddZone: (type: ZoneType) => void;
   onDeleteZone: (zoneId: string) => void;
   onFitToScreen: () => void;
@@ -27,7 +28,7 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
   menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
-  onAddScriptNode, onAddTimeline, onAddZone, onDeleteZone, onFitToScreen, onClose,
+  onAddScriptNode, onAddTimeline, onAddPreview, onAddZone, onDeleteZone, onFitToScreen, onClose,
 }: CanvasContextMenuProps) {
   const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
 
@@ -63,9 +64,14 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
             </button>
           )}
           {zone.type === "production" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
-              <Film className="w-4 h-4" /> Add Timeline
-            </button>
+            <>
+              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
+                <Film className="w-4 h-4" /> Add Timeline
+              </button>
+              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddPreview}>
+                <Monitor className="w-4 h-4" /> Add Preview Monitor
+              </button>
+            </>
           )}
           <div className="h-px bg-border my-1" />
           <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-destructive/20 text-destructive" onClick={() => onDeleteZone(zone.id)}>

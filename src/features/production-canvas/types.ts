@@ -73,6 +73,7 @@ export type SelectedItem =
   | { type: "location"; id: string }
   | { type: "script"; id: string }
   | { type: "zone"; id: string }
+  | { type: "preview"; id: string }
   | null;
 
 export type Tool = "select" | "hand";
@@ -120,6 +121,7 @@ export interface CanvasState {
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
   timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
+  previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
   zoom: number;
   pan: { x: number; y: number };

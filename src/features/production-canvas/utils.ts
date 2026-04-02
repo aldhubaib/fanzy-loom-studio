@@ -4,12 +4,13 @@ import type {
   ZoneBounds, ZoneConnectorConfig, CanvasState,
 } from "./types";
 import type { TimelineNodeData } from "./components/TimelineNode";
+import type { PreviewNodeData } from "./components/PreviewMonitorNode";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
   SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H, TIMELINE_TRACK_H, TIMELINE_HEADER_H, TIMELINE_RULER_H,
   ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
-  ZONE_CONNECTOR_CONFIGS,
+  ZONE_CONNECTOR_CONFIGS, PREVIEW_MON_W, PREVIEW_MON_H,
 } from "./constants";
 
 // ─── Connection Helpers ─────────────────────────────────────
@@ -36,6 +37,7 @@ export function computeZoneBounds(
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
+  previewNodes: PreviewNodeData[] = [],
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -61,6 +63,11 @@ export function computeZoneBounds(
   nodes
     .filter((n: any) => n.zoneId === zone.id)
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
+
+  // Preview nodes can live in any zone (typically production)
+  previewNodes
+    .filter((n) => n.zoneId === zone.id)
+    .forEach((n) => children.push({ x: n.x, y: n.y, w: PREVIEW_MON_W, h: PREVIEW_MON_H }));
 
   if (children.length === 0) {
     return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
