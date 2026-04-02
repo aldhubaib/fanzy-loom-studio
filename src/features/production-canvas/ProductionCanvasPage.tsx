@@ -84,6 +84,35 @@ function ProductionCanvasPageInner() {
     ? cs.getConnectedActors(selectedFrame.zoneId)
     : [];
 
+  // ── Animation Callbacks ────────────────────────────────
+  const handleAnimateShot = useCallback((frameId: string) => {
+    // Set to animating
+    cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "animating" as ShotStatus, animationProgress: 0 } : f));
+    // Simulate progress
+    const steps = 30;
+    const interval = 100; // 3s total
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, animationProgress: Math.round((step / steps) * 100) } : f));
+      if (step >= steps) {
+        clearInterval(timer);
+        const frame = cs.frames.find((f) => f.id === frameId);
+        cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "video_ready" as ShotStatus, animationProgress: 100, videoDuration: f.duration } : f));
+        toast.success(`Shot ${frame?.scene || ""} animated`);
+      }
+    }, interval);
+  }, [cs.frames]);
+
+  const handleAnimateAll = useCallback(() => {
+    const approvedFrames = cs.frames.filter((f) => f.shotStatus === "approved");
+    if (approvedFrames.length === 0) return;
+    approvedFrames.forEach((frame, idx) => {
+      setTimeout(() => handleAnimateShot(frame.id), idx * 500);
+    });
+    toast(`Animating ${approvedFrames.length} shots...`);
+  }, [cs.frames, handleAnimateShot]);
+
   // ── Callbacks ─────────────────────────────────────────
   const handleDeleteConnection = useCallback(
     (from: string, to: string) => {
