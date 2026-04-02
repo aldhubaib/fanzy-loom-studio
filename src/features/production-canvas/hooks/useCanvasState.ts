@@ -482,6 +482,7 @@ export function useCanvasState(projectId: string | undefined) {
     locationNodes, setLocationNodes,
     scriptNodes, setScriptNodes,
     timelineNodes, setTimelineNodes,
+    previewNodes, setPreviewNodes,
     connections, setConnections,
     // Viewport
     zoom, setZoom, pan, setPan, tool, setTool,
