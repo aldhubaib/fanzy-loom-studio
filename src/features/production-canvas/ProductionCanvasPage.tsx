@@ -1,1451 +1,354 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useParams, Link } from "react-router-dom";
+// ─── Production Canvas Page ─────────────────────────────────
+// Composed from isolated sub-components. All constants, types,
+// and logic are extracted — this file is purely composition.
+
+import { useCallback } from "react";
+import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import {
-  Plus, MousePointer, Hand, Grid3X3, Maximize, X, Settings, MapPin, Users,
-  ArrowLeft, Film, Camera, Clock, Sparkles, ChevronDown, Check, User, Trash2,
-  ZoomIn, ZoomOut, Images, ChevronLeft, ChevronRight, Expand, FileText,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import { CharacterDetailsPanel, type CharacterData } from "./components/CharacterDetailsPanel";
+import type { ZoneType, ScriptNode } from "./types";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W } from "./constants";
+import { ZONE_COLORS, ZONE_LABELS } from "./constants";
+import { useCanvasState } from "./hooks/useCanvasState";
 
-// Shot frame images
-import frame1 from "@/assets/storyboard/frame-1.jpg";
-import frame2 from "@/assets/storyboard/frame-2.jpg";
-import frame3 from "@/assets/storyboard/frame-3.jpg";
-import frame4 from "@/assets/storyboard/frame-4.jpg";
-import frame5 from "@/assets/storyboard/frame-5.jpg";
-import frame6 from "@/assets/storyboard/frame-6.jpg";
+import { CanvasErrorBoundary } from "./components/ErrorBoundary";
+import { CanvasToolbar } from "./components/CanvasToolbar";
+import { CanvasConnectors } from "./components/CanvasConnectors";
+import { CanvasContextMenu } from "./components/CanvasContextMenu";
+import { CastPicker, LocationPicker } from "./components/CanvasPickers";
+import { CanvasDrawer } from "./components/CanvasDrawer";
+import { CanvasMinimap } from "./components/CanvasMinimap";
+import { ZoneBackground } from "./components/ZoneBackground";
+import { ShotFrameNode } from "./components/ShotFrameNode";
+import { CastNodeCard } from "./components/CastNodeCard";
+import { LocationNodeCard } from "./components/LocationNodeCard";
+import { ScriptNodeCard } from "./components/ScriptNodeCard";
 
-// Actor images
-import actorMarlowe from "@/assets/actors/marlowe.png";
-import actorVivian from "@/assets/actors/vivian.png";
-import actorEddie from "@/assets/actors/eddie.png";
-
-// Location images
-import locOffice from "@/assets/locations/office.jpg";
-import locStreet from "@/assets/locations/street.jpg";
-import locJazzClub from "@/assets/locations/jazz-club.jpg";
-import locBridge from "@/assets/locations/bridge.jpg";
-
-// Shot type images
-import shotWide from "@/assets/shots/wide.jpg";
-import shotMedium from "@/assets/shots/medium.jpg";
-import shotCloseup from "@/assets/shots/closeup.jpg";
-import shotECU from "@/assets/shots/extreme-closeup.jpg";
-import shotOTS from "@/assets/shots/ots.jpg";
-import shotPOV from "@/assets/shots/pov.jpg";
-import shotDynamic from "@/assets/shots/dynamic.jpg";
-import shotLow from "@/assets/shots/low-angle.jpg";
-import shotHigh from "@/assets/shots/high-angle.jpg";
-import shotAerial from "@/assets/shots/aerial.jpg";
-
-// Location detail images
-import locDetailOffice from "@/assets/locations/interior-office.jpg";
-import locDetailStreet from "@/assets/locations/exterior-street.jpg";
-import locDetailClub from "@/assets/locations/interior-club.jpg";
-import locDetailBridge from "@/assets/locations/exterior-bridge.jpg";
-import locDetailPenthouse from "@/assets/locations/interior-penthouse.jpg";
-import locDetailWarehouse from "@/assets/locations/interior-warehouse.jpg";
-import locDetailRestaurant from "@/assets/locations/interior-restaurant.jpg";
-import locDetailCar from "@/assets/locations/interior-car.jpg";
-
-// ─── Types ──────────────────────────────────────────────────
-// Actor type aliases CharacterData from the shared panel
-type Actor = CharacterData;
-
-interface FrameData {
-  id: string;
-  x: number;
-  y: number;
-  image: string;
-  scene: string;
-  shot: string;
-  description: string;
-  duration: string;
-  actors: string[];
-  location?: string;
-  zoneId: string;
-}
-
-interface CastNode {
-  id: string;
-  actorId: string;
-  x: number;
-  y: number;
-  zoneId: string;
-}
-
-interface LocationNode {
-  id: string;
-  locationName: string;
-  x: number;
-  y: number;
-  zoneId: string;
-}
-
-interface ScriptNode {
-  id: string;
-  heading: string;
-  body: string;
-  x: number;
-  y: number;
-  zoneId: string;
-}
-
-interface Zone {
-  id: string;
-  label: string;
-  type: "casting" | "shots" | "locations" | "script";
-  x: number;
-  y: number;
-  color: string;
-}
-
-interface Connection {
-  from: string;
-  to: string;
-}
-
-interface ZoneConnectorConfig {
-  key: "casting" | "script" | "locations";
-  color: string;
-  label: string;
-  side: "left" | "right";
-  yFrac: number;
-}
-
-type SelectedItem =
-  | { type: "frame"; id: string }
-  | { type: "cast"; id: string }
-  | { type: "location"; id: string }
-  | { type: "script"; id: string }
-  | { type: "zone"; id: string }
-  | null;
-
-type Tool = "select" | "hand";
-
-// ─── Constants ──────────────────────────────────────────────
-const FRAME_W = 260;
-const IMAGE_H = 146;
-const FRAME_H = IMAGE_H + 70;
-const PORT_Y = FRAME_H / 2;
-const CAST_W = 160;
-const CAST_H = 260;
-const LOC_W = 180;
-const LOC_H = 140;
-const SCRIPT_W = 280;
-const SCRIPT_H = 160;
-const DRAWER_W = 360;
-const ZONE_PAD = 40;
-const ZONE_LABEL_H = 40;
-const MIN_ZONE_W = 300;
-const MIN_ZONE_H = 200;
-
-const CONNECTION_PORT_SEPARATOR = "::";
-
-const zoneConnectorConfigs = {
-  casting: [
-    { key: "casting", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-  ],
-  shots: [
-    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
-    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
-    { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
-  ],
-  locations: [
-    { key: "locations", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-  ],
-  script: [
-    { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
-  ],
-} satisfies Record<Zone["type"], ZoneConnectorConfig[]>;
-
-const makeZonePortId = (zoneId: string, portKey: ZoneConnectorConfig["key"]) => `${zoneId}${CONNECTION_PORT_SEPARATOR}${portKey}`;
-
-const getConnectionBaseId = (endpoint: string) => endpoint.split(CONNECTION_PORT_SEPARATOR)[0];
-
-const getConnectionPortKey = (endpoint: string) => {
-  if (!endpoint.includes(CONNECTION_PORT_SEPARATOR)) return undefined;
-  return endpoint.split(CONNECTION_PORT_SEPARATOR)[1] as ZoneConnectorConfig["key"];
-};
-
-const locationImages: Record<string, string> = {
-  "Office": locOffice,
-  "Street": locStreet,
-  "Jazz Club": locJazzClub,
-  "Bridge": locBridge,
-};
-
-const locationDetailOptions = [
-  { value: "Office", label: "Office", img: locDetailOffice },
-  { value: "Street", label: "Street", img: locDetailStreet },
-  { value: "Jazz Club", label: "Jazz Club", img: locDetailClub },
-  { value: "Bridge", label: "Bridge", img: locDetailBridge },
-  { value: "Penthouse", label: "Penthouse", img: locDetailPenthouse },
-  { value: "Warehouse", label: "Warehouse", img: locDetailWarehouse },
-  { value: "Restaurant", label: "Restaurant", img: locDetailRestaurant },
-  { value: "Car", label: "Car Interior", img: locDetailCar },
-];
-
-const shotTypes = [
-  { value: "WIDE", label: "Wide", img: shotWide },
-  { value: "MED", label: "Medium", img: shotMedium },
-  { value: "CU", label: "Close-Up", img: shotCloseup },
-  { value: "ECU", label: "Extreme CU", img: shotECU },
-  { value: "OTS", label: "Over Shoulder", img: shotOTS },
-  { value: "POV", label: "POV", img: shotPOV },
-  { value: "DYNAMIC", label: "Dynamic", img: shotDynamic },
-  { value: "LOW", label: "Low Angle", img: shotLow },
-  { value: "HIGH", label: "High Angle", img: shotHigh },
-  { value: "AERIAL", label: "Aerial", img: shotAerial },
-];
-
-const actorRoster: Actor[] = [
-  { id: "a1", name: "Jack Marlowe", portrait: actorMarlowe, role: "Protagonist", description: "A world-weary private detective.", gender: "Male", ageRange: "Middle Age (31-55)", ethnicity: "Caucasian", bodyType: "Average", height: "Tall", hairColor: "Dark Brown", hairStyle: "Short", eyeColor: "Brown", skinTone: "Light", clothing: "Formal", distinguishingFeatures: "Facial Scar", generatedPortraits: [{ id: "g1a", src: actorMarlowe, description: "Detective — classic noir" }], selectedPortraitId: "g1a" },
-  { id: "a2", name: "Vivian Lake", portrait: actorVivian, role: "Supporting", description: "A mysterious woman with a missing person case.", gender: "Female", ageRange: "Young Adult (18-30)", ethnicity: "Caucasian", bodyType: "Slim", height: "Average", hairColor: "Dark Brown", hairStyle: "Long", eyeColor: "Green", skinTone: "Very Light", clothing: "High Fashion", distinguishingFeatures: "None", generatedPortraits: [{ id: "g2a", src: actorVivian, description: "Vivian — classic look" }], selectedPortraitId: "g2a" },
-  { id: "a3", name: "Eddie", portrait: actorEddie, role: "Supporting", description: "Marlowe's street-smart informant.", gender: "Male", ageRange: "Young Adult (18-30)", ethnicity: "African", bodyType: "Average", height: "Average", hairColor: "Black", hairStyle: "Short", eyeColor: "Brown", skinTone: "Dark", clothing: "Streetwear", distinguishingFeatures: "None", generatedPortraits: [{ id: "g3a", src: actorEddie, description: "Eddie — street look" }], selectedPortraitId: "g3a" },
-];
-
-// ─── Initial Data ───────────────────────────────────────────
-const initialZones: Zone[] = [
-  { id: "z-casting", label: "Casting", type: "casting", x: -500, y: 0, color: "190 80% 50%" },
-  { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
-  { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
-  { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
-];
-
-const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office", zoneId: "z-shots" },
-  { id: "f2", x: 400, y: 80, image: frame2, scene: "SC 1", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], zoneId: "z-shots" },
-  { id: "f3", x: 720, y: 80, image: frame3, scene: "SC 2", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club", zoneId: "z-shots" },
-  { id: "f4", x: 80, y: 340, image: frame4, scene: "SC 2", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office", zoneId: "z-shots" },
-  { id: "f5", x: 400, y: 340, image: frame5, scene: "SC 3", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge", zoneId: "z-shots" },
-  { id: "f6", x: 720, y: 340, image: frame6, scene: "SC 3", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street", zoneId: "z-shots" },
-];
-
-const initialCastNodes: CastNode[] = [
-  { id: "cn1", actorId: "a1", x: -460, y: 80, zoneId: "z-casting" },
-  { id: "cn2", actorId: "a2", x: -260, y: 80, zoneId: "z-casting" },
-  { id: "cn3", actorId: "a3", x: -460, y: 340, zoneId: "z-casting" },
-];
-
-const initialLocationNodes: LocationNode[] = [
-  { id: "ln1", locationName: "Office", x: 1240, y: 80, zoneId: "z-locations" },
-  { id: "ln2", locationName: "Bridge", x: 1460, y: 80, zoneId: "z-locations" },
-  { id: "ln3", locationName: "Jazz Club", x: 1240, y: 260, zoneId: "z-locations" },
-  { id: "ln4", locationName: "Street", x: 1460, y: 260, zoneId: "z-locations" },
-];
-
-const initialScriptNodes: ScriptNode[] = [
-  { id: "sn1", heading: "INT. MARLOWE'S OFFICE - NIGHT", body: "Marlowe sits at his desk, the room thick with cigarette smoke. A knock at the door.", x: 80, y: -460, zoneId: "z-script" },
-  { id: "sn2", heading: "EXT. RAIN-SLICKED ALLEY - NIGHT", body: "Vivian emerges from the shadows, heels clicking on wet pavement.", x: 400, y: -460, zoneId: "z-script" },
-  { id: "sn3", heading: "INT. THE BLUE NOTE JAZZ CLUB - NIGHT", body: "A saxophone wails. Eddie leans against the bar, watching the door.", x: 720, y: -460, zoneId: "z-script" },
-];
-
-const initialConnections: Connection[] = [
-  { from: "f1", to: "f2" }, { from: "f2", to: "f3" },
-  { from: "f3", to: "f4" }, { from: "f4", to: "f5" }, { from: "f5", to: "f6" },
-  { from: makeZonePortId("z-casting", "casting"), to: makeZonePortId("z-shots", "casting") },
-  { from: makeZonePortId("z-locations", "locations"), to: makeZonePortId("z-shots", "locations") },
-  { from: makeZonePortId("z-script", "script"), to: makeZonePortId("z-shots", "script") },
-];
-
-// ─── Zone Bounds Helper ─────────────────────────────────────
-function computeZoneBounds(
-  zone: Zone,
-  frames: FrameData[],
-  castNodes: CastNode[],
-  locationNodes: LocationNode[],
-  scriptNodes: ScriptNode[] = [],
-) {
-  const children: { x: number; y: number; w: number; h: number }[] = [];
-
-  if (zone.type === "shots") {
-    frames.filter(f => f.zoneId === zone.id).forEach(f => children.push({ x: f.x, y: f.y, w: FRAME_W, h: FRAME_H }));
-  } else if (zone.type === "casting") {
-    castNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: CAST_W, h: CAST_H }));
-  } else if (zone.type === "locations") {
-    locationNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: LOC_W, h: LOC_H }));
-  } else if (zone.type === "script") {
-    scriptNodes.filter(n => n.zoneId === zone.id).forEach(n => children.push({ x: n.x, y: n.y, w: SCRIPT_W, h: SCRIPT_H }));
-  }
-
-  if (children.length === 0) {
-    return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
-  }
-
-  const minX = Math.min(...children.map(c => c.x)) - ZONE_PAD;
-  const minY = Math.min(...children.map(c => c.y)) - ZONE_PAD - ZONE_LABEL_H;
-  const maxX = Math.max(...children.map(c => c.x + c.w)) + ZONE_PAD;
-  const maxY = Math.max(...children.map(c => c.y + c.h)) + ZONE_PAD;
-
-  return {
-    x: minX,
-    y: minY,
-    w: Math.max(MIN_ZONE_W, maxX - minX),
-    h: Math.max(MIN_ZONE_H, maxY - minY),
-  };
-}
-
-// ─── Drawer Components ──────────────────────────────────────
-
-function ShotDrawer({ frame, actors, connectedActors, onUpdate, onDelete }: {
-  frame: FrameData;
-  actors: Actor[];
-  connectedActors: Actor[];
-  onUpdate: (f: FrameData) => void;
-  onDelete: () => void;
-}) {
-  const [prompt, setPrompt] = useState(frame.description);
-  const [shot, setShot] = useState(frame.shot);
-  const [duration, setDuration] = useState(frame.duration);
-  const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
-  const [location, setLocation] = useState(frame.location || "");
-
-  useEffect(() => {
-    setPrompt(frame.description);
-    setShot(frame.shot);
-    setDuration(frame.duration);
-    setSelectedActors(frame.actors);
-    setLocation(frame.location || "");
-  }, [frame.id]);
-
-  const toggleActor = (id: string) => {
-    setSelectedActors(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
-  };
-
-  const save = () => {
-    onUpdate({ ...frame, description: prompt, shot, duration, actors: selectedActors, location: location || undefined });
-    toast.success("Shot updated");
-  };
-
-  // Use connected actors (from linked casting zone) instead of full roster
-  const availableActors = connectedActors.length > 0 ? connectedActors : actors;
-
-  return (
-    <div className="space-y-4">
-      {frame.image && (
-        <div className="rounded-lg overflow-hidden border border-border">
-          <img src={frame.image} alt={frame.description} className="w-full object-cover max-h-[180px]" />
-        </div>
-      )}
-
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">{frame.scene}</span>
-        <span className="text-xs text-muted-foreground">{frame.shot}</span>
-        <span className="text-xs text-muted-foreground ml-auto">{frame.duration}</span>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Scene Prompt</Label>
-        <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} className="min-h-[60px] text-sm resize-none" placeholder="Describe the scene..." />
-      </div>
-
-      <Separator />
-
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Shot Type</Label>
-        <div className="grid grid-cols-5 gap-1.5">
-          {shotTypes.map(st => (
-            <button key={st.value} onClick={() => setShot(st.value)}
-              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", shot === st.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
-              <img src={st.img} alt={st.label} className="w-full h-full object-cover" />
-              {shot === st.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
-            </button>
-          ))}
-        </div>
-        <p className="text-[10px] text-muted-foreground text-center">{shotTypes.find(s => s.value === shot)?.label}</p>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Location</Label>
-        <div className="grid grid-cols-4 gap-1.5">
-          {locationDetailOptions.map(loc => (
-            <button key={loc.value} onClick={() => setLocation(location === loc.value ? "" : loc.value)}
-              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
-              <img src={loc.img} alt={loc.label} className="w-full h-full object-cover" />
-              {location === loc.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Duration</Label>
-        <div className="flex gap-1.5">
-          {["2s", "3s", "4s", "5s", "6s", "8s"].map(d => (
-            <button key={d} onClick={() => setDuration(d)}
-              className={cn("px-2.5 py-1 rounded-md text-xs font-medium transition-all", duration === d ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Label className="text-xs text-muted-foreground">Actors in Scene</Label>
-          {connectedActors.length > 0 && (
-            <span className="text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">from connected cast</span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {availableActors.map(actor => {
-            const isIn = selectedActors.includes(actor.id);
-            return (
-              <button key={actor.id} onClick={() => toggleActor(actor.id)}
-                className={cn("flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs transition-all",
-                  isIn ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-muted-foreground/60")}>
-                <img src={actor.portrait} alt={actor.name} className="w-5 h-5 rounded-full object-cover" />
-                <span>{actor.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="flex gap-2">
-        <Button size="sm" className="flex-1 gap-1.5" onClick={save}><Check className="w-3.5 h-3.5" /> Save</Button>
-        <Button size="sm" variant="outline" className="gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
-      </div>
-      <button onClick={onDelete} className="w-full flex items-center justify-center gap-1.5 text-xs text-destructive hover:text-destructive/80 py-2 transition-colors">
-        <Trash2 className="w-3 h-3" /> Delete Shot
-      </button>
-    </div>
-  );
-}
-
-// CastDrawer is now replaced by CharacterDetailsPanel (imported)
-
-function LocationDrawer({ locationName, frames }: { locationName: string; frames: FrameData[] }) {
-  const img = locationImages[locationName];
-  const appearances = frames.filter(f => f.location === locationName);
-  return (
-    <div className="space-y-4">
-      {img && <div className="rounded-xl overflow-hidden border border-border"><img src={img} alt={locationName} className="w-full object-cover max-h-[200px]" /></div>}
-      <h3 className="text-lg font-bold text-foreground">{locationName}</h3>
-      <Separator />
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Used in {appearances.length} shot{appearances.length !== 1 ? "s" : ""}</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {appearances.map(f => (
-            <div key={f.id} className="rounded-lg overflow-hidden border border-border bg-secondary">
-              {f.image && <img src={f.image} alt={f.description} className="w-full aspect-video object-cover" />}
-              <div className="p-2">
-                <p className="text-[10px] font-bold text-primary">{f.scene}</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">{f.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ZoneDrawer({ zone, castNodes, locationNodes, frames }: {
-  zone: Zone; castNodes: CastNode[]; locationNodes: LocationNode[]; frames: FrameData[];
-}) {
-  const castCount = castNodes.filter(n => n.zoneId === zone.id).length;
-  const locCount = locationNodes.filter(n => n.zoneId === zone.id).length;
-  const frameCount = frames.filter(f => f.zoneId === zone.id).length;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `hsl(${zone.color} / 0.15)` }}>
-          {zone.type === "casting" && <Users className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
-          {zone.type === "shots" && <Camera className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
-          {zone.type === "locations" && <MapPin className="w-5 h-5" style={{ color: `hsl(${zone.color})` }} />}
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-foreground">{zone.label}</h3>
-          <p className="text-xs text-muted-foreground">
-            {zone.type === "casting" && `${castCount} cast member${castCount !== 1 ? "s" : ""}`}
-            {zone.type === "shots" && `${frameCount} shot${frameCount !== 1 ? "s" : ""}`}
-            {zone.type === "locations" && `${locCount} location${locCount !== 1 ? "s" : ""}`}
-          </p>
-        </div>
-      </div>
-      <Separator />
-      <p className="text-sm text-muted-foreground">
-        {zone.type === "casting" && "Connect this zone to a Shots zone to make these actors available in those shots."}
-        {zone.type === "shots" && "Connect a Casting zone here to pull actors. Connect a Locations zone to assign locations."}
-        {zone.type === "locations" && "Connect this zone to a Shots zone to make these locations available."}
-      </p>
-      <p className="text-[10px] text-muted-foreground/60">Right-click inside the zone to add items. Drag the zone label to reposition.</p>
-    </div>
-  );
-}
-
-// ─── Main Canvas ────────────────────────────────────────────
-export default function ProductionCanvasPage() {
+function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const SAVE_KEY = `canvas-${projectId ?? "default"}`;
+  const cs = useCanvasState(projectId);
 
-  // Load saved state or fall back to defaults
-  const saved = useMemo(() => {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch { /* ignore */ }
-    return null;
-  }, [SAVE_KEY]);
+  // ── Derived values ────────────────────────────────────
+  const showDrawer = !!cs.selected;
 
-  const [actors, setActors] = useState<Actor[]>(saved?.actors ?? actorRoster);
-  const [zones, setZones] = useState<Zone[]>(saved?.zones ?? initialZones);
-  const [frames, setFrames] = useState<FrameData[]>(saved?.frames ?? initialFrames);
-  const [castNodes, setCastNodes] = useState<CastNode[]>(saved?.castNodes ?? initialCastNodes);
-  const [locationNodes, setLocationNodes] = useState<LocationNode[]>(saved?.locationNodes ?? initialLocationNodes);
-  const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(saved?.scriptNodes ?? initialScriptNodes);
-  const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
-  const [zoom, setZoom] = useState(saved?.zoom ?? 1);
-  const [pan, setPan] = useState(saved?.pan ?? { x: 0, y: 0 });
-  const [tool, setTool] = useState<Tool>("select");
-  const [dragging, setDragging] = useState<string | null>(null);
-  const [draggingZone, setDraggingZone] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [zoneDragStart, setZoneDragStart] = useState<{ x: number; y: number } | null>(null);
-  const [editingZoneLabel, setEditingZoneLabel] = useState<string | null>(null);
-  const [panning, setPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [selected, setSelected] = useState<SelectedItem>(null);
-  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
-  const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
-  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId?: string } | null>(null);
-  const [castPickerPos, setCastPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
-  const [locationPickerPos, setLocationPickerPos] = useState<{ x: number; y: number; worldX: number; worldY: number; zoneId: string } | null>(null);
+  const selectedFrame = cs.selected?.type === "frame"
+    ? cs.frames.find((f) => f.id === cs.selected!.id)
+    : null;
 
-  // Auto-save to localStorage (debounced)
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => {
-    clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({
-          actors, zones, frames, castNodes, locationNodes, scriptNodes, connections, zoom, pan,
-        }));
-      } catch { /* quota exceeded — silently ignore */ }
-    }, 800);
-    return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, connections, zoom, pan, SAVE_KEY]);
+  const connectedActorsForFrame = selectedFrame
+    ? cs.getConnectedActors(selectedFrame.zoneId)
+    : [];
 
-  // Compute zone bounds
-  const zoneBounds = useMemo(() => {
-    const map: Record<string, { x: number; y: number; w: number; h: number }> = {};
-    zones.forEach(z => { map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes); });
-    return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes]);
+  // ── Callbacks ─────────────────────────────────────────
+  const handleDeleteConnection = useCallback(
+    (from: string, to: string) => {
+      cs.setConnections((prev) => prev.filter((c) => !(c.from === from && c.to === to)));
+    },
+    [cs.setConnections],
+  );
 
-  useEffect(() => {
-    setConnections(prev => {
-      const normalized = prev.map(connection => {
-        const fromId = getConnectionBaseId(connection.from);
-        const toId = getConnectionBaseId(connection.to);
-        const fromZone = zones.find(z => z.id === fromId);
-        const toZone = zones.find(z => z.id === toId);
-
-        if (!fromZone || !toZone) return connection;
-
-        const fromPort = getConnectionPortKey(connection.from) ?? (fromZone.type === "shots" ? (toZone.type === "shots" ? undefined : toZone.type) : fromZone.type);
-        const toPort = getConnectionPortKey(connection.to) ?? (toZone.type === "shots" ? (fromZone.type === "shots" ? undefined : fromZone.type) : toZone.type);
-
-        if (!fromPort || !toPort || fromPort !== toPort) return connection;
-
-        if (fromZone.type === "shots" && toZone.type !== "shots") {
-          return {
-            from: makeZonePortId(toId, toPort),
-            to: makeZonePortId(fromId, fromPort),
-          };
-        }
-
-        if (toZone.type === "shots" && fromZone.type !== "shots") {
-          return {
-            from: makeZonePortId(fromId, fromPort),
-            to: makeZonePortId(toId, toPort),
-          };
-        }
-
-        return connection;
-      });
-
-      const deduped = normalized.filter((connection, index, array) => (
-        array.findIndex(item => item.from === connection.from && item.to === connection.to) === index
-      ));
-
-      const changed =
-        deduped.length !== prev.length ||
-        deduped.some((connection, index) => connection.from !== prev[index]?.from || connection.to !== prev[index]?.to);
-
-      return changed ? deduped : prev;
-    });
-  }, [zones]);
-
-  // Get actors connected to a shots zone via zone connections
-  const getConnectedActors = useCallback((shotsZoneId: string): Actor[] => {
-    const castingZoneIds = [...new Set(connections.flatMap(c => {
-      const fromId = getConnectionBaseId(c.from);
-      const toId = getConnectionBaseId(c.to);
-      const fromZone = zones.find(z => z.id === fromId);
-      const toZone = zones.find(z => z.id === toId);
-
-      if (!fromZone || !toZone) return [];
-      if (fromId === shotsZoneId && toZone.type === "casting") return [toId];
-      if (toId === shotsZoneId && fromZone.type === "casting") return [fromId];
-      return [];
-    }))];
-    const actorIds = castNodes
-      .filter(n => castingZoneIds.includes(n.zoneId))
-      .map(n => n.actorId);
-    return actors.filter(a => actorIds.includes(a.id));
-  }, [actors, connections, zones, castNodes]);
-
-  // Find which zone a world coordinate falls in
-  const findZoneAt = useCallback((wx: number, wy: number): string | undefined => {
-    for (const z of zones) {
-      const b = zoneBounds[z.id];
-      if (b && wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h) return z.id;
-    }
-    return undefined;
-  }, [zones, zoneBounds]);
-
-  // Pan/Zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
       e.preventDefault();
-      const rect = containerRef.current?.getBoundingClientRect();
+      if ((e.target as HTMLElement).closest("[data-node]")) return;
+      const rect = cs.containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(prev => {
-        const next = Math.min(3, Math.max(0.15, prev + delta));
-        const scale = next / prev;
-        setPan(p => ({ x: mouseX - scale * (mouseX - p.x), y: mouseY - scale * (mouseY - p.y) }));
-        return next;
-      });
-    } else {
-      setPan(p => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
-    }
-  }, []);
+      const worldX = (e.clientX - rect.left - cs.pan.x) / cs.zoom;
+      const worldY = (e.clientY - rect.top - cs.pan.y) / cs.zoom;
+      const zoneId = cs.findZoneAt(worldX, worldY);
+      cs.setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY, zoneId });
+    },
+    [cs.pan, cs.zoom, cs.findZoneAt, cs.setCanvasMenu, cs.containerRef],
+  );
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1 || (e.button === 0 && tool === "hand")) {
-      setPanning(true);
-      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-      e.preventDefault();
-    } else if (e.button === 0 && tool === "select") {
-      setSelected(null);
-    }
-  }, [tool, pan]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (connectingFrom) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      setConnectingMouse({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
-    }
-    if (panning) setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-    if (draggingZone && zoneDragStart) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const worldX = (e.clientX - rect.left - pan.x) / zoom;
-      const worldY = (e.clientY - rect.top - pan.y) / zoom;
-      const dx = worldX - zoneDragStart.x;
-      const dy = worldY - zoneDragStart.y;
-      setZoneDragStart({ x: worldX, y: worldY });
-      setFrames(prev => prev.map(f => f.zoneId === draggingZone ? { ...f, x: f.x + dx, y: f.y + dy } : f));
-      setCastNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
-      setLocationNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
-      setScriptNodes(prev => prev.map(n => n.zoneId === draggingZone ? { ...n, x: n.x + dx, y: n.y + dy } : n));
-    }
-    if (dragging) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const x = (e.clientX - rect.left - pan.x) / zoom - dragOffset.x;
-      const y = (e.clientY - rect.top - pan.y) / zoom - dragOffset.y;
-      setFrames(prev => prev.map(f => f.id === dragging ? { ...f, x, y } : f));
-      setCastNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
-      setLocationNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
-      setScriptNodes(prev => prev.map(n => n.id === dragging ? { ...n, x, y } : n));
-    }
-  }, [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart]);
-
-  const handleMouseUp = useCallback(() => {
-    setPanning(false);
-    setDragging(null);
-    setDraggingZone(null);
-    setZoneDragStart(null);
-    setConnectingFrom(null);
-  }, []);
-
-  const startDrag = useCallback((e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
-    if (tool !== "select" || e.button !== 0) return;
-    e.stopPropagation();
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const mx = (e.clientX - rect.left - pan.x) / zoom;
-    const my = (e.clientY - rect.top - pan.y) / zoom;
-    setDragOffset({ x: mx - node.x, y: my - node.y });
-    setDragging(node.id);
-    setSelected(null);
-  }, [tool, pan, zoom]);
-
-  const startConnect = useCallback((e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setConnectingFrom(id);
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setConnectingMouse({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
-  }, [pan, zoom]);
-
-  const endConnect = useCallback((id: string) => {
-    if (!connectingFrom || connectingFrom === id) {
-      setConnectingFrom(null);
-      return;
-    }
-
-    let nextFrom = connectingFrom;
-    let nextTo = id;
-
-    const fromZone = zones.find(z => z.id === getConnectionBaseId(connectingFrom));
-    const toZone = zones.find(z => z.id === getConnectionBaseId(id));
-
-    if (fromZone || toZone) {
-      if (!fromZone || !toZone) {
-        setConnectingFrom(null);
-        return;
-      }
-
-      const fromPort = getConnectionPortKey(connectingFrom);
-      const toPort = getConnectionPortKey(id);
-
-      const validForward =
-        toZone.type === "shots" &&
-        fromZone.type !== "shots" &&
-        !!fromPort &&
-        fromPort === toPort &&
-        fromZone.type === fromPort;
-
-      const validReverse =
-        fromZone.type === "shots" &&
-        toZone.type !== "shots" &&
-        !!fromPort &&
-        fromPort === toPort &&
-        toZone.type === fromPort;
-
-      if (!validForward && !validReverse) {
-        setConnectingFrom(null);
-        return;
-      }
-
-      if (validReverse) {
-        nextFrom = id;
-        nextTo = connectingFrom;
-      }
-    }
-
-    const exists = connections.some(c => c.from === nextFrom && c.to === nextTo);
-    if (!exists) setConnections(prev => [...prev, { from: nextFrom, to: nextTo }]);
-    setConnectingFrom(null);
-  }, [connectingFrom, connections, zones]);
-
-  const getPortPos = useCallback((nodeId: string, side: "left" | "right") => {
-    const baseId = getConnectionBaseId(nodeId);
-    const portKey = getConnectionPortKey(nodeId);
-    const zone = zones.find(z => z.id === baseId);
-    const zb = zoneBounds[baseId];
-
-    if (zone && zb) {
-      const port = zoneConnectorConfigs[zone.type].find(config => config.key === portKey);
-      if (port) {
-        return {
-          x: port.side === "right" ? zb.x + zb.w : zb.x,
-          y: zb.y + (zb.h * port.yFrac),
-        };
-      }
-
-      return { x: side === "right" ? zb.x + zb.w : zb.x, y: zb.y + zb.h / 2 };
-    }
-
-    const f = frames.find(fr => fr.id === baseId);
-    if (f) return { x: side === "right" ? f.x + FRAME_W : f.x, y: f.y + PORT_Y };
-    const cn = castNodes.find(n => n.id === baseId);
-    if (cn) return { x: side === "right" ? cn.x + CAST_W : cn.x, y: cn.y + CAST_H / 2 };
-    const ln = locationNodes.find(n => n.id === baseId);
-    if (ln) return { x: side === "right" ? ln.x + LOC_W : ln.x, y: ln.y + LOC_H / 2 };
-    const sn = scriptNodes.find(n => n.id === baseId);
-    if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
-    return { x: 0, y: 0 };
-  }, [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes]);
-
-  const getZoneColor = useCallback((nodeId: string): string => {
-    const baseId = getConnectionBaseId(nodeId);
-    const portKey = getConnectionPortKey(nodeId);
-    const zone = zones.find(z => z.id === baseId);
-    if (zone) {
-      const port = zoneConnectorConfigs[zone.type].find(config => config.key === portKey);
-      return port?.color ?? zone.color;
-    }
-    // Check if node belongs to a zone
-    const castNode = castNodes.find(n => n.id === baseId);
-    if (castNode) { const z = zones.find(zz => zz.id === castNode.zoneId); if (z) return z.color; }
-    const locNode = locationNodes.find(n => n.id === baseId);
-    if (locNode) { const z = zones.find(zz => zz.id === locNode.zoneId); if (z) return z.color; }
-    const scrNode = scriptNodes.find(n => n.id === baseId);
-    if (scrNode) { const z = zones.find(zz => zz.id === scrNode.zoneId); if (z) return z.color; }
-    return "var(--primary)";
-  }, [zones, castNodes, locationNodes, scriptNodes]);
-
-  const connectors = connections.map(c => {
-    const fromId = getConnectionBaseId(c.from);
-    const toId = getConnectionBaseId(c.to);
-    const p1 = getPortPos(c.from, "right");
-    const p2 = getPortPos(c.to, "left");
-    const isZoneConn = zones.some(z => z.id === fromId) || zones.some(z => z.id === toId);
-    const color = getZoneColor(c.from);
-    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, from: c.from, to: c.to, isZoneConn, color };
-  });
-
-  const fitToScreen = useCallback(() => {
-    if (!containerRef.current) return;
-    const allBounds = Object.values(zoneBounds);
-    if (allBounds.length === 0) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const minX = Math.min(...allBounds.map(b => b.x));
-    const minY = Math.min(...allBounds.map(b => b.y));
-    const maxX = Math.max(...allBounds.map(b => b.x + b.w));
-    const maxY = Math.max(...allBounds.map(b => b.y + b.h));
-    const cw = maxX - minX + 120;
-    const ch = maxY - minY + 120;
-    const drawWidth = selected ? rect.width - DRAWER_W : rect.width;
-    const nz = Math.min(drawWidth / cw, rect.height / ch, 1.2);
-    setZoom(nz);
-    setPan({ x: (drawWidth - cw * nz) / 2 - minX * nz + 60 * nz, y: (rect.height - ch * nz) / 2 - minY * nz + 60 * nz });
-  }, [zoneBounds, selected]);
-
-  const addFrame = useCallback((x?: number, y?: number, zoneId?: string) => {
-    const targetZone = zoneId || zones.find(z => z.type === "shots")?.id || "z-shots";
-    const zb = zoneBounds[targetZone];
-    const id = `f${Date.now()}`;
-    const last = frames.filter(f => f.zoneId === targetZone);
-    const lastF = last[last.length - 1];
-    setFrames(prev => [...prev, {
-      id, x: x ?? (lastF ? lastF.x + 300 : (zb ? zb.x + ZONE_PAD : 80)),
-      y: y ?? (lastF ? lastF.y : (zb ? zb.y + ZONE_PAD + ZONE_LABEL_H : 80)),
-      image: "", scene: `SC ${Math.ceil((frames.length + 1) / 2)}`, shot: "WIDE",
-      description: "New frame", duration: "3s", actors: [], zoneId: targetZone,
-    }]);
-    setSelected({ type: "frame", id });
-  }, [frames, zones, zoneBounds]);
-
-  // Spacebar for hand tool
-  useEffect(() => {
-    const d = (e: KeyboardEvent) => { if (e.code === "Space" && !e.repeat) { setTool("hand"); e.preventDefault(); } };
-    const u = (e: KeyboardEvent) => { if (e.code === "Space") setTool("select"); };
-    window.addEventListener("keydown", d);
-    window.addEventListener("keyup", u);
-    return () => { window.removeEventListener("keydown", d); window.removeEventListener("keyup", u); };
-  }, []);
-
-  // Fit on mount
-  useEffect(() => { const t = setTimeout(fitToScreen, 150); return () => clearTimeout(t); }, []);
-
-  // Resolve selected
-  const selectedFrame = selected?.type === "frame" ? frames.find(f => f.id === selected.id) : null;
-  const selectedCast = selected?.type === "cast" ? castNodes.find(n => n.id === selected.id) : null;
-  const selectedLocation = selected?.type === "location" ? locationNodes.find(n => n.id === selected.id) : null;
-  const selectedScript = selected?.type === "script" ? scriptNodes.find(n => n.id === selected.id) : null;
-  const selectedZone = selected?.type === "zone" ? zones.find(z => z.id === selected.id) : null;
-  const selectedActor = selectedCast ? actors.find(a => a.id === selectedCast.actorId) : null;
-
-  const connectedActorsForFrame = selectedFrame ? getConnectedActors(selectedFrame.zoneId) : [];
-
-  const drawerTitle = selectedFrame ? "Shot Settings" : selectedActor ? "Cast Details" : selectedLocation ? "Location" : selectedScript ? "Scene" : selectedZone ? selectedZone.label : null;
-  const showDrawer = !!selected;
+  const handleCanvasMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      cs.setCanvasMenu(null);
+      cs.setCastPickerPos(null);
+      cs.setLocationPickerPos(null);
+      cs.handleMouseDown(e);
+    },
+    [cs.setCanvasMenu, cs.setCastPickerPos, cs.setLocationPickerPos, cs.handleMouseDown],
+  );
 
   return (
     <div className="h-screen w-full relative bg-background overflow-hidden flex">
       <div className="flex-1 relative">
-        {/* Back button */}
-        <Link to={`/project/${projectId}/storyboard`}
-          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-4 h-4" /><span className="text-xs">Back to Pipeline</span>
-        </Link>
+        <CanvasToolbar
+          projectId={projectId}
+          tool={cs.tool}
+          zoom={cs.zoom}
+          onSetTool={cs.setTool}
+          onAddFrame={() => cs.addFrame()}
+          onFitToScreen={cs.fitToScreen}
+          onZoomIn={() => cs.setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+          onZoomOut={() => cs.setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+        />
 
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg">
-          <Film className="w-4 h-4 text-primary" />
-          <span className="text-sm font-bold text-foreground">Production Canvas</span>
-          <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Beta</span>
-        </div>
-
-        {/* Floating toolbar */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 flex flex-col items-center gap-1 p-1.5 rounded-2xl bg-card/90 backdrop-blur-md border border-border shadow-2xl">
-          <button onClick={() => addFrame()} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Add Shot"><Plus className="w-4 h-4" /></button>
-          <div className="w-6 h-px bg-border my-0.5" />
-          <button onClick={() => setTool("select")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "select" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Select"><MousePointer className="w-4 h-4" /></button>
-          <button onClick={() => setTool("hand")} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", tool === "hand" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60")} title="Pan (Space)"><Hand className="w-4 h-4" /></button>
-          <div className="w-6 h-px bg-border my-0.5" />
-          <button onClick={fitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen"><Maximize className="w-4 h-4" /></button>
-        </div>
-
-        {/* Zoom */}
-        <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-sm border border-border text-xs text-muted-foreground">
-          <button onClick={() => setZoom(z => Math.max(0.15, z - 0.1))} className="p-0.5 hover:text-foreground"><ZoomOut className="w-3.5 h-3.5" /></button>
-          <span className="min-w-[3ch] text-center">{Math.round(zoom * 100)}%</span>
-          <button onClick={() => setZoom(z => Math.min(3, z + 0.1))} className="p-0.5 hover:text-foreground"><ZoomIn className="w-3.5 h-3.5" /></button>
-        </div>
-
-        {/* Canvas */}
+        {/* Canvas surface */}
         <div
-          ref={containerRef}
-          className={cn("absolute inset-0", tool === "hand" || panning ? "cursor-grab" : "cursor-default", panning && "cursor-grabbing")}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            if ((e.target as HTMLElement).closest("[data-node]")) return;
-            const rect = containerRef.current?.getBoundingClientRect();
-            if (!rect) return;
-            const worldX = (e.clientX - rect.left - pan.x) / zoom;
-            const worldY = (e.clientY - rect.top - pan.y) / zoom;
-            const zoneId = findZoneAt(worldX, worldY);
-            setCanvasMenu({ x: e.clientX - rect.left, y: e.clientY - rect.top, worldX, worldY, zoneId });
-          }}
-          onWheel={handleWheel}
-          onMouseDown={(e) => { setCanvasMenu(null); setCastPickerPos(null); setLocationPickerPos(null); handleMouseDown(e); }}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          ref={cs.containerRef}
+          className={cn(
+            "absolute inset-0",
+            cs.tool === "hand" || cs.panning ? "cursor-grab" : "cursor-default",
+            cs.panning && "cursor-grabbing",
+          )}
+          onContextMenu={handleContextMenu}
+          onWheel={cs.handleWheel}
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={cs.handleMouseMove}
+          onMouseUp={cs.handleMouseUp}
+          onMouseLeave={cs.handleMouseUp}
         >
           {/* Dot grid */}
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px)`,
-            backgroundSize: `${32 * zoom}px ${32 * zoom}px`,
-            backgroundPosition: `${pan.x % (32 * zoom)}px ${pan.y % (32 * zoom)}px`,
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px)`,
+              backgroundSize: `${GRID_SIZE * cs.zoom}px ${GRID_SIZE * cs.zoom}px`,
+              backgroundPosition: `${cs.pan.x % (GRID_SIZE * cs.zoom)}px ${cs.pan.y % (GRID_SIZE * cs.zoom)}px`,
+            }}
+          />
 
           {/* Transform layer */}
-          <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: "0 0" }}>
+          <div style={{ transform: `translate(${cs.pan.x}px, ${cs.pan.y}px) scale(${cs.zoom})`, transformOrigin: "0 0" }}>
 
             {/* Zone backgrounds */}
-            {zones.map(zone => {
-              const b = zoneBounds[zone.id];
+            {cs.zones.map((zone) => {
+              const b = cs.zoneBounds[zone.id];
               if (!b) return null;
-              const isSelected = selected?.type === "zone" && selected.id === zone.id;
               return (
-                <div
+                <ZoneBackground
                   key={zone.id}
-                  className="absolute pointer-events-none"
-                  style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
-                >
-                  {/* Dashed border */}
-                  <div
-                    className={cn("absolute inset-0 rounded-2xl border-2 border-dashed transition-colors cursor-grab active:cursor-grabbing pointer-events-auto", isSelected && "border-opacity-80")}
-                    style={{ borderColor: `hsl(${zone.color} / ${isSelected ? 0.6 : 0.25})`, background: `hsl(var(--background))` }}
-                    onMouseDown={(e) => {
-                      if (e.button !== 0) return;
-                      e.stopPropagation();
-                      setDraggingZone(zone.id);
-                      const rect = containerRef.current?.getBoundingClientRect();
-                      if (!rect) return;
-                      setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
-                    }}
-                  />
-                  {/* Zone-level connectors */}
-                  {zoneConnectorConfigs[zone.type].map((port) => {
-                      const portId = makeZonePortId(zone.id, port.key);
-                      const portColor = `hsl(${port.color})`;
-                      const yPos = b.h * port.yFrac;
-                      const isLeft = port.side === "left";
-                      const size = zone.type === "shots" ? 20 : 18;
-                      const borderW = zone.type === "shots" ? 4 : 3;
-                      return (
-                        <TooltipProvider key={port.key} delayDuration={100}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className="absolute z-30 rounded-full bg-card hover:scale-125 transition-all cursor-crosshair pointer-events-auto"
-                                style={{
-                                  width: size, height: size,
-                                  borderWidth: borderW, borderStyle: "solid",
-                                  borderColor: portColor,
-                                  [isLeft ? "left" : "right"]: -(size / 2),
-                                  top: yPos - (size / 2),
-                                }}
-                                onMouseDown={(e) => { e.stopPropagation(); startConnect(e, portId); }}
-                                onMouseUp={(e) => { e.stopPropagation(); endConnect(portId); }}
-                              >
-                                <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-100 transition-opacity" style={{ backgroundColor: portColor }} />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side={isLeft ? "left" : "right"} className="text-[10px] py-0.5 px-1.5">{port.label}</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                  })}
-                  {/* Label */}
-                  <div
-                    className="absolute -top-8 left-4 px-3 py-1 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
-                    onMouseDown={(e) => {
-                      if (e.button !== 0 || editingZoneLabel === zone.id) return;
-                      e.stopPropagation();
-                      setDraggingZone(zone.id);
-                      const rect = containerRef.current?.getBoundingClientRect();
-                      if (!rect) return;
-                      setZoneDragStart({ x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom });
-                    }}
-                    onDoubleClick={(e) => { e.stopPropagation(); setEditingZoneLabel(zone.id); }}
-                  >
-                    {editingZoneLabel === zone.id ? (
-                      <input
-                        autoFocus
-                        className="text-lg font-bold bg-transparent border-b border-current outline-none"
-                        style={{ color: `hsl(${zone.color} / 0.7)` }}
-                        defaultValue={zone.label}
-                        onBlur={(e) => {
-                          const val = e.target.value.trim();
-                          if (val) setZones(prev => prev.map(z => z.id === zone.id ? { ...z, label: val } : z));
-                          setEditingZoneLabel(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                          if (e.key === "Escape") setEditingZoneLabel(null);
-                        }}
-                        onMouseDown={e => e.stopPropagation()}
-                      />
-                    ) : (
-                      <span className="text-lg font-bold" style={{ color: `hsl(${zone.color} / 0.7)` }}>{zone.label}</span>
-                    )}
-                  </div>
-                </div>
+                  zone={zone}
+                  bounds={b}
+                  isSelected={cs.selected?.type === "zone" && cs.selected.id === zone.id}
+                  isEditingLabel={cs.editingZoneLabel === zone.id}
+                  onZoneDragStart={(e) => cs.startZoneDrag(e, zone.id)}
+                  onLabelDoubleClick={() => cs.setEditingZoneLabel(zone.id)}
+                  onLabelRename={(val) => cs.setZones((prev) => prev.map((z) => (z.id === zone.id ? { ...z, label: val } : z)))}
+                  onLabelEditCancel={() => cs.setEditingZoneLabel(null)}
+                  onStartConnect={(e, portId) => cs.startConnect(e, portId)}
+                  onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
+                />
               );
             })}
 
             {/* Connection lines */}
-            <svg
-              className="absolute pointer-events-none overflow-visible z-10"
-              style={{ left: -2500, top: -2500, width: 10000, height: 10000, position: "absolute" }}
-              viewBox="-2500 -2500 10000 10000"
-            >
-              {connectors.map(c => {
-                const dx = Math.abs(c.x2 - c.x1);
-                const curve = Math.min(200, Math.max(30, dx * 0.35));
-                const strokeColor = c.color.startsWith("var(") ? `hsl(${c.color})` : `hsl(${c.color})`;
-                return (
-                  <g key={`${c.from}-${c.to}`} style={{ pointerEvents: "auto", cursor: "pointer" }}
-                    onClick={() => setConnections(prev => prev.filter(cc => !(cc.from === c.from && cc.to === c.to)))}>
-                    <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`} stroke="transparent" strokeWidth="16" fill="none" />
-                    <path d={`M ${c.x1} ${c.y1} C ${c.x1 + curve} ${c.y1}, ${c.x2 - curve} ${c.y2}, ${c.x2} ${c.y2}`}
-                      stroke={strokeColor}
-                      strokeOpacity={0.5}
-                      strokeWidth={c.isZoneConn ? 3 : 2.5}
-                      strokeLinecap="round"
-                      fill="none" />
-                  </g>
-                );
-              })}
-              {connectingFrom && (() => {
-                const p = getPortPos(connectingFrom, "right");
-                const dx = Math.abs(connectingMouse.x - p.x);
-                const curve = Math.min(200, Math.max(30, dx * 0.35));
-                return <path d={`M ${p.x} ${p.y} C ${p.x + curve} ${p.y}, ${connectingMouse.x - curve} ${connectingMouse.y}, ${connectingMouse.x} ${connectingMouse.y}`} stroke="hsl(var(--primary))" strokeOpacity="0.7" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="8 6" fill="none" />;
-              })()}
-            </svg>
+            <CanvasConnectors
+              connectors={cs.connectors}
+              connectingFrom={cs.connectingFrom}
+              connectingFromPos={cs.connectingFrom ? cs.getPortPos(cs.connectingFrom, "right") : null}
+              connectingMouse={cs.connectingMouse}
+              onDeleteConnection={handleDeleteConnection}
+            />
 
             {/* Shot frames */}
-            {frames.map((frame, idx) => {
-              return (
-              <div key={frame.id} data-node
-                className={cn("absolute rounded-xl border-2 bg-card select-none group transition-shadow",
-                  selected?.id === frame.id ? "border-primary shadow-lg shadow-primary/20" : "border-border hover:border-muted-foreground/40")}
-                style={{ left: frame.x, top: frame.y, width: FRAME_W }}
-                onMouseDown={(e) => startDrag(e, frame)}>
-                <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{idx + 1}</div>
-                <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
-                  <button
-                    className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors"
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "frame", id: frame.id }); }}
-                    aria-label="Open shot settings"
-                    title="Open shot settings"
-                  >
-                    <Settings className="w-3 h-3" />
-                  </button>
-                  <div className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">{frame.shot}</div>
-                </div>
-                <div className="w-full bg-secondary overflow-hidden rounded-t-[10px]" style={{ height: IMAGE_H }}>
-                  {frame.image ? <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
-                    : <div className="w-full h-full flex items-center justify-center text-muted-foreground/30"><Plus className="w-8 h-8" /></div>}
-                </div>
-                <div className="p-2.5 space-y-1 rounded-b-[10px]" onMouseDown={e => e.stopPropagation()}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
-                    <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <TooltipProvider delayDuration={200}>
-                      {frame.actors.map(aid => {
-                        const a = actors.find(ac => ac.id === aid);
-                        if (!a) return null;
-                        return (
-                          <Tooltip key={a.id}><TooltipTrigger asChild>
-                            <div className="w-5 h-5 rounded-full overflow-hidden border border-border"><img src={a.portrait} alt={a.name} className="w-full h-full object-cover" draggable={false} /></div>
-                          </TooltipTrigger><TooltipContent side="bottom" className="text-xs">{a.name}</TooltipContent></Tooltip>
-                        );
-                      })}
-                    </TooltipProvider>
-                    {frame.location && locationImages[frame.location] && (
-                      <div className="ml-auto w-8 h-5 rounded overflow-hidden border border-border">
-                        <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
-                </div>
-              </div>
-              );
-            })}
+            {cs.frames.map((frame, idx) => (
+              <ShotFrameNode
+                key={frame.id}
+                frame={frame}
+                index={idx}
+                actors={cs.actors}
+                isSelected={cs.selected?.id === frame.id}
+                onMouseDown={(e) => cs.startDrag(e, frame)}
+                onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
+              />
+            ))}
 
             {/* Cast nodes */}
-            {castNodes.map(node => {
-              const actor = actors.find(a => a.id === node.actorId);
+            {cs.castNodes.map((node) => {
+              const actor = cs.actors.find((a) => a.id === node.actorId);
               if (!actor) return null;
-              const sceneCount = frames.filter(f => f.actors.includes(node.actorId)).length;
+              const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
               return (
-                <div key={node.id} data-node
-                  className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
-                    selected?.id === node.id ? "border-cyan-500 shadow-lg shadow-cyan-500/20" : "border-border hover:border-muted-foreground/40")}
-                  style={{ left: node.x, top: node.y, width: CAST_W }}
-                  onMouseDown={(e) => startDrag(e, node)}>
-                  <div className="absolute top-2 left-2 z-10 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{sceneCount} shots</div>
-                  <button
-                    className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "cast", id: node.id }); }}
-                    aria-label="Open cast settings"
-                    title="Open cast settings"
-                  >
-                    <Settings className="w-3 h-3" />
-                  </button>
-                  <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setCastNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
-                    <X className="w-3 h-3" />
-                  </button>
-                  <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
-                  <div className="p-2">
-                    <p className="text-xs font-bold text-foreground">{actor.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{actor.role}</p>
-                  </div>
-                </div>
+                <CastNodeCard
+                  key={node.id}
+                  node={node}
+                  actor={actor}
+                  sceneCount={sceneCount}
+                  isSelected={cs.selected?.id === node.id}
+                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
+                  onDelete={() => {
+                    cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
+                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                  }}
+                />
               );
             })}
 
             {/* Location nodes */}
-            {locationNodes.map(node => {
-              const img = locationImages[node.locationName];
-              if (!img) return null;
-              const shotCount = frames.filter(f => f.location === node.locationName).length;
+            {cs.locationNodes.map((node) => {
+              const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
               return (
-                <div key={node.id} data-node
-                  className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
-                    selected?.id === node.id ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-border hover:border-muted-foreground/40")}
-                  style={{ left: node.x, top: node.y, width: LOC_W }}
-                  onMouseDown={(e) => startDrag(e, node)}>
-                  <div className="absolute top-2 left-2 z-10 bg-emerald-500/20 backdrop-blur-sm text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{shotCount} shots</div>
-                  <button
-                    className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setSelected({ type: "location", id: node.id }); }}
-                    aria-label="Open location settings"
-                    title="Open location settings"
-                  >
-                    <Settings className="w-3 h-3" />
-                  </button>
-                  <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setLocationNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
-                    <X className="w-3 h-3" />
-                  </button>
-                  <img src={img} alt={node.locationName} className="w-full aspect-video object-cover" draggable={false} />
-                  <div className="p-2"><p className="text-xs font-bold text-foreground">{node.locationName}</p></div>
-                </div>
+                <LocationNodeCard
+                  key={node.id}
+                  node={node}
+                  isSelected={cs.selected?.id === node.id}
+                  shotCount={shotCount}
+                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
+                  onDelete={() => {
+                    cs.setLocationNodes((prev) => prev.filter((n) => n.id !== node.id));
+                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                  }}
+                />
               );
             })}
 
             {/* Script nodes */}
-            {scriptNodes.map(node => (
-              <div key={node.id} data-node
-                className={cn("absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
-                  selected?.id === node.id ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-border hover:border-muted-foreground/40")}
-                style={{ left: node.x, top: node.y, width: SCRIPT_W }}
-                onMouseDown={(e) => startDrag(e, node)}>
-                <button
-                  className="absolute top-2 right-8 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md transition-all"
-                  onMouseDown={e => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); setSelected({ type: "script", id: node.id }); }}
-                  aria-label="Open scene settings"
-                  title="Open scene settings"
-                >
-                  <Settings className="w-3 h-3" />
-                </button>
-                <button className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
-                  onMouseDown={e => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); setScriptNodes(prev => prev.filter(n => n.id !== node.id)); if (selected?.id === node.id) setSelected(null); }}>
-                  <X className="w-3 h-3" />
-                </button>
-                <div className="p-3 space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider truncate">{node.heading}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed">{node.body}</p>
-                </div>
-              </div>
+            {cs.scriptNodes.map((node) => (
+              <ScriptNodeCard
+                key={node.id}
+                node={node}
+                isSelected={cs.selected?.id === node.id}
+                onMouseDown={(e) => cs.startDrag(e, node)}
+                onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                onDelete={() => {
+                  cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                  if (cs.selected?.id === node.id) cs.setSelected(null);
+                }}
+              />
             ))}
           </div>
 
           {/* Context menu */}
-          {canvasMenu && (() => {
-            const zone = canvasMenu.zoneId ? zones.find(z => z.id === canvasMenu.zoneId) : null;
-            return (
-              <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: canvasMenu.x, top: canvasMenu.y }} onMouseDown={e => e.stopPropagation()}>
-                {zone ? (
-                  <>
-                    <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{zone.label} Zone</p>
-                    {zone.type === "shots" && (
-                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                        addFrame(canvasMenu.worldX, canvasMenu.worldY, canvasMenu.zoneId || undefined);
-                        setCanvasMenu(null);
-                      }}><Camera className="w-4 h-4" /> Add Shot</button>
-                    )}
-                    {zone.type === "casting" && (
-                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                        setCastPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: zone.id });
-                        setCanvasMenu(null);
-                      }}><Users className="w-4 h-4" /> Add Cast Member</button>
-                    )}
-                    {zone.type === "locations" && (
-                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                        setLocationPickerPos({ x: canvasMenu.x, y: canvasMenu.y, worldX: canvasMenu.worldX, worldY: canvasMenu.worldY, zoneId: zone.id });
-                        setCanvasMenu(null);
-                      }}><MapPin className="w-4 h-4" /> Add Location</button>
-                    )}
-                    {zone.type === "script" && (
-                      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => {
-                        setScriptNodes(prev => [...prev, {
-                          id: `sn-${Date.now()}`,
-                          heading: "INT. NEW LOCATION - DAY",
-                          body: "Description of the scene...",
-                          x: canvasMenu.worldX - SCRIPT_W / 2,
-                          y: canvasMenu.worldY,
-                          zoneId: zone.id,
-                        }]);
-                        setCanvasMenu(null);
-                      }}><FileText className="w-4 h-4" /> Add Scene</button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
-                    {["casting", "shots", "locations", "script"].map(type => {
-                      const icons: Record<string, React.ReactNode> = {
-                        casting: <Users className="w-4 h-4" />,
-                        shots: <Camera className="w-4 h-4" />,
-                        locations: <MapPin className="w-4 h-4" />,
-                        script: <FileText className="w-4 h-4" />,
-                      };
-                      const labels: Record<string, string> = { casting: "Casting", shots: "Shots", locations: "Locations", script: "Script" };
-                      const colors: Record<string, string> = { casting: "190 80% 50%", shots: "220 70% 55%", locations: "150 60% 45%", script: "280 60% 55%" };
-                      return (
-                        <button key={type} className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
-                          onClick={() => {
-                            setZones(prev => {
-                              const count = prev.filter(z => z.type === type).length;
-                              const label = count > 0 ? `${labels[type]} #${count + 1}` : labels[type];
-                              return [...prev, {
-                                id: `z-${type}-${Date.now()}`,
-                                label,
-                                type: type as Zone["type"],
-                                x: canvasMenu.worldX,
-                                y: canvasMenu.worldY,
-                                color: colors[type],
-                              }];
-                            });
-                            setCanvasMenu(null);
-                          }}>{icons[type]} {labels[type]} Zone</button>
-                      );
-                    })}
-                  </>
-                )}
-                <div className="h-px bg-border my-1" />
-                <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={() => { fitToScreen(); setCanvasMenu(null); }}>
-                  <Maximize className="w-4 h-4" /> Fit to Screen
-                </button>
-              </div>
-            );
-          })()}
-
-          {/* Cast Picker */}
-          {castPickerPos && (
-            <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: castPickerPos.x, top: castPickerPos.y }} onMouseDown={e => e.stopPropagation()}>
-              <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Actor</p>
-              {actors.map(actor => (
-                <button key={actor.id} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
-                  onClick={() => {
-                    setCastNodes(prev => [...prev, { id: `cn-${Date.now()}`, actorId: actor.id, x: castPickerPos.worldX - CAST_W / 2, y: castPickerPos.worldY, zoneId: castPickerPos.zoneId }]);
-                    setCastPickerPos(null);
-                  }}>
-                  <img src={actor.portrait} alt={actor.name} className="w-7 h-7 rounded-full object-cover" />
-                  <span>{actor.name}</span>
-                </button>
-              ))}
-              <div className="h-px bg-border my-1" />
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-muted-foreground" onClick={() => setCastPickerPos(null)}>
-                <X className="w-4 h-4" /> Cancel
-              </button>
-            </div>
+          {cs.canvasMenu && (
+            <CanvasContextMenu
+              menu={cs.canvasMenu}
+              zones={cs.zones}
+              onAddFrame={() => {
+                cs.addFrame(cs.canvasMenu!.worldX, cs.canvasMenu!.worldY, cs.canvasMenu!.zoneId);
+                cs.setCanvasMenu(null);
+              }}
+              onAddCastPicker={() => {
+                cs.setCastPickerPos({ x: cs.canvasMenu!.x, y: cs.canvasMenu!.y, worldX: cs.canvasMenu!.worldX, worldY: cs.canvasMenu!.worldY, zoneId: cs.canvasMenu!.zoneId || "" });
+                cs.setCanvasMenu(null);
+              }}
+              onAddLocationPicker={() => {
+                cs.setLocationPickerPos({ x: cs.canvasMenu!.x, y: cs.canvasMenu!.y, worldX: cs.canvasMenu!.worldX, worldY: cs.canvasMenu!.worldY, zoneId: cs.canvasMenu!.zoneId || "" });
+                cs.setCanvasMenu(null);
+              }}
+              onAddScriptNode={() => {
+                const zone = cs.zones.find((z) => z.id === cs.canvasMenu!.zoneId);
+                if (zone) {
+                  cs.setScriptNodes((prev) => [...prev, {
+                    id: `sn-${Date.now()}`,
+                    heading: "INT. NEW LOCATION - DAY",
+                    body: "Description of the scene...",
+                    x: cs.canvasMenu!.worldX - SCRIPT_W / 2,
+                    y: cs.canvasMenu!.worldY,
+                    zoneId: zone.id,
+                  }]);
+                }
+                cs.setCanvasMenu(null);
+              }}
+              onAddZone={(type) => {
+                cs.setZones((prev) => {
+                  const count = prev.filter((z) => z.type === type).length;
+                  const label = count > 0 ? `${ZONE_LABELS[type]} #${count + 1}` : ZONE_LABELS[type];
+                  return [...prev, {
+                    id: `z-${type}-${Date.now()}`,
+                    label,
+                    type,
+                    x: cs.canvasMenu!.worldX,
+                    y: cs.canvasMenu!.worldY,
+                    color: ZONE_COLORS[type],
+                  }];
+                });
+                cs.setCanvasMenu(null);
+              }}
+              onFitToScreen={() => { cs.fitToScreen(); cs.setCanvasMenu(null); }}
+              onClose={() => cs.setCanvasMenu(null)}
+            />
           )}
 
-          {/* Location Picker */}
-          {locationPickerPos && (
-            <div className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm" style={{ left: locationPickerPos.x, top: locationPickerPos.y }} onMouseDown={e => e.stopPropagation()}>
-              <p className="px-3 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">Choose Location</p>
-              {Object.entries(locationImages).map(([name, img]) => (
-                <button key={name} className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground" onMouseDown={e => e.stopPropagation()}
-                  onClick={() => {
-                    setLocationNodes(prev => [...prev, { id: `ln-${Date.now()}`, locationName: name, x: locationPickerPos.worldX - LOC_W / 2, y: locationPickerPos.worldY, zoneId: locationPickerPos.zoneId }]);
-                    setLocationPickerPos(null);
-                  }}>
-                  <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
-                  <span>{name}</span>
-                </button>
-              ))}
-              <div className="h-px bg-border my-1" />
-              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-muted-foreground" onClick={() => setLocationPickerPos(null)}>
-                <X className="w-4 h-4" /> Cancel
-              </button>
-            </div>
+          {/* Pickers */}
+          {cs.castPickerPos && (
+            <CastPicker
+              position={cs.castPickerPos}
+              actors={cs.actors}
+              onSelect={(actor) => {
+                cs.setCastNodes((prev) => [...prev, {
+                  id: `cn-${Date.now()}`,
+                  actorId: actor.id,
+                  x: cs.castPickerPos!.worldX - CAST_W / 2,
+                  y: cs.castPickerPos!.worldY,
+                  zoneId: cs.castPickerPos!.zoneId,
+                }]);
+                cs.setCastPickerPos(null);
+              }}
+              onClose={() => cs.setCastPickerPos(null)}
+            />
+          )}
+          {cs.locationPickerPos && (
+            <LocationPicker
+              position={cs.locationPickerPos}
+              onSelect={(name) => {
+                cs.setLocationNodes((prev) => [...prev, {
+                  id: `ln-${Date.now()}`,
+                  locationName: name,
+                  x: cs.locationPickerPos!.worldX - LOC_W / 2,
+                  y: cs.locationPickerPos!.worldY,
+                  zoneId: cs.locationPickerPos!.zoneId,
+                }]);
+                cs.setLocationPickerPos(null);
+              }}
+              onClose={() => cs.setLocationPickerPos(null)}
+            />
           )}
         </div>
 
         {/* Minimap */}
-        <div className="absolute bottom-4 w-[140px] h-[90px] bg-card/90 backdrop-blur-sm border border-border rounded-lg overflow-hidden z-20" style={{ right: showDrawer ? DRAWER_W + 16 : 16 }}>
-          <svg className="w-full h-full" viewBox="-600 -100 2200 900">
-            {zones.map(z => {
-              const b = zoneBounds[z.id];
-              if (!b) return null;
-              return <rect key={z.id} x={b.x} y={b.y} width={b.w} height={b.h} rx={8} fill="none" stroke={`hsl(${z.color})`} strokeOpacity={0.2} strokeWidth={3} strokeDasharray="8 6" />;
-            })}
-            {frames.map(f => <rect key={f.id} x={f.x} y={f.y} width={FRAME_W} height={FRAME_H} rx={4} fill={selected?.id === f.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={selected?.id === f.id ? 0.6 : 0.2} />)}
-            {castNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={CAST_W} height={CAST_H} rx={4} fill="hsl(190 80% 50%)" fillOpacity={0.3} />)}
-            {locationNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={LOC_W} height={LOC_H} rx={4} fill="hsl(150 60% 45%)" fillOpacity={0.3} />)}
-            {scriptNodes.map(n => <rect key={n.id} x={n.x} y={n.y} width={SCRIPT_W} height={SCRIPT_H} rx={4} fill="hsl(280 60% 55%)" fillOpacity={0.3} />)}
-          </svg>
-        </div>
+        <CanvasMinimap
+          zones={cs.zones}
+          frames={cs.frames}
+          castNodes={cs.castNodes}
+          locationNodes={cs.locationNodes}
+          scriptNodes={cs.scriptNodes}
+          zoneBounds={cs.zoneBounds}
+          selected={cs.selected}
+          showDrawer={showDrawer}
+        />
       </div>
 
-      {/* Context-sensitive drawer */}
-      <AnimatePresence>
-      {showDrawer && (
-        <motion.div
-          initial={{ x: DRAWER_W, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: DRAWER_W, opacity: 0 }}
-          transition={{ type: "spring", damping: 26, stiffness: 300 }}
-          className="h-full border-l border-border bg-card flex flex-col z-50 relative shrink-0"
-          style={{ width: DRAWER_W }}
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-            <div className="flex items-center gap-2">
-              {selectedFrame && <Camera className="w-4 h-4 text-primary" />}
-              {selectedActor && <User className="w-4 h-4 text-cyan-500" />}
-              {selectedLocation && <MapPin className="w-4 h-4 text-emerald-500" />}
-              {selectedScript && <FileText className="w-4 h-4 text-purple-400" />}
-              {selectedZone && (
-                selectedZone.type === "casting" ? <Users className="w-4 h-4 text-cyan-500" /> :
-                selectedZone.type === "shots" ? <Camera className="w-4 h-4 text-primary" /> :
-                selectedZone.type === "script" ? <FileText className="w-4 h-4 text-purple-400" /> :
-                <MapPin className="w-4 h-4 text-emerald-500" />
-              )}
-              <h2 className="text-sm font-bold text-foreground">{drawerTitle}</h2>
-            </div>
-            <button onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {selectedFrame && (
-              <ShotDrawer frame={selectedFrame} actors={actors} connectedActors={connectedActorsForFrame}
-                onUpdate={(updated) => setFrames(prev => prev.map(f => f.id === updated.id ? updated : f))}
-                onDelete={() => { setFrames(prev => prev.filter(f => f.id !== selectedFrame.id)); setConnections(prev => prev.filter(c => c.from !== selectedFrame.id && c.to !== selectedFrame.id)); setSelected(null); }} />
-            )}
-            {selectedActor && (
-              <CharacterDetailsPanel
-                character={selectedActor}
-                onChange={(updated) => setActors(prev => prev.map(a => a.id === updated.id ? updated : a))}
-                onDelete={() => {
-                  setCastNodes(prev => prev.filter(n => n.actorId !== selectedActor.id));
-                  setSelected(null);
-                }}
-                appearances={frames.filter(f => f.actors.includes(selectedActor.id)).map(f => ({
-                  id: f.id, scene: f.scene, shot: f.shot, description: f.description, image: f.image,
-                }))}
-              />
-            )}
-            {selectedLocation && <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />}
-            {selectedScript && (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Scene Heading</Label>
-                  <input
-                    value={selectedScript.heading}
-                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, heading: e.target.value } : n))}
-                    className="w-full text-sm font-bold bg-secondary/50 border border-border rounded-lg px-3 py-2 mt-1 text-foreground outline-none focus:border-purple-500/50"
-                  />
-                </div>
-                <Separator />
-                <div>
-                  <Label className="text-xs text-muted-foreground">Scene Description</Label>
-                  <Textarea
-                    value={selectedScript.body}
-                    onChange={e => setScriptNodes(prev => prev.map(n => n.id === selectedScript.id ? { ...n, body: e.target.value } : n))}
-                    className="mt-1 min-h-[120px] text-sm"
-                    placeholder="Describe what happens in this scene..."
-                  />
-                </div>
-                <Separator />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
-                  onClick={() => { setScriptNodes(prev => prev.filter(n => n.id !== selectedScript.id)); setSelected(null); }}
-                >
-                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                  Delete Scene
-                </Button>
-              </div>
-            )}
-            {selectedZone && <ZoneDrawer zone={selectedZone} castNodes={castNodes} locationNodes={locationNodes} frames={frames} />}
-          </div>
-        </motion.div>
-      )}
-      </AnimatePresence>
+      {/* Side drawer */}
+      <CanvasDrawer
+        selected={cs.selected}
+        frames={cs.frames}
+        actors={cs.actors}
+        castNodes={cs.castNodes}
+        locationNodes={cs.locationNodes}
+        scriptNodes={cs.scriptNodes}
+        zones={cs.zones}
+        connectedActorsForFrame={connectedActorsForFrame}
+        onClose={() => cs.setSelected(null)}
+        onUpdateFrame={(updated) => cs.setFrames((prev) => prev.map((f) => (f.id === updated.id ? updated : f)))}
+        onDeleteFrame={(id) => {
+          cs.setFrames((prev) => prev.filter((f) => f.id !== id));
+          cs.setConnections((prev) => prev.filter((c) => c.from !== id && c.to !== id));
+          cs.setSelected(null);
+        }}
+        onUpdateActor={(updated) => cs.setActors((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
+        onDeleteCastNode={(actorId) => {
+          cs.setCastNodes((prev) => prev.filter((n) => n.actorId !== actorId));
+          cs.setSelected(null);
+        }}
+        onUpdateScriptNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+        onDeleteScriptNode={(id) => {
+          cs.setScriptNodes((prev) => prev.filter((n) => n.id !== id));
+          cs.setSelected(null);
+        }}
+        onDeleteConnection={handleDeleteConnection}
+      />
     </div>
+  );
+}
+
+export default function ProductionCanvasPage() {
+  return (
+    <CanvasErrorBoundary fallbackTitle="Canvas crashed">
+      <ProductionCanvasPageInner />
+    </CanvasErrorBoundary>
   );
 }

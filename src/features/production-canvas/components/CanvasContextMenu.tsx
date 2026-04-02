@@ -1,0 +1,83 @@
+import { memo } from "react";
+import { Camera, Users, MapPin, FileText, Maximize } from "lucide-react";
+import type { Zone, ZoneType, CanvasMenuState } from "../types";
+import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
+
+interface CanvasContextMenuProps {
+  menu: CanvasMenuState;
+  zones: Zone[];
+  onAddFrame: () => void;
+  onAddCastPicker: () => void;
+  onAddLocationPicker: () => void;
+  onAddScriptNode: () => void;
+  onAddZone: (type: ZoneType) => void;
+  onFitToScreen: () => void;
+  onClose: () => void;
+}
+
+const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
+  casting: <Users className="w-4 h-4" />,
+  shots: <Camera className="w-4 h-4" />,
+  locations: <MapPin className="w-4 h-4" />,
+  script: <FileText className="w-4 h-4" />,
+};
+
+export const CanvasContextMenu = memo(function CanvasContextMenu({
+  menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
+  onAddScriptNode, onAddZone, onFitToScreen, onClose,
+}: CanvasContextMenuProps) {
+  const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
+
+  return (
+    <div
+      className="absolute z-50 min-w-[200px] bg-popover border border-border rounded-lg shadow-xl py-1 text-sm"
+      style={{ left: menu.x, top: menu.y }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      {zone ? (
+        <>
+          <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+            {zone.label} Zone
+          </p>
+          {zone.type === "shots" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddFrame}>
+              <Camera className="w-4 h-4" /> Add Shot
+            </button>
+          )}
+          {zone.type === "casting" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddCastPicker}>
+              <Users className="w-4 h-4" /> Add Cast Member
+            </button>
+          )}
+          {zone.type === "locations" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddLocationPicker}>
+              <MapPin className="w-4 h-4" /> Add Location
+            </button>
+          )}
+          {zone.type === "script" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddScriptNode}>
+              <FileText className="w-4 h-4" /> Add Scene
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
+          {(["casting", "shots", "locations", "script"] as ZoneType[]).map((type) => (
+            <button
+              key={type}
+              className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
+              onClick={() => onAddZone(type)}
+            >
+              {zoneTypeIcons[type]} {ZONE_LABELS[type]} Zone
+            </button>
+          ))}
+        </>
+      )}
+      <div className="h-px bg-border my-1" />
+      <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onFitToScreen}>
+        <Maximize className="w-4 h-4" /> Fit to Screen
+      </button>
+    </div>
+  );
+});
