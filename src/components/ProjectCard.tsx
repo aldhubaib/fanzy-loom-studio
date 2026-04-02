@@ -57,21 +57,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         <p className="text-xs text-muted-foreground">
           {project.scenes} scenes · {project.characters} characters · Edited {project.editedAgo}
         </p>
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">Pipeline</span>
-            <span className="text-muted-foreground">{project.pipelineComplete}/{project.pipelineTotal}</span>
-          </div>
-          <div className="h-1 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${progress}%`,
-                background: progress === 100 ? 'hsl(142 71% 45%)' : 'hsl(var(--primary))',
-              }}
-            />
-          </div>
-        </div>
       </div>
     </motion.div>
   );
