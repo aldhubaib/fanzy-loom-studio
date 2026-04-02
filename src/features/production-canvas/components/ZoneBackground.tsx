@@ -50,6 +50,7 @@ interface ZoneBackgroundProps {
   onLabelEditCancel: () => void;
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
+  onSelect?: () => void;
   /** Handler map: tool key → callback. Only tools with a handler are rendered. */
   onToolAction?: Record<string, () => void>;
 }
@@ -57,7 +58,7 @@ interface ZoneBackgroundProps {
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect, onToolAction,
+  onStartConnect, onEndConnect, onSelect, onToolAction,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
@@ -90,7 +91,7 @@ export const ZoneBackground = memo(function ZoneBackground({
           borderColor: `hsl(${zone.color} / ${isSelected || hovered ? 0.55 : 0.25})`,
           background: "hsl(var(--background))",
         }}
-        onMouseDown={onZoneDragStart}
+        onMouseDown={(e) => { onSelect?.(); onZoneDragStart(e); }}
       />
 
       {/* Zone-level connectors */}
@@ -162,8 +163,8 @@ export const ZoneBackground = memo(function ZoneBackground({
           )}
         </div>
 
-        {/* Zone tools — visible on hover */}
-        {hovered && tools.map((tool) => {
+        {/* Zone tools — visible on hover or when selected */}
+        {(hovered || isSelected) && tools.map((tool) => {
           const Icon = tool.icon;
           return (
             <TooltipProvider key={tool.key} delayDuration={200}>
