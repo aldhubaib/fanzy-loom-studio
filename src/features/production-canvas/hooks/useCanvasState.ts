@@ -15,7 +15,7 @@ import {
   ZONE_CONNECTOR_CONFIGS, actorRoster,
   initialZones, initialFrames, initialCastNodes,
   initialLocationNodes, initialScriptNodes, initialConnections,
-  initialTimelineNodes,
+  initialTimelineNodes, initialPreviewNodes,
 } from "../constants";
 import type { TimelineNodeData } from "../components/TimelineNode";
 import type { PreviewNodeData } from "../components/PreviewMonitorNode";
