@@ -50,6 +50,7 @@ interface ZoneBackgroundProps {
   onLabelEditCancel: () => void;
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
+  onSelect?: () => void;
   /** Handler map: tool key → callback. Only tools with a handler are rendered. */
   onToolAction?: Record<string, () => void>;
 }
@@ -57,7 +58,7 @@ interface ZoneBackgroundProps {
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect, onToolAction,
+  onStartConnect, onEndConnect, onSelect, onToolAction,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
