@@ -295,6 +295,29 @@ export const ZoneBackground = memo(function ZoneBackground({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
+        {/* Shots zone stats */}
+        {zone.type === "shots" && shotStats && (hovered || isSelected) && (
+          <div className="flex items-center gap-2 ml-2 pointer-events-auto">
+            <span className="text-[10px] text-muted-foreground font-medium">
+              {shotStats.total} shot{shotStats.total !== 1 ? "s" : ""}
+            </span>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <span className="text-[10px] text-emerald-400 font-medium">{shotStats.approved} approved</span>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{shotStats.drafts} draft{shotStats.drafts !== 1 ? "s" : ""}</span>
+            {shotStats.animatable > 0 && onAnimateAll && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAnimateAll(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-1"
+              >
+                <Zap className="w-3 h-3" />
+                Animate All ({shotStats.animatable})
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
