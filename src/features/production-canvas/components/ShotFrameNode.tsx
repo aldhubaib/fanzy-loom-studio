@@ -93,9 +93,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           >
             <Settings className="w-3 h-3" />
           </button>
-          <div className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-            {status === "video_ready" && frame.videoDuration ? `▶ ${frame.videoDuration}` : frame.shot}
-          </div>
         </div>
 
         {/* Image area */}
