@@ -482,7 +482,7 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
       else if (zone.type === "script") setScriptNodes(applyPositions);
       else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, frames, castNodes, locationNodes, scriptNodes],
+    [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
   );
 
   // ── Reset canvas ──────────────────────────────────────
