@@ -104,8 +104,8 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         </div>
       </div>
 
-      {/* Full-screen Image Gallery Modal */}
-      {galleryOpen && (
+      {/* Full-screen Image Gallery Modal - rendered via portal to escape canvas transform */}
+      {galleryOpen && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex"
           onClick={() => setGalleryOpen(false)}
