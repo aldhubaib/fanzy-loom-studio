@@ -539,7 +539,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       else if (zone.type === "script") setScriptNodes(applyPositions);
       else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
+    [zones, frames, castNodes, locationNodes, scriptNodes, zoneCols],
   );
   autoGridZoneRef.current = autoGridZone;
 
