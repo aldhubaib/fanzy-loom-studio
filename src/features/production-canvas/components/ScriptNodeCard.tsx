@@ -6,6 +6,7 @@ import { SCRIPT_W } from "../constants";
 
 interface ScriptNodeCardProps {
   node: ScriptNode;
+  sceneNumber: number;
   isSelected: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
