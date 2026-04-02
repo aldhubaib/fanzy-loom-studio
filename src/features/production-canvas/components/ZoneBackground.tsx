@@ -265,6 +265,34 @@ export const ZoneBackground = memo(function ZoneBackground({
             </Tooltip>
           </TooltipProvider>
         )}
+
+        {/* Aspect ratio selector for shots zones */}
+        {zone.type === "shots" && onAspectRatioChange && (hovered || isSelected) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md opacity-60 hover:opacity-100 transition-opacity text-[10px] font-bold"
+                style={{ color: `hsl(${zone.color} / 0.8)` }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <RectangleHorizontal className="w-3 h-3" />
+                {shotAspectRatio || "16:9"}
+                <ChevronDown className="w-2.5 h-2.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" sideOffset={8} className="w-24">
+              {ASPECT_RATIOS.map((ratio) => (
+                <DropdownMenuItem
+                  key={ratio}
+                  onClick={() => onAspectRatioChange(ratio)}
+                  className={cn("text-xs", ratio === (shotAspectRatio || "16:9") && "text-primary font-bold")}
+                >
+                  {ratio}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );
