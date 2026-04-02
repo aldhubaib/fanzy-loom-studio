@@ -35,8 +35,6 @@ export const ZoneBackground = memo(function ZoneBackground({
     <div
       className="absolute pointer-events-none"
       style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {/* Dashed border */}
       <div
@@ -49,6 +47,8 @@ export const ZoneBackground = memo(function ZoneBackground({
           background: "hsl(var(--background))",
         }}
         onMouseDown={onZoneDragStart}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       />
 
       {/* Zone-level connectors */}
