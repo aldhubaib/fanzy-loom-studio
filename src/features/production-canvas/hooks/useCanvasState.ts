@@ -552,6 +552,16 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   );
   autoGridZoneRef.current = autoGridZone;
 
+  useEffect(() => {
+    const nonScriptZones = zones.filter((zone) => zone.type !== "script");
+    const t = setTimeout(() => {
+      nonScriptZones.forEach((zone) => {
+        autoGridZoneRef.current(zone.id, zone.type === "script" ? 1 : zoneCols[zone.id] ?? 3);
+      });
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
   // ── Reorder node within zone ───────────────────────────
   const reorderNode = useCallback(
     (nodeId: string, direction: "left" | "right", nodeType: "cast" | "location" | "frame") => {
