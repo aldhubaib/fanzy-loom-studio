@@ -45,6 +45,9 @@ function ProductionCanvasPageInner() {
   const cs = useCanvasState(projectId, scriptStackHeights);
 
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const stackRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const stackObservers = useRef<Record<string, ResizeObserver>>({});
 
