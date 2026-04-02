@@ -25,7 +25,7 @@ export const CastNodeCard = memo(function CastNodeCard({
         "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
         isSelected
           ? "border-cyan-500 shadow-lg shadow-cyan-500/20"
-          : "border-border hover:border-muted-foreground/40",
+          : "border-border hover:border-cyan-500/40",
       )}
       style={{ left: node.x, top: node.y, width: CAST_W }}
       onMouseDown={onMouseDown}

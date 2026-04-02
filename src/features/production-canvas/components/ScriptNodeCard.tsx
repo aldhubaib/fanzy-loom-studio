@@ -22,7 +22,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
         "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
         isSelected
           ? "border-purple-500 shadow-lg shadow-purple-500/20"
-          : "border-border hover:border-muted-foreground/40",
+          : "border-border hover:border-purple-500/40",
       )}
       style={{ left: node.x, top: node.y, width: SCRIPT_W }}
       onMouseDown={onMouseDown}

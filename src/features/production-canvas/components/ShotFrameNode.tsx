@@ -24,7 +24,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         "absolute rounded-xl border-2 bg-card select-none group transition-shadow",
         isSelected
           ? "border-primary shadow-lg shadow-primary/20"
-          : "border-border hover:border-muted-foreground/40",
+          : "border-border hover:border-primary/40",
       )}
       style={{ left: frame.x, top: frame.y, width: FRAME_W }}
       onMouseDown={onMouseDown}
