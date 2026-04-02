@@ -277,6 +277,18 @@ function ProductionCanvasPageInner() {
                 }
                 cs.setCanvasMenu(null);
               }}
+              onAddTimeline={() => {
+                const zone = cs.zones.find((z) => z.id === cs.canvasMenu!.zoneId);
+                if (zone) {
+                  cs.setTimelineNodes((prev) => [...prev, {
+                    id: `tn-${Date.now()}`,
+                    x: cs.canvasMenu!.worldX - TIMELINE_W / 2,
+                    y: cs.canvasMenu!.worldY,
+                    zoneId: zone.id,
+                  }]);
+                }
+                cs.setCanvasMenu(null);
+              }}
               onAddZone={(type) => {
                 cs.setZones((prev) => {
                   const count = prev.filter((z) => z.type === type).length;
