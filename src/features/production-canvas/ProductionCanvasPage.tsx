@@ -35,20 +35,25 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
-  const cs = useCanvasState(projectId, pageViewZones);
+  const [stackViewZones, setStackViewZones] = useState<Set<string>>(new Set());
+  const cs = useCanvasState(projectId);
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
-  const togglePageView = useCallback((zoneId: string) => {
-    setPageViewZones((prev) => {
+  const toggleStackView = useCallback((zoneId: string) => {
+    setStackViewZones((prev) => {
       const next = new Set(prev);
       if (next.has(zoneId)) next.delete(zoneId);
       else next.add(zoneId);
       return next;
     });
-  }, []);
+    // Re-layout with 1 column (stack) or 3 columns (grid)
+    setTimeout(() => {
+      const isNowStack = !stackViewZones.has(zoneId);
+      cs.autoGridZone(zoneId, isNowStack ? 1 : 3);
+    }, 0);
+  }, [stackViewZones, cs]);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
