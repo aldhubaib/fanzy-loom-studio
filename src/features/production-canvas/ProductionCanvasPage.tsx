@@ -8,6 +8,7 @@ import { mockProjects } from "@/data/mockProjects";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
 import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, FRAME_W, FRAME_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
+import { getFrameHForAspect } from "./utils";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
@@ -235,7 +236,8 @@ function ProductionCanvasPageInner() {
                       const row = Math.floor(idx / cols);
                       const startX = b2.x + ZONE_PAD;
                       const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
-                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (FRAME_H + gap), zone.id);
+                      const dynamicFrameH = getFrameHForAspect(cs.shotAspectRatio);
+                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (dynamicFrameH + gap), zone.id);
                     } else if (zone.type === "casting") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;

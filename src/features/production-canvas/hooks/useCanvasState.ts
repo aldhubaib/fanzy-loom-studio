@@ -22,7 +22,7 @@ import type { PreviewNodeData } from "../components/PreviewMonitorNode";
 import {
   computeZoneBounds, loadCanvasState, saveCanvasState,
   makeZonePortId, getConnectionBaseId, getConnectionPortKey,
-  getPortPosition, getZoneColor as resolveZoneColor,
+  getPortPosition, getZoneColor as resolveZoneColor, getFrameHForAspect,
 } from "../utils";
 
 export function useCanvasState(projectId: string | undefined, scriptStackHeights: Record<string, number> = {}) {
@@ -89,7 +89,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     const filteredCast = dragging ? castNodes.filter((n) => n.id !== dragging) : castNodes;
     const filteredLoc = dragging ? locationNodes.filter((n) => n.id !== dragging) : locationNodes;
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights);
+      map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights, shotAspectRatio);
     });
     // Freeze the dragged zone's bounds so configured columns stay visually fixed while dragging
     if (frozenDragZoneBounds) {
@@ -517,7 +517,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },
         script: { w: SCRIPT_W * 3, h: SCRIPT_H },
-        shots: { w: FRAME_W, h: FRAME_H },
+        shots: { w: FRAME_W, h: getFrameHForAspect(shotAspectRatio) },
       };
       const size = sizeMap[zone.type];
       if (!size) return;
@@ -564,7 +564,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       else if (zone.type === "script") setScriptNodes(applyPositions);
       else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, frames, castNodes, locationNodes, scriptNodes, zoneCols],
+    [zones, frames, castNodes, locationNodes, scriptNodes, zoneCols, shotAspectRatio],
   );
   autoGridZoneRef.current = autoGridZone;
 
@@ -618,6 +618,17 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     [castNodes, locationNodes, frames, autoGridZone],
   );
 
+  // Re-grid shots zones when aspect ratio changes
+  useEffect(() => {
+    const shotsZones = zones.filter((z) => z.type === "shots");
+    if (shotsZones.length === 0) return;
+    const t = setTimeout(() => {
+      shotsZones.forEach((zone) => {
+        autoGridZoneRef.current(zone.id, zoneCols[zone.id] ?? 3);
+      });
+    }, 0);
+    return () => clearTimeout(t);
+  }, [shotAspectRatio]);
 
   const resetCanvas = useCallback(() => {
     localStorage.removeItem(SAVE_KEY);
