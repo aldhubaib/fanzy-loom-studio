@@ -208,6 +208,7 @@ function ProductionCanvasPageInner() {
                   cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
                   if (cs.selected?.id === node.id) cs.setSelected(null);
                 }}
+                onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
               />
             ))}
           </div>
