@@ -42,13 +42,6 @@ export const CastNodeCard = memo(function CastNodeCard({
       >
         <Settings className="w-3 h-3" />
       </button>
-      <button
-        className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-destructive w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-      >
-        <X className="w-3 h-3" />
-      </button>
       <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
       <div className="p-2">
         <p className="text-xs font-bold text-foreground">{actor.name}</p>
