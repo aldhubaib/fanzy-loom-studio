@@ -54,6 +54,8 @@ export const LOC_W = 180;
 export const LOC_H = 140;
 export const SCRIPT_W = 280;
 export const SCRIPT_H = 160;
+export const SCREENPLAY_W = 620;
+export const SCREENPLAY_H = 877; // A4 ratio at 620px width
 export const DRAWER_W = 360;
 export const TIMELINE_W = 800;
 export const TIMELINE_H = 560;
@@ -90,8 +92,9 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "casting", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   shots: [
-    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
-    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
+    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.15 },
+    { key: "screenplay", color: "45 85% 55%", label: "Screenplay", side: "left", yFrac: 0.35 },
+    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.55 },
     { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
     { key: "production", color: "350 75% 55%", label: "Production", side: "right", yFrac: 0.5 },
   ],
@@ -100,6 +103,9 @@ export const ZONE_CONNECTOR_CONFIGS = {
   ],
   script: [
     { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+  screenplay: [
+    { key: "screenplay", color: "45 85% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   production: [
     { key: "production", color: "350 75% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
@@ -112,6 +118,7 @@ export const ZONE_COLORS: Record<ZoneType, string> = {
   shots: "220 70% 55%",
   locations: "150 60% 45%",
   script: "280 60% 55%",
+  screenplay: "45 85% 55%",
   production: "350 75% 55%",
 };
 
@@ -120,6 +127,7 @@ export const ZONE_LABELS: Record<ZoneType, string> = {
   shots: "Shots",
   locations: "Locations",
   script: "Script",
+  screenplay: "Screenplay",
   production: "Production",
 };
 
