@@ -189,17 +189,30 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                 );
               })}
             </TooltipProvider>
-            {frame.location && locationImages[frame.location] && (
-              <div className="ml-auto flex items-center gap-0.5">
-                <button
-                  className="w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
-                >
-                  <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-                </button>
-              </div>
-            )}
+            {(() => {
+              const locs = Array.isArray(frame.location) ? frame.location : (frame.location ? [frame.location] : []);
+              const validLocs = locs.filter(l => locationImages[l]);
+              if (validLocs.length === 0) return null;
+              const shown = validLocs.slice(0, 2);
+              const extra = validLocs.length - 2;
+              return (
+                <div className="ml-auto flex items-center gap-0.5">
+                  {shown.map((loc, i) => (
+                    <button
+                      key={loc + i}
+                      className="w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
+                    >
+                      <img src={locationImages[loc]} alt={loc} className="w-full h-full object-cover" draggable={false} />
+                    </button>
+                  ))}
+                  {extra > 0 && (
+                    <span className="text-[8px] font-bold text-muted-foreground ml-0.5">+{extra}</span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
         </div>
@@ -336,10 +349,10 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                   })}
                 </div>
               </div>
-              {frame.location && (
+                {frame.location && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Eye className="w-3 h-3" />
-                  {frame.location}
+                  {Array.isArray(frame.location) ? frame.location.join(", ") : frame.location}
                 </div>
               )}
               <p className="text-sm text-foreground/60">{frame.description}</p>
@@ -361,7 +374,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
       , document.body)}
 
       {/* Location image lightbox */}
-      {locationLightbox && frame.location && locationImages[frame.location] && typeof document !== "undefined" && document.body && createPortal(
+      {locationLightbox && frame.location && typeof document !== "undefined" && document.body && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center"
           onClick={() => setLocationLightbox(false)}
@@ -372,14 +385,18 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="p-8" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={locationImages[frame.location]}
-              alt={frame.location}
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              draggable={false}
-            />
-            <p className="text-center text-sm text-foreground/70 mt-3">{frame.location}</p>
+          <div className="p-8 flex gap-6 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+            {(Array.isArray(frame.location) ? frame.location : [frame.location]).filter(l => locationImages[l]).map((loc, i) => (
+              <div key={loc + i} className="text-center">
+                <img
+                  src={locationImages[loc]}
+                  alt={loc}
+                  className="max-w-[300px] max-h-[60vh] object-contain rounded-lg"
+                  draggable={false}
+                />
+                <p className="text-sm text-foreground/70 mt-2">{loc}</p>
+              </div>
+            ))}
           </div>
         </div>
       , document.body)}
