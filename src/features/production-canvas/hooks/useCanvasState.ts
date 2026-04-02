@@ -82,11 +82,15 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
+    // Exclude the currently-dragged node so zone border stays fixed during drag
+    const filteredFrames = dragging ? frames.filter((f) => f.id !== dragging) : frames;
+    const filteredCast = dragging ? castNodes.filter((n) => n.id !== dragging) : castNodes;
+    const filteredLoc = dragging ? locationNodes.filter((n) => n.id !== dragging) : locationNodes;
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, scriptStackHeights);
+      map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, scriptStackHeights]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, scriptStackHeights, dragging]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
