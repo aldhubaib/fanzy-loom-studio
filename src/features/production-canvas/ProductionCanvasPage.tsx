@@ -6,7 +6,7 @@ import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
-import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, FRAME_W, FRAME_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
