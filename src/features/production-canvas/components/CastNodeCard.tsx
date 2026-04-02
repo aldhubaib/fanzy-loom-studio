@@ -45,7 +45,7 @@ export const CastNodeCard = memo(function CastNodeCard({
       <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
       <div className="p-2">
         <p className="text-xs font-bold text-foreground">{actor.name}</p>
-        <p className="text-[10px] text-muted-foreground">{actor.role}</p>
+        
       </div>
     </div>
   );
