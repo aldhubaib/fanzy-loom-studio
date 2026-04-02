@@ -202,6 +202,54 @@ function ProductionCanvasPageInner() {
                     autoGrid: () => cs.autoGridZone(zone.id, stackViewZones.has(zone.id) ? 1 : 3),
                     ...(zone.type === "script" ? { stackView: () => toggleStackView(zone.id) } : {}),
                   }}
+                  onAddItem={() => {
+                    const b2 = cs.zoneBounds[zone.id];
+                    if (!b2) return;
+                    const wx = b2.x + b2.w / 2;
+                    const wy = b2.y + b2.h / 2;
+                    if (zone.type === "shots") {
+                      cs.addFrame(wx, wy, zone.id);
+                    } else if (zone.type === "casting") {
+                      const rect = cs.containerRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      const sx = rect.left + (wx * cs.zoom + cs.pan.x);
+                      const sy = rect.top + (wy * cs.zoom + cs.pan.y);
+                      cs.setCastPickerPos({ x: sx - rect.left, y: sy - rect.top, worldX: wx, worldY: wy, zoneId: zone.id });
+                    } else if (zone.type === "locations") {
+                      const rect = cs.containerRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      const sx = rect.left + (wx * cs.zoom + cs.pan.x);
+                      const sy = rect.top + (wy * cs.zoom + cs.pan.y);
+                      cs.setLocationPickerPos({ x: sx - rect.left, y: sy - rect.top, worldX: wx, worldY: wy, zoneId: zone.id });
+                    } else if (zone.type === "script") {
+                      const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
+                      cs.setScriptNodes((prev) => [...prev, {
+                        id: `sn-${Date.now()}`,
+                        heading: "New Scene",
+                        body: "Description of the scene...",
+                        x: wx - SCRIPT_W / 2,
+                        y: wy,
+                        zoneId: zone.id,
+                        order: maxOrder + 1,
+                      }]);
+                    }
+                  }}
+                  onDuplicateZone={() => {
+                    const newId = `z-${zone.type}-${Date.now()}`;
+                    const b2 = cs.zoneBounds[zone.id];
+                    const offsetX = b2 ? b2.w + 80 : 400;
+                    cs.setZones((prev) => {
+                      const count = prev.filter((z) => z.type === zone.type).length;
+                      return [...prev, {
+                        id: newId,
+                        label: `${zone.label} Copy`,
+                        type: zone.type,
+                        x: zone.x + offsetX,
+                        y: zone.y,
+                        color: zone.color,
+                      }];
+                    });
+                  }}
                 />
               );
             })}
