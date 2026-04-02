@@ -2,7 +2,7 @@
 // Composed from isolated sub-components. All constants, types,
 // and logic are extracted — this file is purely composition.
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
@@ -24,6 +24,7 @@ import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
 import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
+import { ScriptPageView } from "./components/ScriptPageView";
 
 interface PendingDelete {
   severity: DeleteSeverity;
@@ -38,6 +39,16 @@ function ProductionCanvasPageInner() {
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
+
+  const togglePageView = useCallback((zoneId: string) => {
+    setPageViewZones((prev) => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) next.delete(zoneId);
+      else next.add(zoneId);
+      return next;
+    });
+  }, []);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
@@ -179,7 +190,10 @@ function ProductionCanvasPageInner() {
                   onStartConnect={(e, portId) => cs.startConnect(e, portId)}
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
                   onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
-                  onToolAction={{ autoGrid: () => cs.autoGridZone(zone.id) }}
+                  onToolAction={{
+                    autoGrid: () => cs.autoGridZone(zone.id),
+                    ...(zone.type === "script" ? { pageView: () => togglePageView(zone.id) } : {}),
+                  }}
                 />
               );
             })}
@@ -281,39 +295,77 @@ function ProductionCanvasPageInner() {
               );
             })}
 
-            {/* Script nodes */}
-            {cs.scriptNodes.map((node) => (
-              <ScriptNodeCard
-                key={node.id}
-                node={node}
-                isSelected={cs.selected?.id === node.id}
-                onMouseDown={(e) => cs.startDrag(e, node)}
-                onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
-                onDelete={() => {
-                  const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
-                  const doDelete = () => {
-                    cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
-                    if (cs.selected?.id === node.id) cs.setSelected(null);
-                  };
-                  if (linkedFrames.length > 0) {
-                    setPendingDelete({
-                      severity: "destructive",
-                      title: "Delete Script Node",
-                      description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
-                      onConfirm: doDelete,
-                    });
-                  } else {
-                    setPendingDelete({
-                      severity: "warning",
-                      title: "Delete Script Node",
-                      description: `Are you sure you want to delete this script block?`,
-                      onConfirm: doDelete,
-                    });
+            {/* Script nodes — card view or page view per zone */}
+            {(() => {
+              // Group script nodes by zone
+              const scriptByZone = new Map<string, typeof cs.scriptNodes>();
+              cs.scriptNodes.forEach((node) => {
+                const arr = scriptByZone.get(node.zoneId) || [];
+                arr.push(node);
+                scriptByZone.set(node.zoneId, arr);
+              });
+
+              const elements: React.ReactNode[] = [];
+
+              scriptByZone.forEach((nodes, zoneId) => {
+                if (pageViewZones.has(zoneId)) {
+                  // Page view
+                  const zone = cs.zones.find((z) => z.id === zoneId);
+                  if (zone) {
+                    elements.push(
+                      <ScriptPageView
+                        key={`page-${zoneId}`}
+                        zoneId={zoneId}
+                        nodes={nodes}
+                        zoneX={zone.x}
+                        zoneY={zone.y}
+                        isSelected={cs.selected?.type === "zone" && cs.selected.id === zoneId}
+                        onMouseDown={(e) => cs.startDrag(e, { id: nodes[0]?.id || zoneId, x: zone.x, y: zone.y })}
+                        onUpdateNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+                      />
+                    );
                   }
-                }}
-                onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-              />
-            ))}
+                } else {
+                  // Card view
+                  nodes.forEach((node) => {
+                    elements.push(
+                      <ScriptNodeCard
+                        key={node.id}
+                        node={node}
+                        isSelected={cs.selected?.id === node.id}
+                        onMouseDown={(e) => cs.startDrag(e, node)}
+                        onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                        onDelete={() => {
+                          const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
+                          const doDelete = () => {
+                            cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                            if (cs.selected?.id === node.id) cs.setSelected(null);
+                          };
+                          if (linkedFrames.length > 0) {
+                            setPendingDelete({
+                              severity: "destructive",
+                              title: "Delete Script Node",
+                              description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
+                              onConfirm: doDelete,
+                            });
+                          } else {
+                            setPendingDelete({
+                              severity: "warning",
+                              title: "Delete Script Node",
+                              description: `Are you sure you want to delete this script block?`,
+                              onConfirm: doDelete,
+                            });
+                          }
+                        }}
+                        onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+                      />
+                    );
+                  });
+                }
+              });
+
+              return elements;
+            })()}
 
             {/* Timeline nodes */}
             {cs.timelineNodes.map((node) => {
