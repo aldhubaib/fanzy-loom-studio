@@ -152,10 +152,19 @@ export function getPortPosition(
 }
 
 // ─── Persistence ────────────────────────────────────────────
+export const CANVAS_STATE_VERSION = 2;
+
 export function loadCanvasState(key: string): CanvasState | null {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Version check — bust stale saves when schema changes
+    if (!parsed._version || parsed._version < CANVAS_STATE_VERSION) {
+      console.warn("[Canvas] Outdated save version, resetting.");
+      localStorage.removeItem(key);
+      return null;
+    }
     const parsed = JSON.parse(raw);
     // Basic shape validation
     if (
