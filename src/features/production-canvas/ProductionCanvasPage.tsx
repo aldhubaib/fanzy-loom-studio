@@ -380,11 +380,14 @@ function ProductionCanvasPageInner() {
             {(() => {
               const sorted = [...cs.locationNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
               return sorted.map((node) => {
-                const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
+                const loc = cs.locations.find((l) => l.id === node.locationId);
+                if (!loc) return null;
+                const shotCount = cs.frames.filter((f) => f.location === loc.name).length;
                 return (
                   <LocationNodeCard
                     key={node.id}
                     node={node}
+                    location={loc}
                     isSelected={cs.selected?.id === node.id}
                     shotCount={shotCount}
                     onMouseDown={(e) => { cs.setSelected({ type: "location", id: node.id }); cs.startDrag(e, node); }}
@@ -398,14 +401,14 @@ function ProductionCanvasPageInner() {
                         setPendingDelete({
                           severity: "destructive",
                           title: "Delete Location Node",
-                          description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
+                          description: `"${loc.name}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
                           onConfirm: doDelete,
                         });
                       } else {
                         setPendingDelete({
                           severity: "warning",
                           title: "Delete Location Node",
-                          description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
+                          description: `Are you sure you want to delete "${loc.name}" from the canvas?`,
                           onConfirm: doDelete,
                         });
                       }
