@@ -96,16 +96,18 @@ export const ShotFrameNode = memo(function ShotFrameNode({
               })}
             </TooltipProvider>
             {frame.location && locationImages[frame.location] && (
-              <button
-                className="ml-auto relative w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
-              >
-                <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-                <div className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full">
+              <div className="ml-auto relative">
+                <button
+                  className="w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
+                >
+                  <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
+                </button>
+                <div className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full pointer-events-none">
                   1
                 </div>
-              </button>
+              </div>
             )}
           </div>
           <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
