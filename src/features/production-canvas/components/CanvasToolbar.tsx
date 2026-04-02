@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown, ArrowLeft } from "lucide-react";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, Undo2, Redo2, ChevronDown, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
