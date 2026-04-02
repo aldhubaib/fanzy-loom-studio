@@ -26,7 +26,7 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
   menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
-  onAddScriptNode, onAddZone, onFitToScreen, onClose,
+  onAddScriptNode, onAddTimeline, onAddZone, onFitToScreen, onClose,
 }: CanvasContextMenuProps) {
   const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
 
