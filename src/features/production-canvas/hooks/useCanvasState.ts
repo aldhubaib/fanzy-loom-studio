@@ -79,10 +79,10 @@ export function useCanvasState(projectId: string | undefined) {
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
