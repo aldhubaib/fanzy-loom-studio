@@ -33,8 +33,8 @@ export function FanzySidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+        <div className="flex items-center gap-2 justify-center group-data-[state=expanded]:justify-start">
+          <div className="w-8 h-8 min-w-[2rem] min-h-[2rem] rounded-md bg-primary flex items-center justify-center shrink-0">
             <Film className="w-4 h-4 text-primary-foreground" />
           </div>
           {!collapsed && (
