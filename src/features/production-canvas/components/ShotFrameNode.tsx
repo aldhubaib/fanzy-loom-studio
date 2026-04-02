@@ -1,14 +1,32 @@
 import { memo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Settings, Images, X, Check } from "lucide-react";
+import { Plus, Settings, Images, X, Check, Play, Film, Zap, CheckCircle, Loader2, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import type { Actor, FrameData } from "../types";
+import { Progress } from "@/components/ui/progress";
+import type { Actor, FrameData, ShotStatus } from "../types";
 import { FRAME_W, locationImages } from "../constants";
 
 function parseAspectRatio(ratio: string): number {
   const [w, h] = ratio.split(":").map(Number);
   return (w && h) ? w / h : 16 / 9;
+}
+
+function getStatusConfig(status: ShotStatus) {
+  switch (status) {
+    case "empty":
+      return { label: "DRAFT", color: "bg-muted-foreground/60 text-foreground", borderClass: "border-border", icon: null };
+    case "generating":
+      return { label: "GENERATING", color: "bg-amber-500/80 text-white", borderClass: "border-amber-500/50", icon: Loader2 };
+    case "preview":
+      return { label: "DRAFT", color: "bg-muted-foreground/60 text-foreground", borderClass: "border-amber-500/40", icon: null };
+    case "approved":
+      return { label: "APPROVED", color: "bg-emerald-500/80 text-white", borderClass: "border-emerald-500/50", icon: CheckCircle };
+    case "animating":
+      return { label: "ANIMATING", color: "bg-amber-500/80 text-white", borderClass: "border-amber-500/50", icon: Loader2 };
+    case "video_ready":
+      return { label: "VIDEO", color: "bg-primary/80 text-primary-foreground", borderClass: "border-primary/50", icon: Play };
+  }
 }
 
 interface ShotFrameNodeProps {
@@ -19,17 +37,30 @@ interface ShotFrameNodeProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onSelectImage?: (frameId: string, image: string) => void;
+  onAnimate?: (frameId: string) => void;
   aspectRatio?: string;
 }
 
 export const ShotFrameNode = memo(function ShotFrameNode({
-  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage, aspectRatio = "16:9",
+  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage, onAnimate, aspectRatio = "16:9",
 }: ShotFrameNodeProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState(0);
   const [locationLightbox, setLocationLightbox] = useState(false);
+  const [videoLightbox, setVideoLightbox] = useState(false);
   const imageCount = frame.generatedImages?.length ?? 0;
   const imageH = Math.round(FRAME_W / parseAspectRatio(aspectRatio));
+
+  const status: ShotStatus = frame.shotStatus || (frame.image ? "preview" : "empty");
+  const config = getStatusConfig(status);
+  const StatusIcon = config.icon;
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (status === "video_ready") {
+      setVideoLightbox(true);
+    }
+  };
 
   return (
     <>
@@ -39,11 +70,20 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           "absolute rounded-xl border-2 bg-card select-none group transition-shadow cursor-grab active:cursor-grabbing",
           isSelected
             ? "border-primary shadow-lg shadow-primary/20"
-            : "border-border hover:border-primary/40",
+            : config.borderClass,
         )}
         style={{ left: frame.x, top: frame.y, width: FRAME_W }}
         onMouseDown={onMouseDown}
       >
+        {/* Status badge — top left */}
+        <div className="absolute top-2 left-2 z-10">
+          <div className={cn("flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md", config.color)}>
+            {StatusIcon && <StatusIcon className={cn("w-2.5 h-2.5", status === "generating" || status === "animating" ? "animate-spin" : "")} />}
+            {config.label}
+          </div>
+        </div>
+
+        {/* Top right controls */}
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
           <button
             className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors"
@@ -54,20 +94,54 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             <Settings className="w-3 h-3" />
           </button>
           <div className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-            {frame.shot}
+            {status === "video_ready" && frame.videoDuration ? `▶ ${frame.videoDuration}` : frame.shot}
           </div>
         </div>
 
+        {/* Image area */}
         <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: imageH }}>
-          {frame.image ? (
-            <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
+          {status === "generating" ? (
+            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 gap-2">
+              <div className="w-full h-full bg-gradient-to-r from-secondary via-muted/30 to-secondary animate-pulse" />
+              <span className="absolute text-[10px] font-medium text-muted-foreground">Generating...</span>
+            </div>
+          ) : frame.image ? (
+            <div className="relative w-full h-full" onMouseDown={(e) => e.stopPropagation()} onClick={handleImageClick}>
+              <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
+              {/* Video play overlay */}
+              {status === "video_ready" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
+                    <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+                  </div>
+                </div>
+              )}
+              {/* Animating overlay */}
+              {status === "animating" && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                  <Film className="w-8 h-8 text-amber-400 animate-pulse" />
+                  <span className="text-[10px] font-medium text-white mt-1">Animating...</span>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
               <Plus className="w-8 h-8" />
             </div>
           )}
+
+          {/* Animation progress bar */}
+          {status === "animating" && frame.animationProgress != null && (
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/30">
+              <div
+                className="h-full bg-amber-400 transition-all duration-300 ease-linear"
+                style={{ width: `${frame.animationProgress}%` }}
+              />
+            </div>
+          )}
+
           {/* Image count badge */}
-          {imageCount > 0 && (
+          {imageCount > 0 && status !== "animating" && status !== "generating" && (
             <button
               className="absolute bottom-2 left-2 z-10 flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md hover:bg-background/95 transition-colors"
               onMouseDown={(e) => e.stopPropagation()}
@@ -79,6 +153,19 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             </button>
           )}
         </div>
+
+        {/* Animate button for approved shots */}
+        {status === "approved" && onAnimate && (
+          <div className="px-2.5 pt-1.5" onMouseDown={(e) => e.stopPropagation()}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onAnimate(frame.id); }}
+              className="w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+            >
+              <Zap className="w-3 h-3" />
+              Animate
+            </button>
+          </div>
+        )}
 
         <div className="p-2.5 space-y-1 rounded-b-[10px]" onMouseDown={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between">
@@ -121,13 +208,12 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         </div>
       </div>
 
-      {/* Full-screen Image Gallery Modal - rendered via portal to escape canvas transform */}
+      {/* Full-screen Image Gallery Modal */}
       {galleryOpen && typeof document !== "undefined" && document.body && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex"
           onClick={() => setGalleryOpen(false)}
         >
-          {/* Close button */}
           <button
             onClick={() => setGalleryOpen(false)}
             className="absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
@@ -135,8 +221,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             <X className="w-5 h-5" />
           </button>
 
-
-          {/* Main preview area */}
           <div
             className="flex-1 flex items-center justify-center p-8"
             onClick={(e) => e.stopPropagation()}
@@ -151,7 +235,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             )}
           </div>
 
-          {/* Right-side thumbnail strip */}
           <div
             className="w-40 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
             onClick={(e) => e.stopPropagation()}
@@ -185,7 +268,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             })}
           </div>
 
-          {/* Bottom bar */}
           <div
             className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3"
             onClick={(e) => e.stopPropagation()}
@@ -203,6 +285,80 @@ export const ShotFrameNode = memo(function ShotFrameNode({
               <Check className="w-3.5 h-3.5" />
               Use this image
             </button>
+          </div>
+        </div>
+      , document.body)}
+
+      {/* Video Preview Lightbox */}
+      {videoLightbox && status === "video_ready" && typeof document !== "undefined" && document.body && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center"
+          onClick={() => setVideoLightbox(false)}
+        >
+          <button
+            onClick={() => setVideoLightbox(false)}
+            className="absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="flex flex-col items-center gap-6 max-w-3xl w-full px-8" onClick={(e) => e.stopPropagation()}>
+            {/* Video area with poster frame */}
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/30">
+              <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <button className="w-16 h-16 rounded-full bg-primary/90 hover:bg-primary flex items-center justify-center shadow-2xl transition-colors">
+                  <Play className="w-8 h-8 text-primary-foreground ml-1" />
+                </button>
+              </div>
+              {/* Duration badge */}
+              <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                <Film className="w-3 h-3" />
+                {frame.videoDuration || frame.duration}
+              </div>
+            </div>
+
+            {/* Metadata */}
+            <div className="w-full space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-bold text-primary">{frame.scene}</span>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-md font-medium">{frame.shot}</span>
+                <span className="text-xs text-muted-foreground">{frame.videoDuration || frame.duration}</span>
+                <div className="flex items-center gap-1 ml-auto">
+                  {frame.actors.map((aid) => {
+                    const a = actors.find((ac) => ac.id === aid);
+                    if (!a) return null;
+                    return (
+                      <div key={a.id} className="flex items-center gap-1.5 bg-background/20 px-2 py-0.5 rounded-full">
+                        <div className="w-4 h-4 rounded-full overflow-hidden">
+                          <img src={a.portrait} alt={a.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] text-foreground/70">{a.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {frame.location && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Eye className="w-3 h-3" />
+                  {frame.location}
+                </div>
+              )}
+              <p className="text-sm text-foreground/60">{frame.description}</p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              <button className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold px-4 py-2 rounded-full transition-colors flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5" />
+                Approve
+              </button>
+              <button className="bg-background/20 hover:bg-background/30 text-foreground text-xs font-semibold px-4 py-2 rounded-full transition-colors flex items-center gap-1.5 border border-border/30">
+                <Zap className="w-3.5 h-3.5" />
+                Re-animate
+              </button>
+            </div>
           </div>
         </div>
       , document.body)}
