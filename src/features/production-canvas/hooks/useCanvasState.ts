@@ -239,6 +239,7 @@ export function useCanvasState(projectId: string | undefined) {
         setLocationNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setScriptNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
         setTimelineNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
+        setPreviewNodes((prev) => prev.map((n) => (n.id === dragging ? { ...n, x, y } : n)));
       }
     },
     [panning, panStart, dragging, dragOffset, pan, zoom, connectingFrom, draggingZone, zoneDragStart],
