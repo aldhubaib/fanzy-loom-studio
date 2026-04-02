@@ -316,6 +316,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     setDraggingZone(null);
     setZoneDragStart(null);
     setConnectingFrom(null);
+    setFrozenDragZoneBounds(null);
   }, [dragging, castNodes, locationNodes, frames, scriptNodes]);
 
   // ── Drag start ────────────────────────────────────────
