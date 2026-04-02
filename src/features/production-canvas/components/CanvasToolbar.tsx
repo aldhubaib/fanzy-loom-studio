@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown, ArrowLeft } from "lucide-react";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, Undo2, Redo2, ChevronDown, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -22,12 +22,15 @@ interface CanvasToolbarProps {
   onFitToScreen: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
-  onResetCanvas: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 export const CanvasToolbar = memo(function CanvasToolbar({
   projectId, projectName, onProjectNameChange, tool, zoom,
-  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
+  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onUndo, onRedo, canUndo, canRedo,
 }: CanvasToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
@@ -106,8 +109,11 @@ export const CanvasToolbar = memo(function CanvasToolbar({
         <button onClick={onFitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
           <Maximize className="w-4 h-4" />
         </button>
-        <button onClick={onResetCanvas} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Reset Canvas">
-          <RotateCcw className="w-4 h-4" />
+        <button onClick={onUndo} disabled={!canUndo} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", canUndo ? "text-muted-foreground hover:text-foreground hover:bg-secondary/60" : "text-muted-foreground/30 cursor-not-allowed")} title="Undo">
+          <Undo2 className="w-4 h-4" />
+        </button>
+        <button onClick={onRedo} disabled={!canRedo} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", canRedo ? "text-muted-foreground hover:text-foreground hover:bg-secondary/60" : "text-muted-foreground/30 cursor-not-allowed")} title="Redo">
+          <Redo2 className="w-4 h-4" />
         </button>
       </div>
 
