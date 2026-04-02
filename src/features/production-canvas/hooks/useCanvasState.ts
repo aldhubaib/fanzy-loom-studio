@@ -15,7 +15,7 @@ import {
   ZONE_CONNECTOR_CONFIGS, actorRoster,
   initialZones, initialFrames, initialCastNodes,
   initialLocationNodes, initialScriptNodes, initialConnections,
-  initialTimelineNodes,
+  initialTimelineNodes, initialPreviewNodes,
 } from "../constants";
 import type { TimelineNodeData } from "../components/TimelineNode";
 import type { PreviewNodeData } from "../components/PreviewMonitorNode";
@@ -40,7 +40,7 @@ export function useCanvasState(projectId: string | undefined) {
   const [locationNodes, setLocationNodes] = useState<LocationNode[]>(saved?.locationNodes ?? initialLocationNodes);
   const [scriptNodes, setScriptNodes] = useState<ScriptNode[]>(saved?.scriptNodes ?? initialScriptNodes);
   const [timelineNodes, setTimelineNodes] = useState<TimelineNodeData[]>(saved?.timelineNodes ?? initialTimelineNodes);
-  const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>(saved?.previewNodes ?? []);
+  const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>(saved?.previewNodes ?? initialPreviewNodes);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
 
   // ── Viewport ────────────────────────────────────────────
@@ -423,7 +423,7 @@ export function useCanvasState(projectId: string | undefined) {
     setLocationNodes(initialLocationNodes);
     setScriptNodes(initialScriptNodes);
     setTimelineNodes(initialTimelineNodes);
-    setPreviewNodes([]);
+    setPreviewNodes(initialPreviewNodes);
     setConnections(initialConnections);
     setZoom(1);
     setPan({ x: 0, y: 0 });

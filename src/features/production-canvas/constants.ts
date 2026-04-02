@@ -210,3 +210,7 @@ export const initialConnections: Connection[] = [
 export const initialTimelineNodes: import("./components/TimelineNode").TimelineNodeData[] = [
   { id: "tn1", x: 1240, y: 640, zoneId: "z-production" },
 ];
+
+export const initialPreviewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[] = [
+  { id: "pv1", x: 1240, y: 1000, zoneId: "z-production" },
+];
