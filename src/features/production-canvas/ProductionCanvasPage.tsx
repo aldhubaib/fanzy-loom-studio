@@ -310,7 +310,7 @@ function ProductionCanvasPageInner() {
                   actor={actor}
                   sceneCount={sceneCount}
                   isSelected={cs.selected?.id === node.id}
-                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
                   onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
                   onDelete={() => {
                     const doDelete = () => {
