@@ -409,7 +409,23 @@ export function useCanvasState(projectId: string | undefined) {
     [frames, zones, zoneBounds],
   );
 
-  // ── Spacebar for hand tool ────────────────────────────
+  // ── Reset canvas ──────────────────────────────────────
+  const resetCanvas = useCallback(() => {
+    localStorage.removeItem(SAVE_KEY);
+    setActors(actorRoster);
+    setZones(initialZones);
+    setFrames(initialFrames);
+    setCastNodes(initialCastNodes);
+    setLocationNodes(initialLocationNodes);
+    setScriptNodes(initialScriptNodes);
+    setTimelineNodes(initialTimelineNodes);
+    setConnections(initialConnections);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    setSelected(null);
+    setTimeout(fitToScreen, FIT_DELAY_MS);
+  }, [SAVE_KEY, fitToScreen]);
+
   useEffect(() => {
     const d = (e: KeyboardEvent) => {
       if (e.code === "Space" && !e.repeat) {
