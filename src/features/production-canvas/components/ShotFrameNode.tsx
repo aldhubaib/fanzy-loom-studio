@@ -4,7 +4,12 @@ import { Plus, Settings, Images, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { Actor, FrameData } from "../types";
-import { FRAME_W, IMAGE_H, locationImages } from "../constants";
+import { FRAME_W, locationImages } from "../constants";
+
+function parseAspectRatio(ratio: string): number {
+  const [w, h] = ratio.split(":").map(Number);
+  return (w && h) ? w / h : 16 / 9;
+}
 
 interface ShotFrameNodeProps {
   frame: FrameData;
@@ -14,15 +19,17 @@ interface ShotFrameNodeProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onSelectImage?: (frameId: string, image: string) => void;
+  aspectRatio?: string;
 }
 
 export const ShotFrameNode = memo(function ShotFrameNode({
-  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage,
+  frame, index, actors, isSelected, onMouseDown, onSettingsClick, onSelectImage, aspectRatio = "16:9",
 }: ShotFrameNodeProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState(0);
   const [locationLightbox, setLocationLightbox] = useState(false);
   const imageCount = frame.generatedImages?.length ?? 0;
+  const imageH = Math.round(FRAME_W / parseAspectRatio(aspectRatio));
 
   return (
     <>
@@ -51,7 +58,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           </div>
         </div>
 
-        <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: IMAGE_H }}>
+        <div className="w-full bg-secondary overflow-hidden rounded-t-[10px] relative" style={{ height: imageH }}>
           {frame.image ? (
             <img src={frame.image} alt={frame.description} className="w-full h-full object-cover" draggable={false} />
           ) : (

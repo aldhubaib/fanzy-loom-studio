@@ -1,10 +1,18 @@
 import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, FileText, Plus, Copy, Columns, type LucideIcon } from "lucide-react";
+import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Zone, ZoneBounds, ZoneType } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
 import { makeZonePortId } from "../utils";
+
+const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "1:2", "2:1", "4:5"] as const;
 
 // ─── Zone Tool Definition ───────────────────────────────────
 // Shared and zone-specific tools are declared here.
@@ -51,12 +59,15 @@ interface ZoneBackgroundProps {
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
   onColsChange?: (cols: number) => void;
+  shotAspectRatio?: string;
+  onAspectRatioChange?: (ratio: string) => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
+  shotAspectRatio, onAspectRatioChange,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
@@ -253,6 +264,34 @@ export const ZoneBackground = memo(function ZoneBackground({
               <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">Columns</TooltipContent>
             </Tooltip>
           </TooltipProvider>
+        )}
+
+        {/* Aspect ratio selector for shots zones */}
+        {zone.type === "shots" && onAspectRatioChange && (hovered || isSelected) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md opacity-60 hover:opacity-100 transition-opacity text-[10px] font-bold"
+                style={{ color: `hsl(${zone.color} / 0.8)` }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <RectangleHorizontal className="w-3 h-3" />
+                {shotAspectRatio || "16:9"}
+                <ChevronDown className="w-2.5 h-2.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" sideOffset={8} className="w-24">
+              {ASPECT_RATIOS.map((ratio) => (
+                <DropdownMenuItem
+                  key={ratio}
+                  onClick={() => onAspectRatioChange(ratio)}
+                  className={cn("text-xs", ratio === (shotAspectRatio || "16:9") && "text-primary font-bold")}
+                >
+                  {ratio}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </div>

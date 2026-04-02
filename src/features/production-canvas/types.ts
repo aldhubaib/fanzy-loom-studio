@@ -129,6 +129,7 @@ export interface CanvasState {
   previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
   zoneCols?: Record<string, number>;
+  shotAspectRatio?: string;
   zoom: number;
   pan: { x: number; y: number };
 }

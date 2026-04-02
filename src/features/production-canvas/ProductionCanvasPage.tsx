@@ -218,6 +218,8 @@ function ProductionCanvasPageInner() {
                     cs.setZoneCols((prev) => ({ ...prev, [zone.id]: cols }));
                     cs.autoGridZone(zone.id, zone.type === "script" ? 1 : cols);
                   }}
+                  shotAspectRatio={cs.shotAspectRatio}
+                  onAspectRatioChange={(ratio) => cs.setShotAspectRatio(ratio)}
                   onToolAction={{
                     autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
@@ -309,6 +311,7 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => { cs.setSelected({ type: "frame", id: frame.id }); cs.startDrag(e, frame); }}
                   onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
                   onSelectImage={(frameId, image) => cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, image } : f))}
+                  aspectRatio={cs.shotAspectRatio}
                 />
               ));
             })()}
