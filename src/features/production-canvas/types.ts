@@ -134,6 +134,7 @@ export interface ConnectorData {
 /** Serializable canvas state for persistence */
 export interface CanvasState {
   actors: Actor[];
+  locations: LocationData[];
   zones: Zone[];
   frames: FrameData[];
   castNodes: CastNode[];
