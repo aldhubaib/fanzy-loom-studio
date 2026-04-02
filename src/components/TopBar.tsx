@@ -30,9 +30,6 @@ export function TopBar({ onNewProject }: TopBarProps) {
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
         </button>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/60 to-accent/40 flex items-center justify-center text-xs font-semibold text-foreground">
-          JD
-        </div>
       </div>
     </header>
   );
