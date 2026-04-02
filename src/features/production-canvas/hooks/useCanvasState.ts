@@ -25,7 +25,7 @@ import {
   getPortPosition, getZoneColor as resolveZoneColor,
 } from "../utils";
 
-export function useCanvasState(projectId: string | undefined, pageViewZones?: Set<string>) {
+export function useCanvasState(projectId: string | undefined) {
   const containerRef = useRef<HTMLDivElement>(null);
   const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
@@ -81,10 +81,10 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, pageViewZones);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, pageViewZones]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
@@ -429,7 +429,7 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
 
   // ── Auto-grid zone nodes ───────────────────────────────
   const autoGridZone = useCallback(
-    (zoneId: string) => {
+    (zoneId: string, overrideCols?: number) => {
       const zone = zones.find((z) => z.id === zoneId);
       if (!zone) return;
 
@@ -456,7 +456,7 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
       if (nodes.length === 0) return;
 
       // Always use 3 columns
-      const cols = 3;
+      const cols = overrideCols ?? 3;
       
       // Use current zone bounds as starting point to avoid shifting
       const b = zoneBounds[zoneId];

@@ -26,7 +26,7 @@ const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [
 
 /** Tools unique to a specific zone type */
 const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {
-  script: [{ key: "pageView", icon: FileText, label: "Page View" }],
+  script: [{ key: "stackView", icon: FileText, label: "Stack View" }],
 };
 
 function getToolsForZone(type: ZoneType): ZoneToolDef[] {
@@ -44,7 +44,7 @@ interface ZoneBackgroundProps {
   bounds: ZoneBounds;
   isSelected: boolean;
   isEditingLabel: boolean;
-  isPageView?: boolean;
+  isStackView?: boolean;
   onZoneDragStart: (e: React.MouseEvent) => void;
   onLabelDoubleClick: () => void;
   onLabelRename: (newLabel: string) => void;
@@ -57,7 +57,7 @@ interface ZoneBackgroundProps {
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
-  zone, bounds, isSelected, isEditingLabel, isPageView,
+  zone, bounds, isSelected, isEditingLabel, isStackView,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction,
 }: ZoneBackgroundProps) {
@@ -166,10 +166,10 @@ export const ZoneBackground = memo(function ZoneBackground({
 
         {/* Zone tools — visible on hover or when selected */}
         {(hovered || isSelected) && tools.map((tool) => {
-          // Swap icon & label for the pageView toggle
-          const isPageToggle = tool.key === "pageView";
-          const Icon = isPageToggle ? (isPageView ? LayoutGrid : FileText) : tool.icon;
-          const label = isPageToggle ? (isPageView ? "Card View" : "Page View") : tool.label;
+          // Swap icon & label for the stack/grid toggle
+          const isStackToggle = tool.key === "stackView";
+          const Icon = isStackToggle ? (isStackView ? LayoutGrid : FileText) : tool.icon;
+          const label = isStackToggle ? (isStackView ? "Grid View" : "Stack View") : tool.label;
           return (
             <TooltipProvider key={tool.key} delayDuration={200}>
               <Tooltip>

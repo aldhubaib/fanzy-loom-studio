@@ -10,7 +10,6 @@ import {
   SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H,
   ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
-  A4_PAGE_W, A4_PAGE_H,
   ZONE_CONNECTOR_CONFIGS,
 } from "./constants";
 
@@ -39,10 +38,7 @@ export function computeZoneBounds(
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
   previewNodes: PreviewNodeData[] = [],
-  pageViewZones?: Set<string>,
 ): ZoneBounds {
-  const isPageView = zone.type === "script" && pageViewZones?.has(zone.id);
-
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
   const sizeMap: Record<string, { w: number; h: number }> = {
@@ -69,9 +65,6 @@ export function computeZoneBounds(
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
 
   if (children.length === 0) {
-    if (isPageView) {
-      return { x: zone.x, y: zone.y, w: A4_PAGE_W + ZONE_PAD * 2, h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H };
-    }
     return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
   }
 
@@ -79,19 +72,6 @@ export function computeZoneBounds(
   const minY = Math.min(...children.map((c) => c.y)) - ZONE_PAD - ZONE_LABEL_H;
   const maxX = Math.max(...children.map((c) => c.x + c.w)) + ZONE_PAD;
   const maxY = Math.max(...children.map((c) => c.y + c.h)) + ZONE_PAD;
-
-  if (isPageView) {
-    // Auto-expand: ~150px per scene, minimum A4_PAGE_H
-    const SCENE_HEIGHT = 150;
-    const contentH = children.length * SCENE_HEIGHT + 120;
-    const dynamicH = Math.max(A4_PAGE_H, contentH);
-    return {
-      x: minX,
-      y: minY,
-      w: A4_PAGE_W + ZONE_PAD * 2,
-      h: dynamicH + ZONE_PAD * 2 + ZONE_LABEL_H,
-    };
-  }
 
   return {
     x: minX,

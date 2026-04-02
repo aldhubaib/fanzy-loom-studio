@@ -24,7 +24,7 @@ import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
 import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
-import { ScriptPageView } from "./components/ScriptPageView";
+
 
 interface PendingDelete {
   severity: DeleteSeverity;
@@ -35,20 +35,25 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
-  const cs = useCanvasState(projectId, pageViewZones);
+  const [stackViewZones, setStackViewZones] = useState<Set<string>>(new Set());
+  const cs = useCanvasState(projectId);
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
-  const togglePageView = useCallback((zoneId: string) => {
-    setPageViewZones((prev) => {
+  const toggleStackView = useCallback((zoneId: string) => {
+    setStackViewZones((prev) => {
       const next = new Set(prev);
       if (next.has(zoneId)) next.delete(zoneId);
       else next.add(zoneId);
       return next;
     });
-  }, []);
+    // Re-layout with 1 column (stack) or 3 columns (grid)
+    setTimeout(() => {
+      const isNowStack = !stackViewZones.has(zoneId);
+      cs.autoGridZone(zoneId, isNowStack ? 1 : 3);
+    }, 0);
+  }, [stackViewZones, cs]);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
@@ -185,7 +190,7 @@ function ProductionCanvasPageInner() {
                   bounds={b}
                   isSelected={cs.selected?.type === "zone" && cs.selected.id === zone.id}
                   isEditingLabel={cs.editingZoneLabel === zone.id}
-                  isPageView={pageViewZones.has(zone.id)}
+                  isStackView={stackViewZones.has(zone.id)}
                   onZoneDragStart={(e) => cs.startZoneDrag(e, zone.id)}
                   onLabelDoubleClick={() => cs.setEditingZoneLabel(zone.id)}
                   onLabelRename={(val) => cs.setZones((prev) => prev.map((z) => (z.id === zone.id ? { ...z, label: val } : z)))}
@@ -194,8 +199,8 @@ function ProductionCanvasPageInner() {
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
                   onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
                   onToolAction={{
-                    autoGrid: () => cs.autoGridZone(zone.id),
-                    ...(zone.type === "script" ? { pageView: () => togglePageView(zone.id) } : {}),
+                    autoGrid: () => cs.autoGridZone(zone.id, stackViewZones.has(zone.id) ? 1 : 3),
+                    ...(zone.type === "script" ? { stackView: () => toggleStackView(zone.id) } : {}),
                   }}
                 />
               );
@@ -311,21 +316,6 @@ function ProductionCanvasPageInner() {
               const elements: React.ReactNode[] = [];
 
               scriptByZone.forEach((nodes, zoneId) => {
-                if (pageViewZones.has(zoneId)) {
-                  // Page view — render inside zone bounds
-                  const b = cs.zoneBounds[zoneId];
-                  if (b) {
-                    elements.push(
-                      <ScriptPageView
-                        key={`page-${zoneId}`}
-                        zoneId={zoneId}
-                        nodes={nodes}
-                        bounds={b}
-                        onUpdateNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-                      />
-                    );
-                  }
-                } else {
                   // Card view — connector arrows first (behind cards)
                   if (nodes.length > 1) {
                     const CARD_H = 80;
@@ -394,7 +384,6 @@ function ProductionCanvasPageInner() {
                       />
                     );
                   });
-                }
               });
 
               return elements;
