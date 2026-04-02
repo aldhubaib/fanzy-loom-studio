@@ -6,7 +6,7 @@ import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
-import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W, TIMELINE_W } from "./constants";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
@@ -649,12 +649,22 @@ function ProductionCanvasPageInner() {
                 if (!cs.actors.find((a) => a.id === actor.id)) {
                   cs.setActors((prev) => [...prev, actor]);
                 }
+                const zoneId = cs.castPickerPos!.zoneId;
+                const b = cs.zoneBounds[zoneId];
+                const existing = cs.castNodes.filter((n) => n.zoneId === zoneId);
+                const cols = 3;
+                const gap = 20;
+                const idx = existing.length;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const startX = b ? b.x + ZONE_PAD : cs.castPickerPos!.worldX;
+                const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.castPickerPos!.worldY;
                 cs.setCastNodes((prev) => [...prev, {
                   id: `cn-${Date.now()}`,
                   actorId: actor.id,
-                  x: cs.castPickerPos!.worldX - CAST_W / 2,
-                  y: cs.castPickerPos!.worldY,
-                  zoneId: cs.castPickerPos!.zoneId,
+                  x: startX + col * (CAST_W + gap),
+                  y: startY + row * (CAST_H + gap),
+                  zoneId,
                 }]);
                 cs.setCastPickerPos(null);
               }}
@@ -670,12 +680,22 @@ function ProductionCanvasPageInner() {
                   .map((n) => n.locationName)
               }
               onSelect={(name) => {
+                const zoneId = cs.locationPickerPos!.zoneId;
+                const b = cs.zoneBounds[zoneId];
+                const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
+                const cols = 3;
+                const gap = 20;
+                const idx = existing.length;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const startX = b ? b.x + ZONE_PAD : cs.locationPickerPos!.worldX;
+                const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.locationPickerPos!.worldY;
                 cs.setLocationNodes((prev) => [...prev, {
                   id: `ln-${Date.now()}`,
                   locationName: name,
-                  x: cs.locationPickerPos!.worldX - LOC_W / 2,
-                  y: cs.locationPickerPos!.worldY,
-                  zoneId: cs.locationPickerPos!.zoneId,
+                  x: startX + col * (LOC_W + gap),
+                  y: startY + row * (LOC_H + gap),
+                  zoneId,
                 }]);
                 cs.setLocationPickerPos(null);
               }}
