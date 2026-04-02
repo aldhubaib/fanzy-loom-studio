@@ -96,9 +96,13 @@ export const ShotFrameNode = memo(function ShotFrameNode({
               })}
             </TooltipProvider>
             {frame.location && locationImages[frame.location] && (
-              <div className="ml-auto w-8 h-5 rounded overflow-hidden border border-border">
+              <button
+                className="ml-auto w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
+              >
                 <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-              </div>
+              </button>
             )}
           </div>
           <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
