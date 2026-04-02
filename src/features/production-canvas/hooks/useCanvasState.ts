@@ -299,7 +299,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       };
       const zId = findZoneId();
       if (zId) {
-        setTimeout(() => autoGridZone(zId), 10);
+        setTimeout(() => autoGridZoneRef.current(zId), 10);
       }
     }
     setPanning(false);
