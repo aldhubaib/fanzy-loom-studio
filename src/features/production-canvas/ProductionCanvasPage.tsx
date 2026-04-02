@@ -235,7 +235,8 @@ function ProductionCanvasPageInner() {
                       const row = Math.floor(idx / cols);
                       const startX = b2.x + ZONE_PAD;
                       const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
-                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (FRAME_H + gap), zone.id);
+                      const dynamicFrameH = getFrameHForAspect(cs.shotAspectRatio);
+                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (dynamicFrameH + gap), zone.id);
                     } else if (zone.type === "casting") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
