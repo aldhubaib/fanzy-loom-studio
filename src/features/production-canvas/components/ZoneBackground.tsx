@@ -1,6 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, type LucideIcon } from "lucide-react";
+import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, Zap, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -54,20 +54,22 @@ interface ZoneBackgroundProps {
   onStartConnect: (e: React.MouseEvent, portId: string) => void;
   onEndConnect: (e: React.MouseEvent, portId: string) => void;
   onSelect?: () => void;
-  /** Handler map: tool key → callback. Only tools with a handler are rendered. */
   onToolAction?: Record<string, () => void>;
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
   onColsChange?: (cols: number) => void;
   shotAspectRatio?: string;
   onAspectRatioChange?: (ratio: string) => void;
+  /** Shot stats for shots zone header */
+  shotStats?: { total: number; approved: number; drafts: number; animatable: number };
+  onAnimateAll?: () => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
-  shotAspectRatio, onAspectRatioChange,
+  shotAspectRatio, onAspectRatioChange, shotStats, onAnimateAll,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
@@ -292,6 +294,29 @@ export const ZoneBackground = memo(function ZoneBackground({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+
+        {/* Shots zone stats */}
+        {zone.type === "shots" && shotStats && (hovered || isSelected) && (
+          <div className="flex items-center gap-2 ml-2 pointer-events-auto">
+            <span className="text-[10px] text-muted-foreground font-medium">
+              {shotStats.total} shot{shotStats.total !== 1 ? "s" : ""}
+            </span>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <span className="text-[10px] text-emerald-400 font-medium">{shotStats.approved} approved</span>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{shotStats.drafts} draft{shotStats.drafts !== 1 ? "s" : ""}</span>
+            {shotStats.animatable > 0 && onAnimateAll && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAnimateAll(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-1"
+              >
+                <Zap className="w-3 h-3" />
+                Animate All ({shotStats.animatable})
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

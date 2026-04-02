@@ -6,7 +6,8 @@ import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { mockProjects } from "@/data/mockProjects";
 import { cn } from "@/lib/utils";
-import type { ZoneType, ScriptNode } from "./types";
+import { toast } from "sonner";
+import type { ZoneType, ScriptNode, ShotStatus } from "./types";
 import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, FRAME_W, FRAME_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
 import { getFrameHForAspect } from "./utils";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
@@ -82,6 +83,35 @@ function ProductionCanvasPageInner() {
   const connectedActorsForFrame = selectedFrame
     ? cs.getConnectedActors(selectedFrame.zoneId)
     : [];
+
+  // ── Animation Callbacks ────────────────────────────────
+  const handleAnimateShot = useCallback((frameId: string) => {
+    // Set to animating
+    cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "animating" as ShotStatus, animationProgress: 0 } : f));
+    // Simulate progress
+    const steps = 30;
+    const interval = 100; // 3s total
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, animationProgress: Math.round((step / steps) * 100) } : f));
+      if (step >= steps) {
+        clearInterval(timer);
+        const frame = cs.frames.find((f) => f.id === frameId);
+        cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "video_ready" as ShotStatus, animationProgress: 100, videoDuration: f.duration } : f));
+        toast.success(`Shot ${frame?.scene || ""} animated`);
+      }
+    }, interval);
+  }, [cs.frames]);
+
+  const handleAnimateAll = useCallback(() => {
+    const approvedFrames = cs.frames.filter((f) => f.shotStatus === "approved");
+    if (approvedFrames.length === 0) return;
+    approvedFrames.forEach((frame, idx) => {
+      setTimeout(() => handleAnimateShot(frame.id), idx * 500);
+    });
+    toast(`Animating ${approvedFrames.length} shots...`);
+  }, [cs.frames, handleAnimateShot]);
 
   // ── Callbacks ─────────────────────────────────────────
   const handleDeleteConnection = useCallback(
@@ -237,6 +267,13 @@ function ProductionCanvasPageInner() {
                   }}
                   shotAspectRatio={cs.shotAspectRatio}
                   onAspectRatioChange={(ratio) => cs.setShotAspectRatio(ratio)}
+                  shotStats={zone.type === "shots" ? (() => {
+                    const zoneFrames = cs.frames.filter((f) => f.zoneId === zone.id);
+                    const approved = zoneFrames.filter((f) => f.shotStatus === "approved").length;
+                    const drafts = zoneFrames.filter((f) => !f.shotStatus || f.shotStatus === "empty" || f.shotStatus === "preview").length;
+                    return { total: zoneFrames.length, approved, drafts, animatable: approved };
+                  })() : undefined}
+                  onAnimateAll={zone.type === "shots" ? handleAnimateAll : undefined}
                   onToolAction={{
                     autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
@@ -329,6 +366,7 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => { cs.setSelected({ type: "frame", id: frame.id }); cs.startDrag(e, frame); }}
                   onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
                   onSelectImage={(frameId, image) => cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, image } : f))}
+                  onAnimate={(frameId) => handleAnimateShot(frameId)}
                   aspectRatio={cs.shotAspectRatio}
                 />
               ));
