@@ -26,7 +26,21 @@ export const CastPicker = memo(function CastPicker({
       id: `actor-${Date.now()}`,
       name: newName.trim(),
       role: newRole.trim() || "New Role",
+      description: "",
       portrait: `https://ui-avatars.com/api/?name=${encodeURIComponent(newName.trim())}&background=1a1a2e&color=8b5cf6&size=200`,
+      gender: "",
+      ageRange: "",
+      ethnicity: "",
+      bodyType: "",
+      height: "",
+      hairColor: "",
+      hairStyle: "",
+      eyeColor: "",
+      skinTone: "",
+      clothing: "",
+      distinguishingFeatures: "",
+      generatedPortraits: [],
+      selectedPortraitId: null,
     };
     onSelect(newActor);
   };
