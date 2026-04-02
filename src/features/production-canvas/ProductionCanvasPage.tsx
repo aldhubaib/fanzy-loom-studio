@@ -182,8 +182,25 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => cs.startDrag(e, node)}
                   onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
                   onDelete={() => {
-                    cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
-                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                    const doDelete = () => {
+                      cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
+                      if (cs.selected?.id === node.id) cs.setSelected(null);
+                    };
+                    if (sceneCount > 0) {
+                      setPendingDelete({
+                        severity: "destructive",
+                        title: "Delete Cast Node",
+                        description: `"${actor.name}" is assigned to ${sceneCount} shot${sceneCount > 1 ? "s" : ""}. Deleting this node will remove the actor from all connected shots.`,
+                        onConfirm: doDelete,
+                      });
+                    } else {
+                      setPendingDelete({
+                        severity: "warning",
+                        title: "Delete Cast Node",
+                        description: `Are you sure you want to delete "${actor.name}" from the canvas?`,
+                        onConfirm: doDelete,
+                      });
+                    }
                   }}
                 />
               );
