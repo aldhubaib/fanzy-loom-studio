@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import type {
-  Actor, FrameData, CastNode, LocationNode, ScriptNode, Zone, SelectedItem,
+  Actor, FrameData, CastNode, LocationNode, LocationData, ScriptNode, Zone, SelectedItem,
 } from "../types";
 import { DRAWER_W } from "../constants";
 import { ShotDrawer } from "./ShotDrawer";
-import { LocationDrawer } from "./LocationDrawer";
+import { LocationDetailsPanel } from "./LocationDetailsPanel";
 import { ZoneDrawer } from "./ZoneDrawer";
 import { CharacterDetailsPanel } from "./CharacterDetailsPanel";
 
@@ -18,6 +18,7 @@ interface CanvasDrawerProps {
   selected: SelectedItem;
   frames: FrameData[];
   actors: Actor[];
+  locations: LocationData[];
   castNodes: CastNode[];
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
@@ -28,23 +29,27 @@ interface CanvasDrawerProps {
   onDeleteFrame: (id: string) => void;
   onUpdateActor: (a: Actor) => void;
   onDeleteCastNode: (actorId: string) => void;
+  onUpdateLocation: (loc: LocationData) => void;
+  onDeleteLocationNode: (locationId: string) => void;
   onUpdateScriptNode: (id: string, updates: Partial<ScriptNode>) => void;
   onDeleteScriptNode: (id: string) => void;
   onDeleteConnection: (from: string, to: string) => void;
 }
 
 export const CanvasDrawer = memo(function CanvasDrawer({
-  selected, frames, actors, castNodes, locationNodes, scriptNodes, zones,
+  selected, frames, actors, locations, castNodes, locationNodes, scriptNodes, zones,
   connectedActorsForFrame, onClose,
   onUpdateFrame, onDeleteFrame, onUpdateActor, onDeleteCastNode,
+  onUpdateLocation, onDeleteLocationNode,
   onUpdateScriptNode, onDeleteScriptNode, onDeleteConnection,
 }: CanvasDrawerProps) {
   const selectedFrame = selected?.type === "frame" ? frames.find((f) => f.id === selected.id) : null;
   const selectedCast = selected?.type === "cast" ? castNodes.find((n) => n.id === selected.id) : null;
-  const selectedLocation = selected?.type === "location" ? locationNodes.find((n) => n.id === selected.id) : null;
+  const selectedLocationNode = selected?.type === "location" ? locationNodes.find((n) => n.id === selected.id) : null;
   const selectedScript = selected?.type === "script" ? scriptNodes.find((n) => n.id === selected.id) : null;
   const selectedZone = selected?.type === "zone" ? zones.find((z) => z.id === selected.id) : null;
   const selectedActor = selectedCast ? actors.find((a) => a.id === selectedCast.actorId) : null;
+  const selectedLocation = selectedLocationNode ? locations.find((l) => l.id === selectedLocationNode.locationId) : null;
 
   const showDrawer = !!selected;
 
@@ -53,7 +58,7 @@ export const CanvasDrawer = memo(function CanvasDrawer({
     : selectedActor
       ? "Cast Details"
       : selectedLocation
-        ? "Location"
+        ? "Location Details"
         : selectedScript
           ? "Scene"
           : selectedZone
@@ -113,7 +118,17 @@ export const CanvasDrawer = memo(function CanvasDrawer({
               />
             )}
             {selectedLocation && (
-              <LocationDrawer locationName={selectedLocation.locationName} frames={frames} />
+              <LocationDetailsPanel
+                location={selectedLocation}
+                onChange={onUpdateLocation}
+                onDelete={() => onDeleteLocationNode(selectedLocation.id)}
+                appearances={frames
+                  .filter((f) => f.location === selectedLocation.name)
+                  .map((f) => ({
+                    id: f.id, scene: f.scene, shot: f.shot,
+                    description: f.description, image: f.image,
+                  }))}
+              />
             )}
             {selectedScript && (
               <div className="space-y-4">

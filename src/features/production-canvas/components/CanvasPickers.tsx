@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { X, Plus } from "lucide-react";
-import type { Actor, PickerPosition } from "../types";
-import { CAST_W, LOC_W, locationImages } from "../constants";
+import type { Actor, LocationData, PickerPosition } from "../types";
+import { CAST_W, LOC_W } from "../constants";
 
 interface CastPickerProps {
   position: PickerPosition;
@@ -77,21 +77,34 @@ export const CastPicker = memo(function CastPicker({
 
 interface LocationPickerProps {
   position: PickerPosition;
-  existingLocationNames?: string[];
-  onSelect: (name: string) => void;
+  locations: LocationData[];
+  existingLocationIds?: string[];
+  onSelect: (location: LocationData) => void;
   onClose: () => void;
 }
 
 export const LocationPicker = memo(function LocationPicker({
-  position, existingLocationNames = [], onSelect, onClose,
+  position, locations, existingLocationIds = [], onSelect, onClose,
 }: LocationPickerProps) {
-  const availableLocations = Object.entries(locationImages).filter(
-    ([name]) => !existingLocationNames.includes(name)
+  const availableLocations = locations.filter(
+    (loc) => !existingLocationIds.includes(loc.id)
   );
 
   const handleCreateNew = () => {
-    const newName = `Location ${Date.now()}`;
-    onSelect(newName);
+    const newLoc: LocationData = {
+      id: `loc-${Date.now()}`,
+      name: "New Location",
+      description: "",
+      setting: "",
+      timeOfDay: "",
+      weather: "",
+      era: "",
+      mood: "",
+      portrait: "",
+      generatedImages: [],
+      selectedImageId: null,
+    };
+    onSelect(newLoc);
   };
 
   return (
@@ -104,15 +117,19 @@ export const LocationPicker = memo(function LocationPicker({
       {availableLocations.length === 0 && (
         <p className="px-3 py-2 text-xs text-muted-foreground/60 italic">All locations already added</p>
       )}
-      {availableLocations.map(([name, img]) => (
+      {availableLocations.map((loc) => (
         <button
-          key={name}
+          key={loc.id}
           className="flex items-center gap-2.5 w-full px-3 py-2 hover:bg-secondary/60 text-foreground"
           onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => onSelect(name)}
+          onClick={() => onSelect(loc)}
         >
-          <img src={img} alt={name} className="w-8 h-5 rounded object-cover" />
-          <span>{name}</span>
+          {loc.portrait ? (
+            <img src={loc.portrait} alt={loc.name} className="w-8 h-5 rounded object-cover" />
+          ) : (
+            <div className="w-8 h-5 rounded bg-muted flex items-center justify-center text-[8px] text-muted-foreground">—</div>
+          )}
+          <span>{loc.name}</span>
         </button>
       ))}
       <div className="h-px bg-border my-1" />
