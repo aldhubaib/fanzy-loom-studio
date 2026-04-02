@@ -300,6 +300,8 @@ export const ScriptPageView = memo(function ScriptPageView({
                 onDragEnd={handleDragEnd}
                 isDragOver={dragOverId === n.id && dragId !== n.id}
                 isDragging={dragId === n.id}
+                isSelected={selectedSection === n.id}
+                onSelect={handleSelectSection}
               />
             ))
           ) : (
