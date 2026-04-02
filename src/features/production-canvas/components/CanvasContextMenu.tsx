@@ -64,9 +64,14 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
             </button>
           )}
           {zone.type === "production" && (
-            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
-              <Film className="w-4 h-4" /> Add Timeline
-            </button>
+            <>
+              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
+                <Film className="w-4 h-4" /> Add Timeline
+              </button>
+              <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddPreview}>
+                <Monitor className="w-4 h-4" /> Add Preview Monitor
+              </button>
+            </>
           )}
           <div className="h-px bg-border my-1" />
           <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-destructive/20 text-destructive" onClick={() => onDeleteZone(zone.id)}>
