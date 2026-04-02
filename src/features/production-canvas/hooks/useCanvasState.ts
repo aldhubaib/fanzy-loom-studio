@@ -433,7 +433,7 @@ export function useCanvasState(projectId: string | undefined, stackZoneIds: Set<
       const zone = zones.find((z) => z.id === zoneId);
       if (!zone) return;
 
-      const GAP = overrideCols === 1 ? 12 : 24;
+      const GAP = overrideCols === 1 ? 0 : 24;
       const sizeMap: Partial<Record<ZoneType, { w: number; h: number }>> = {
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },
