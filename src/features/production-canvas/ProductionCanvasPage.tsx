@@ -397,16 +397,42 @@ function ProductionCanvasPageInner() {
                 cs.setCanvasMenu(null);
               }}
               onDeleteZone={(zoneId) => {
-                cs.setZones((prev) => prev.filter((z) => z.id !== zoneId));
-                cs.setFrames((prev) => prev.filter((f) => f.zoneId !== zoneId));
-                cs.setCastNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setPreviewNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
-                cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
-                if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
+                const zone = cs.zones.find((z) => z.id === zoneId);
+                const zoneFrames = cs.frames.filter((f) => f.zoneId === zoneId);
+                const zoneCast = cs.castNodes.filter((n) => n.zoneId === zoneId);
+                const zoneLoc = cs.locationNodes.filter((n) => n.zoneId === zoneId);
+                const zoneScripts = cs.scriptNodes.filter((n) => n.zoneId === zoneId);
+                const totalNodes = zoneFrames.length + zoneCast.length + zoneLoc.length + zoneScripts.length;
+
+                const doDelete = () => {
+                  cs.setZones((prev) => prev.filter((z) => z.id !== zoneId));
+                  cs.setFrames((prev) => prev.filter((f) => f.zoneId !== zoneId));
+                  cs.setCastNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setPreviewNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                  cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
+                  if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
+                };
+
                 cs.setCanvasMenu(null);
+
+                if (totalNodes > 0) {
+                  setPendingDelete({
+                    severity: "destructive",
+                    title: `Delete "${zone?.label || "Zone"}"`,
+                    description: `This zone contains ${totalNodes} node${totalNodes > 1 ? "s" : ""} (${zoneFrames.length} shots, ${zoneCast.length} cast, ${zoneLoc.length} locations, ${zoneScripts.length} scripts). All contents will be permanently deleted.`,
+                    onConfirm: doDelete,
+                  });
+                } else {
+                  setPendingDelete({
+                    severity: "warning",
+                    title: `Delete "${zone?.label || "Zone"}"`,
+                    description: `Are you sure you want to delete this empty zone?`,
+                    onConfirm: doDelete,
+                  });
+                }
               }}
               onFitToScreen={() => { cs.fitToScreen(); cs.setCanvasMenu(null); }}
               onClose={() => cs.setCanvasMenu(null)}
