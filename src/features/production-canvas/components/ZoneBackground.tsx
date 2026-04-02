@@ -59,12 +59,15 @@ interface ZoneBackgroundProps {
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
   onColsChange?: (cols: number) => void;
+  shotAspectRatio?: string;
+  onAspectRatioChange?: (ratio: string) => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
+  shotAspectRatio, onAspectRatioChange,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
