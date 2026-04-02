@@ -72,7 +72,7 @@ function ProductionCanvasPageInner() {
         } else if (zoneTypes.includes("locations")) {
           const locCount = cs.locationNodes.filter((n) => n.zoneId === otherZone.id || n.zoneId === fromZone.id || n.zoneId === toZone.id).length;
           description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will unlink all locations. ${locCount > 0 ? `${locCount} location${locCount > 1 ? "s" : ""} will be removed from connected shots.` : ""}`;
-        } else if (zoneTypes.includes("scripting")) {
+        } else if (zoneTypes.includes("script")) {
           const scriptCount = cs.scriptNodes.filter((n) => n.zoneId === otherZone.id || n.zoneId === fromZone.id || n.zoneId === toZone.id).length;
           description = `Disconnecting "${fromZone.label}" from "${toZone.label}" will unlink all scripts. ${scriptCount > 0 ? `${scriptCount} script block${scriptCount > 1 ? "s" : ""} will lose their shot references.` : ""}`;
         } else if (zoneTypes.includes("production")) {
