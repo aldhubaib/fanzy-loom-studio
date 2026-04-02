@@ -404,7 +404,7 @@ function ProductionCanvasPageInner() {
                     elements.push(
                       <div
                         key={`stack-${zoneId}`}
-                        className="absolute flex flex-col"
+                        className="absolute flex flex-col gap-2"
                         style={{
                           left: b.x + 40,
                           top: b.y + 50,
