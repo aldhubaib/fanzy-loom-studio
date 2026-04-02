@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2 } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize, Trash2, Monitor } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
 import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
 
