@@ -300,12 +300,8 @@ function ProductionCanvasPageInner() {
                   index={idx}
                   actors={cs.actors}
                   isSelected={cs.selected?.id === frame.id}
-                  isFirst={idx === 0}
-                  isLast={idx === sorted.length - 1}
-                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
+                  onMouseDown={(e) => { cs.setSelected({ type: "frame", id: frame.id }); cs.startDrag(e, frame); }}
                   onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
-                  onMoveLeft={() => cs.reorderNode(frame.id, "left", "frame")}
-                  onMoveRight={() => cs.reorderNode(frame.id, "right", "frame")}
                 />
               ));
             })()}
