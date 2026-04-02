@@ -57,7 +57,7 @@ interface ZoneBackgroundProps {
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
-  zone, bounds, isSelected, isEditingLabel, isPageView,
+  zone, bounds, isSelected, isEditingLabel, isStackView,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction,
 }: ZoneBackgroundProps) {
