@@ -392,8 +392,40 @@ function ProductionCanvasPageInner() {
                             sceneNumber={idx + 1}
                             isSelected={cs.selected?.id === node.id}
                             isStackView
+                            isFirst={idx === 0}
+                            isLast={idx === nodes.length - 1}
                             onMouseDown={(e) => cs.startDrag(e, node)}
                             onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                            onMoveUp={() => {
+                              if (idx === 0) return;
+                              cs.setScriptNodes((prev) => {
+                                const zoneNodes = prev.filter((n) => n.zoneId === node.zoneId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                                const prevNode = zoneNodes[idx - 1];
+                                if (!prevNode) return prev;
+                                const prevOrder = prevNode.order ?? 0;
+                                const curOrder = node.order ?? 0;
+                                return prev.map((n) => {
+                                  if (n.id === node.id) return { ...n, order: prevOrder };
+                                  if (n.id === prevNode.id) return { ...n, order: curOrder };
+                                  return n;
+                                });
+                              });
+                            }}
+                            onMoveDown={() => {
+                              if (idx === nodes.length - 1) return;
+                              cs.setScriptNodes((prev) => {
+                                const zoneNodes = prev.filter((n) => n.zoneId === node.zoneId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                                const nextNode = zoneNodes[idx + 1];
+                                if (!nextNode) return prev;
+                                const nextOrder = nextNode.order ?? 0;
+                                const curOrder = node.order ?? 0;
+                                return prev.map((n) => {
+                                  if (n.id === node.id) return { ...n, order: nextOrder };
+                                  if (n.id === nextNode.id) return { ...n, order: curOrder };
+                                  return n;
+                                });
+                              });
+                            }}
                             onDelete={() => {
                               const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
                               const doDelete = () => {
