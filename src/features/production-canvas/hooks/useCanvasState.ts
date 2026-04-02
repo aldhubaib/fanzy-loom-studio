@@ -440,10 +440,11 @@ export function useCanvasState(projectId: string | undefined) {
         script: { w: SCRIPT_W, h: SCRIPT_H },
         shots: { w: FRAME_W, h: FRAME_H },
       };
+      const size = sizeMap[zone.type];
+      if (!size) return;
       // In stack view (1 col), script cards are 3x wider
       const isStack = overrideCols === 1 && zone.type === "script";
       const effectiveSize = isStack ? { w: size.w * 3, h: size.h } : size;
-      if (!size) return;
 
       // Collect nodes for this zone, sorted by logical order when available
       const getNodes = (): { x: number; y: number; id: string }[] => {
