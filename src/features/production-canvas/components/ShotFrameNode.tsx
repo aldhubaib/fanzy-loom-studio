@@ -189,17 +189,30 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                 );
               })}
             </TooltipProvider>
-            {frame.location && locationImages[frame.location] && (
-              <div className="ml-auto flex items-center gap-0.5">
-                <button
-                  className="w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
-                >
-                  <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-                </button>
-              </div>
-            )}
+            {(() => {
+              const locs = Array.isArray(frame.location) ? frame.location : (frame.location ? [frame.location] : []);
+              const validLocs = locs.filter(l => locationImages[l]);
+              if (validLocs.length === 0) return null;
+              const shown = validLocs.slice(0, 2);
+              const extra = validLocs.length - 2;
+              return (
+                <div className="ml-auto flex items-center gap-0.5">
+                  {shown.map((loc, i) => (
+                    <button
+                      key={loc + i}
+                      className="w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
+                    >
+                      <img src={locationImages[loc]} alt={loc} className="w-full h-full object-cover" draggable={false} />
+                    </button>
+                  ))}
+                  {extra > 0 && (
+                    <span className="text-[8px] font-bold text-muted-foreground ml-0.5">+{extra}</span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
         </div>

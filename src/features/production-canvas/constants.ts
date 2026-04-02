@@ -180,7 +180,7 @@ export const initialFrames: FrameData[] = [
   { id: "f2", x: 400, y: 80, image: frame2, scene: "SC 2", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], zoneId: "z-shots", generatedImages: [frame2], shotStatus: "approved" },
   { id: "f3", x: 720, y: 80, image: frame3, scene: "SC 3", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club", zoneId: "z-shots", generatedImages: [frame3, frame1, frame6], shotStatus: "video_ready", videoDuration: "5s" },
   { id: "f4", x: 80, y: 340, image: frame4, scene: "SC 4", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office", zoneId: "z-shots", generatedImages: [frame4], shotStatus: "preview" },
-  { id: "f5", x: 400, y: 340, image: frame5, scene: "SC 5", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: "Bridge", zoneId: "z-shots", generatedImages: [frame5, frame3], shotStatus: "approved" },
+  { id: "f5", x: 400, y: 340, image: frame5, scene: "SC 5", shot: "WIDE", description: "Two silhouettes meet on the foggy bridge.", duration: "6s", actors: ["a1", "a2"], location: ["Bridge", "Office", "Jazz Club", "Street"], zoneId: "z-shots", generatedImages: [frame5, frame3], shotStatus: "approved" },
   { id: "f6", x: 720, y: 340, image: frame6, scene: "SC 6", shot: "DYNAMIC", description: "Car chase through wet city streets.", duration: "4s", actors: ["a1"], location: "Street", zoneId: "z-shots", generatedImages: [frame6, frame2, frame5], shotStatus: "preview" },
 ];
 

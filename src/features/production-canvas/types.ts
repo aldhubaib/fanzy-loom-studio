@@ -16,7 +16,7 @@ export interface FrameData {
   description: string;
   duration: string;
   actors: string[];
-  location?: string;
+  location?: string | string[];
   zoneId: string;
   order?: number;
   generatedImages?: string[];
