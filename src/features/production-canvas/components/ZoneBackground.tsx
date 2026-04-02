@@ -43,6 +43,7 @@ interface ZoneBackgroundProps {
   isSelected: boolean;
   isEditingLabel: boolean;
   isStackView?: boolean;
+  zoneCols?: number;
   onZoneDragStart: (e: React.MouseEvent) => void;
   onLabelDoubleClick: () => void;
   onLabelRename: (newLabel: string) => void;
@@ -54,6 +55,7 @@ interface ZoneBackgroundProps {
   onToolAction?: Record<string, () => void>;
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
+  onColsChange?: (cols: number) => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
