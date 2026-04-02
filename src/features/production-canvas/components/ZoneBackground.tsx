@@ -162,8 +162,8 @@ export const ZoneBackground = memo(function ZoneBackground({
           )}
         </div>
 
-        {/* Zone tools — visible on hover */}
-        {hovered && tools.map((tool) => {
+        {/* Zone tools — visible on hover or when selected */}
+        {(hovered || isSelected) && tools.map((tool) => {
           const Icon = tool.icon;
           return (
             <TooltipProvider key={tool.key} delayDuration={200}>
