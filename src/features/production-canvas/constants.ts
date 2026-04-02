@@ -46,7 +46,7 @@ import type {
 // ─── Dimensions ─────────────────────────────────────────────
 export const FRAME_W = 260;
 export const IMAGE_H = 146;
-export const FRAME_H = IMAGE_H + 70;
+export const FRAME_H = IMAGE_H + 90;
 export const PORT_Y = FRAME_H / 2;
 export const CAST_W = 160;
 export const CAST_H = 260;
