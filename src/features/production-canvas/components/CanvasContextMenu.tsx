@@ -11,6 +11,7 @@ interface CanvasContextMenuProps {
   onAddLocationPicker: () => void;
   onAddScriptNode: () => void;
   onAddTimeline: () => void;
+  onAddPreview: () => void;
   onAddZone: (type: ZoneType) => void;
   onDeleteZone: (zoneId: string) => void;
   onFitToScreen: () => void;
