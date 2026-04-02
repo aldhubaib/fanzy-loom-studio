@@ -26,17 +26,26 @@ function loadAllLocations(): LocationWithStats[] {
 
     try {
       const state: CanvasState = JSON.parse(raw);
-      const { frames = [], locationNodes = [] } = state;
+      const { frames = [], locationNodes = [], locations = [] } = state;
 
-      // Collect unique location names from both location nodes and frame locations
+      // Build a map of locationId -> LocationData for quick lookup
+      const locDataMap = new Map<string, LocationData>();
+      locations.forEach((l: LocationData) => locDataMap.set(l.id, l));
+
+      // Collect unique location names from location nodes
       const locationNames = new Set<string>();
-      locationNodes.forEach((ln: LocationNode) => locationNames.add(ln.locationName));
+      locationNodes.forEach((ln: LocationNode) => {
+        const ld = locDataMap.get(ln.locationId);
+        if (ld) locationNames.add(ld.name);
+      });
       frames.forEach((f: FrameData) => { if (f.location) locationNames.add(f.location); });
 
       for (const locName of locationNames) {
         const shotCount = frames.filter((f: FrameData) => f.location === locName).length;
+        // Find image from location data first, then fallback to detail options
+        const locData = locations.find((l: LocationData) => l.name === locName);
         const opt = locationDetailOptions.find((l) => l.value === locName);
-        const image = opt?.img || "";
+        const image = locData?.portrait || opt?.img || "";
 
         if (locMap.has(locName)) {
           const existing = locMap.get(locName)!;
