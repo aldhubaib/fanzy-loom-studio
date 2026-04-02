@@ -61,7 +61,7 @@ interface ZoneBackgroundProps {
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect, onSelect, onToolAction,
+  onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
