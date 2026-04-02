@@ -29,9 +29,23 @@ export interface CastNode {
   order?: number;
 }
 
+export interface LocationData {
+  id: string;
+  name: string;
+  description: string;
+  setting: string;
+  timeOfDay: string;
+  weather: string;
+  era: string;
+  mood: string;
+  portrait: string;
+  generatedImages: { id: string; src: string; description: string }[];
+  selectedImageId: string | null;
+}
+
 export interface LocationNode {
   id: string;
-  locationName: string;
+  locationId: string;
   x: number;
   y: number;
   zoneId: string;
