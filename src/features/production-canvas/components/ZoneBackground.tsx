@@ -179,7 +179,7 @@ export const ZoneBackground = memo(function ZoneBackground({
                     <Icon className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
+                <TooltipContent side="top" sideOffset={8} className="text-[10px] py-0.5 px-1.5">
                   {tool.label}
                 </TooltipContent>
               </Tooltip>
