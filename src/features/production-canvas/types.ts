@@ -72,7 +72,6 @@ export type SelectedItem =
   | { type: "cast"; id: string }
   | { type: "location"; id: string }
   | { type: "script"; id: string }
-  | { type: "screenplay"; id: string }
   | { type: "zone"; id: string }
   | { type: "preview"; id: string }
   | null;
