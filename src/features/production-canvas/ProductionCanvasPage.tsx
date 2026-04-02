@@ -303,6 +303,7 @@ function ProductionCanvasPageInner() {
                     return { total: zoneFrames.length, approved, drafts, animatable: approved };
                   })() : undefined}
                   onAnimateAll={zone.type === "shots" ? handleAnimateAll : undefined}
+                  isAnimatingAny={zone.type === "shots" ? cs.frames.some((f) => f.shotStatus === "animating") : undefined}
                   onToolAction={{
                     autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
