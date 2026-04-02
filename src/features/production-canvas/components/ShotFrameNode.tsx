@@ -21,6 +21,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 }: ShotFrameNodeProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState(0);
+  const [locationLightbox, setLocationLightbox] = useState(false);
   const imageCount = frame.generatedImages?.length ?? 0;
 
   return (
@@ -95,9 +96,13 @@ export const ShotFrameNode = memo(function ShotFrameNode({
               })}
             </TooltipProvider>
             {frame.location && locationImages[frame.location] && (
-              <div className="ml-auto w-8 h-5 rounded overflow-hidden border border-border">
+              <button
+                className="ml-auto w-8 h-5 rounded overflow-hidden border border-border hover:border-primary/40 transition-colors"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); setLocationLightbox(true); }}
+              >
                 <img src={locationImages[frame.location]} alt={frame.location} className="w-full h-full object-cover" draggable={false} />
-              </div>
+              </button>
             )}
           </div>
           <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
@@ -186,6 +191,30 @@ export const ShotFrameNode = memo(function ShotFrameNode({
               <Check className="w-3.5 h-3.5" />
               Use this image
             </button>
+          </div>
+        </div>
+      , document.body)}
+
+      {/* Location image lightbox */}
+      {locationLightbox && frame.location && locationImages[frame.location] && typeof document !== "undefined" && document.body && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center"
+          onClick={() => setLocationLightbox(false)}
+        >
+          <button
+            onClick={() => setLocationLightbox(false)}
+            className="absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="p-8" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={locationImages[frame.location]}
+              alt={frame.location}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              draggable={false}
+            />
+            <p className="text-center text-sm text-foreground/70 mt-3">{frame.location}</p>
           </div>
         </div>
       , document.body)}
