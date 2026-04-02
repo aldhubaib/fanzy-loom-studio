@@ -830,6 +830,30 @@ function ProductionCanvasPageInner() {
               });
             }
           }}
+          onUpdateLocation={(updated) => cs.setLocations((prev) => prev.map((l) => (l.id === updated.id ? updated : l)))}
+          onDeleteLocationNode={(locationId) => {
+            const loc = cs.locations.find((l) => l.id === locationId);
+            const usedInShots = cs.frames.filter((f) => f.location === loc?.name).length;
+            const doDelete = () => {
+              cs.setLocationNodes((prev) => prev.filter((n) => n.locationId !== locationId));
+              cs.setSelected(null);
+            };
+            if (usedInShots > 0) {
+              setPendingDelete({
+                severity: "destructive",
+                title: "Delete Location",
+                description: `"${loc?.name || "This location"}" is in ${usedInShots} shot${usedInShots > 1 ? "s" : ""}. Deleting will remove it from all shots.`,
+                onConfirm: doDelete,
+              });
+            } else {
+              setPendingDelete({
+                severity: "warning",
+                title: "Delete Location",
+                description: `Are you sure you want to delete "${loc?.name || "this location"}"?`,
+                onConfirm: doDelete,
+              });
+            }
+          }}
           onUpdateScriptNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
           onDeleteScriptNode={(id) => {
             const node = cs.scriptNodes.find((n) => n.id === id);
