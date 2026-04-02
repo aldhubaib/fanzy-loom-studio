@@ -46,7 +46,7 @@ export function computeZoneBounds(
     casting: { w: CAST_W, h: CAST_H },
     locations: { w: LOC_W, h: LOC_H },
     script: { w: SCRIPT_W, h: SCRIPT_H },
-    production: { w: TIMELINE_W, h: TIMELINE_HEADER_H + TIMELINE_RULER_H + TIMELINE_TRACK_H * 4 + 40 },
+    production: { w: TIMELINE_W, h: TIMELINE_H },
   };
 
   const nodeMap: Record<string, Array<{ x: number; y: number; zoneId?: string }>> = {
@@ -63,11 +63,6 @@ export function computeZoneBounds(
   nodes
     .filter((n: any) => n.zoneId === zone.id)
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
-
-  // Preview nodes can live in any zone (typically production)
-  previewNodes
-    .filter((n) => n.zoneId === zone.id)
-    .forEach((n) => children.push({ x: n.x, y: n.y, w: PREVIEW_MON_W, h: PREVIEW_MON_H }));
 
   if (children.length === 0) {
     return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
