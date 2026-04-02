@@ -63,6 +63,7 @@ interface ZoneBackgroundProps {
   /** Shot stats for shots zone header */
   shotStats?: { total: number; approved: number; drafts: number; animatable: number };
   onAnimateAll?: () => void;
+  isAnimatingAny?: boolean;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
