@@ -6,7 +6,7 @@ import type { Zone, ZoneBounds, ZoneConnectorConfig } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
 import { makeZonePortId } from "../utils";
 
-const GRID_ZONE_TYPES = new Set(["casting", "locations", "script"]);
+const GRID_ZONE_TYPES = new Set(["casting", "locations", "script", "shots"]);
 
 interface ZoneBackgroundProps {
   zone: Zone;
