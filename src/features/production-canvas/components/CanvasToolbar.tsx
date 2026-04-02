@@ -22,7 +22,10 @@ interface CanvasToolbarProps {
   onFitToScreen: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
-  onResetCanvas: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 export const CanvasToolbar = memo(function CanvasToolbar({
