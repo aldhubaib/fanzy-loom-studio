@@ -21,6 +21,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 }: ShotFrameNodeProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState(0);
+  const [locationLightbox, setLocationLightbox] = useState(false);
   const imageCount = frame.generatedImages?.length ?? 0;
 
   return (
