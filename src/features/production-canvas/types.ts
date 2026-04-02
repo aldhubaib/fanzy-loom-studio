@@ -52,7 +52,7 @@ export interface Zone {
   color: string;
 }
 
-export type ZoneType = "casting" | "shots" | "locations" | "script";
+export type ZoneType = "casting" | "shots" | "locations" | "script" | "production";
 
 export interface Connection {
   from: string;
@@ -60,7 +60,7 @@ export interface Connection {
 }
 
 export interface ZoneConnectorConfig {
-  key: "casting" | "script" | "locations";
+  key: "casting" | "script" | "locations" | "production";
   color: string;
   label: string;
   side: "left" | "right";
@@ -119,6 +119,7 @@ export interface CanvasState {
   castNodes: CastNode[];
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
+  timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
   connections: Connection[];
   zoom: number;
   pan: { x: number; y: number };

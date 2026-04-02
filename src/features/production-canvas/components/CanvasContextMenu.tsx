@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Maximize } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
 import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
 
@@ -10,6 +10,7 @@ interface CanvasContextMenuProps {
   onAddCastPicker: () => void;
   onAddLocationPicker: () => void;
   onAddScriptNode: () => void;
+  onAddTimeline: () => void;
   onAddZone: (type: ZoneType) => void;
   onFitToScreen: () => void;
   onClose: () => void;
@@ -20,11 +21,12 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
   shots: <Camera className="w-4 h-4" />,
   locations: <MapPin className="w-4 h-4" />,
   script: <FileText className="w-4 h-4" />,
+  production: <Film className="w-4 h-4" />,
 };
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
   menu, zones, onAddFrame, onAddCastPicker, onAddLocationPicker,
-  onAddScriptNode, onAddZone, onFitToScreen, onClose,
+  onAddScriptNode, onAddTimeline, onAddZone, onFitToScreen, onClose,
 }: CanvasContextMenuProps) {
   const zone = menu.zoneId ? zones.find((z) => z.id === menu.zoneId) : null;
 
@@ -59,11 +61,16 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
               <FileText className="w-4 h-4" /> Add Scene
             </button>
           )}
+          {zone.type === "production" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
+              <Film className="w-4 h-4" /> Add Timeline
+            </button>
+          )}
         </>
       ) : (
         <>
           <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
-          {(["casting", "shots", "locations", "script"] as ZoneType[]).map((type) => (
+          {(["casting", "shots", "locations", "script", "production"] as ZoneType[]).map((type) => (
             <button
               key={type}
               className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"

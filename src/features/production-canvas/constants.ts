@@ -55,6 +55,11 @@ export const LOC_H = 140;
 export const SCRIPT_W = 280;
 export const SCRIPT_H = 160;
 export const DRAWER_W = 360;
+export const TIMELINE_W = 800;
+export const TIMELINE_H = 300;
+export const TIMELINE_TRACK_H = 44;
+export const TIMELINE_HEADER_H = 36;
+export const TIMELINE_RULER_H = 24;
 
 // ─── Zone Layout ────────────────────────────────────────────
 export const ZONE_PAD = 40;
@@ -85,12 +90,16 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
     { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
     { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
+    { key: "production", color: "30 90% 55%", label: "Production", side: "right", yFrac: 0.5 },
   ],
   locations: [
     { key: "locations", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   script: [
     { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+  production: [
+    { key: "production", color: "30 90% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
   ],
 } satisfies Record<ZoneType, ZoneConnectorConfig[]>;
 
@@ -100,6 +109,7 @@ export const ZONE_COLORS: Record<ZoneType, string> = {
   shots: "220 70% 55%",
   locations: "150 60% 45%",
   script: "280 60% 55%",
+  production: "30 90% 55%",
 };
 
 export const ZONE_LABELS: Record<ZoneType, string> = {
@@ -107,6 +117,7 @@ export const ZONE_LABELS: Record<ZoneType, string> = {
   shots: "Shots",
   locations: "Locations",
   script: "Script",
+  production: "Production",
 };
 
 // ─── Assets Maps ────────────────────────────────────────────
@@ -154,6 +165,7 @@ export const initialZones: Zone[] = [
   { id: "z-shots", label: "Shots", type: "shots", x: 40, y: 0, color: "var(--primary)" },
   { id: "z-locations", label: "Locations", type: "locations", x: 1200, y: 0, color: "150 60% 45%" },
   { id: "z-script", label: "Script", type: "script", x: 40, y: -500, color: "280 60% 55%" },
+  { id: "z-production", label: "Production", type: "production", x: 1200, y: 600, color: "30 90% 55%" },
 ];
 
 export const initialFrames: FrameData[] = [
@@ -190,4 +202,9 @@ export const initialConnections: Connection[] = [
   { from: `z-casting${CONNECTION_PORT_SEPARATOR}casting`, to: `z-shots${CONNECTION_PORT_SEPARATOR}casting` },
   { from: `z-locations${CONNECTION_PORT_SEPARATOR}locations`, to: `z-shots${CONNECTION_PORT_SEPARATOR}locations` },
   { from: `z-script${CONNECTION_PORT_SEPARATOR}script`, to: `z-shots${CONNECTION_PORT_SEPARATOR}script` },
+  { from: `z-shots${CONNECTION_PORT_SEPARATOR}production`, to: `z-production${CONNECTION_PORT_SEPARATOR}production` },
+];
+
+export const initialTimelineNodes: import("./components/TimelineNode").TimelineNodeData[] = [
+  { id: "tn1", x: 1240, y: 640, zoneId: "z-production" },
 ];

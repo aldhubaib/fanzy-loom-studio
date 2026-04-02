@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
-import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W } from "./constants";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, LOC_W, SCRIPT_W, TIMELINE_W } from "./constants";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
@@ -22,6 +22,7 @@ import { ShotFrameNode } from "./components/ShotFrameNode";
 import { CastNodeCard } from "./components/CastNodeCard";
 import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
+import { TimelineNode } from "./components/TimelineNode";
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
@@ -211,6 +212,38 @@ function ProductionCanvasPageInner() {
                 onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
               />
             ))}
+
+            {/* Timeline nodes */}
+            {cs.timelineNodes.map((node) => {
+              // Get frames from connected shots zones
+              const connectedFrames = cs.frames.filter((f) => {
+                // Find shots zones connected to this timeline's zone
+                const timelineZone = cs.zones.find((z) => z.id === node.zoneId);
+                if (!timelineZone) return false;
+                return cs.connections.some((c) => {
+                  const fromBase = c.from.split("::")[0];
+                  const toBase = c.to.split("::")[0];
+                  const shotsZone = cs.zones.find((z) => z.id === fromBase && z.type === "shots");
+                  const prodZone = cs.zones.find((z) => z.id === toBase && z.type === "production");
+                  if (shotsZone && prodZone && prodZone.id === node.zoneId) return f.zoneId === shotsZone.id;
+                  const shotsZone2 = cs.zones.find((z) => z.id === toBase && z.type === "shots");
+                  const prodZone2 = cs.zones.find((z) => z.id === fromBase && z.type === "production");
+                  if (shotsZone2 && prodZone2 && prodZone2.id === node.zoneId) return f.zoneId === shotsZone2.id;
+                  return false;
+                });
+              });
+              return (
+                <TimelineNode
+                  key={node.id}
+                  node={node}
+                  frames={connectedFrames}
+                  actors={cs.actors}
+                  isSelected={cs.selected?.id === node.id}
+                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                />
+              );
+            })}
           </div>
 
           {/* Context menu */}
@@ -238,6 +271,18 @@ function ProductionCanvasPageInner() {
                     heading: "INT. NEW LOCATION - DAY",
                     body: "Description of the scene...",
                     x: cs.canvasMenu!.worldX - SCRIPT_W / 2,
+                    y: cs.canvasMenu!.worldY,
+                    zoneId: zone.id,
+                  }]);
+                }
+                cs.setCanvasMenu(null);
+              }}
+              onAddTimeline={() => {
+                const zone = cs.zones.find((z) => z.id === cs.canvasMenu!.zoneId);
+                if (zone) {
+                  cs.setTimelineNodes((prev) => [...prev, {
+                    id: `tn-${Date.now()}`,
+                    x: cs.canvasMenu!.worldX - TIMELINE_W / 2,
                     y: cs.canvasMenu!.worldY,
                     zoneId: zone.id,
                   }]);

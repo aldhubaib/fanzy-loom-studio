@@ -3,9 +3,11 @@ import type {
   Zone, FrameData, CastNode, LocationNode, ScriptNode,
   ZoneBounds, ZoneConnectorConfig, CanvasState,
 } from "./types";
+import type { TimelineNodeData } from "./components/TimelineNode";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
-  SCRIPT_W, SCRIPT_H, ZONE_PAD, ZONE_LABEL_H,
+  SCRIPT_W, SCRIPT_H, TIMELINE_W, TIMELINE_H, TIMELINE_TRACK_H, TIMELINE_HEADER_H, TIMELINE_RULER_H,
+  ZONE_PAD, ZONE_LABEL_H,
   MIN_ZONE_W, MIN_ZONE_H, CONNECTION_PORT_SEPARATOR,
   ZONE_CONNECTOR_CONFIGS,
 } from "./constants";
@@ -33,6 +35,7 @@ export function computeZoneBounds(
   castNodes: CastNode[],
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[] = [],
+  timelineNodes: TimelineNodeData[] = [],
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -41,6 +44,7 @@ export function computeZoneBounds(
     casting: { w: CAST_W, h: CAST_H },
     locations: { w: LOC_W, h: LOC_H },
     script: { w: SCRIPT_W, h: SCRIPT_H },
+    production: { w: TIMELINE_W, h: TIMELINE_HEADER_H + TIMELINE_RULER_H + TIMELINE_TRACK_H * 4 + 40 },
   };
 
   const nodeMap: Record<string, Array<{ x: number; y: number; zoneId?: string }>> = {
@@ -48,6 +52,7 @@ export function computeZoneBounds(
     casting: castNodes,
     locations: locationNodes,
     script: scriptNodes,
+    production: timelineNodes,
   };
 
   const nodes = nodeMap[zone.type] ?? [];
@@ -84,6 +89,7 @@ export function getPortPosition(
   castNodes: CastNode[],
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[],
+  timelineNodes: TimelineNodeData[] = [],
 ): { x: number; y: number } {
   const baseId = getConnectionBaseId(nodeId);
   const portKey = getConnectionPortKey(nodeId);
@@ -114,6 +120,9 @@ export function getPortPosition(
 
   const sn = scriptNodes.find((n) => n.id === baseId);
   if (sn) return { x: side === "right" ? sn.x + SCRIPT_W : sn.x, y: sn.y + SCRIPT_H / 2 };
+
+  const tn = timelineNodes.find((n) => n.id === baseId);
+  if (tn) return { x: side === "right" ? tn.x + TIMELINE_W : tn.x, y: tn.y + TIMELINE_H / 2 };
 
   return { x: 0, y: 0 };
 }
