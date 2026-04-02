@@ -17,12 +17,7 @@ export interface ZoneToolDef {
 }
 
 /** Tools available to all (or most) zone types */
-const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [
-  {
-    tool: { key: "autoGrid", icon: LayoutGrid, label: "Auto Grid" },
-    zones: ["casting", "locations", "script", "shots"],
-  },
-];
+const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [];
 
 /** Tools unique to a specific zone type */
 const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {};
