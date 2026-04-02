@@ -309,7 +309,7 @@ function ProductionCanvasPageInner() {
             {/* Cast nodes */}
             {(() => {
               const sorted = [...cs.castNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-              return sorted.map((node, idx) => {
+              return sorted.map((node) => {
                 const actor = cs.actors.find((a) => a.id === node.actorId);
                 if (!actor) return null;
                 const sceneCount = cs.frames.filter((f) => f.actors.includes(node.actorId)).length;
@@ -320,12 +320,8 @@ function ProductionCanvasPageInner() {
                     actor={actor}
                     sceneCount={sceneCount}
                     isSelected={cs.selected?.id === node.id}
-                    isFirst={idx === 0}
-                    isLast={idx === sorted.length - 1}
-                    onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
+                    onMouseDown={(e) => { cs.setSelected({ type: "cast", id: node.id }); cs.startDrag(e, node); }}
                     onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
-                    onMoveLeft={() => cs.reorderNode(node.id, "left", "cast")}
-                    onMoveRight={() => cs.reorderNode(node.id, "right", "cast")}
                     onDelete={() => {
                       const doDelete = () => {
                         cs.setCastNodes((prev) => prev.filter((n) => n.id !== node.id));
