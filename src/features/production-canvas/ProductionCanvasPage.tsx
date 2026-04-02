@@ -293,7 +293,7 @@ function ProductionCanvasPageInner() {
                 index={idx}
                 actors={cs.actors}
                 isSelected={cs.selected?.id === frame.id}
-                onMouseDown={(e) => cs.startDrag(e, frame)}
+                onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
                 onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
               />
             ))}
