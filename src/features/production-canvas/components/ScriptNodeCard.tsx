@@ -6,6 +6,7 @@ import { SCRIPT_W } from "../constants";
 
 interface ScriptNodeCardProps {
   node: ScriptNode;
+  sceneNumber: number;
   isSelected: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
@@ -14,7 +15,7 @@ interface ScriptNodeCardProps {
 }
 
 export const ScriptNodeCard = memo(function ScriptNodeCard({
-  node, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
+  node, sceneNumber, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
 }: ScriptNodeCardProps) {
   const headingRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -35,7 +36,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
     <div
       data-node
       className={cn(
-        "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab",
+        "absolute rounded-xl border-2 bg-card overflow-visible select-none group cursor-grab",
         isSelected
           ? "border-purple-500 shadow-lg shadow-purple-500/20"
           : "border-border hover:border-purple-500/40",
@@ -43,6 +44,10 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       style={{ left: node.x, top: node.y, width: SCRIPT_W }}
       onMouseDown={onMouseDown}
     >
+      {/* Scene number badge */}
+      <div className="absolute -top-3 -left-3 w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md z-10">
+        {sceneNumber}
+      </div>
       <button
         className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
         onMouseDown={(e) => e.stopPropagation()}
@@ -55,6 +60,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       <div className="p-3 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          <span className="text-[10px] font-bold text-purple-300/70 uppercase tracking-wider shrink-0">SC {sceneNumber}</span>
           <div
             ref={headingRef}
             contentEditable
