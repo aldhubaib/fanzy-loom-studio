@@ -443,11 +443,11 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
       const size = sizeMap[zone.type];
       if (!size) return;
 
-      // Collect nodes for this zone
+      // Collect nodes for this zone, sorted by logical order when available
       const getNodes = (): { x: number; y: number; id: string }[] => {
         if (zone.type === "casting") return castNodes.filter((n) => n.zoneId === zoneId);
         if (zone.type === "locations") return locationNodes.filter((n) => n.zoneId === zoneId);
-        if (zone.type === "script") return scriptNodes.filter((n) => n.zoneId === zoneId);
+        if (zone.type === "script") return [...scriptNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (zone.type === "shots") return frames.filter((f) => f.zoneId === zoneId);
         return [];
       };
@@ -455,8 +455,8 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
       const nodes = getNodes();
       if (nodes.length === 0) return;
 
-      // Calculate grid columns based on count
-      const cols = Math.ceil(Math.sqrt(nodes.length));
+      // Always use 3 columns
+      const cols = 3;
       
       // Use current zone bounds as starting point to avoid shifting
       const b = zoneBounds[zoneId];
