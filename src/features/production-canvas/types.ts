@@ -17,6 +17,7 @@ export interface FrameData {
   location?: string;
   zoneId: string;
   order?: number;
+  generatedImages?: string[];
 }
 
 export interface CastNode {
