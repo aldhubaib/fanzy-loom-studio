@@ -337,8 +337,8 @@ export function useCanvasState(projectId: string | undefined) {
   // ── Connector data ────────────────────────────────────
   const getPortPos = useCallback(
     (nodeId: string, side: "left" | "right") =>
-      getPortPosition(nodeId, side, zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes),
-    [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
+      getPortPosition(nodeId, side, zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes, timelineNodes),
+    [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes, timelineNodes],
   );
 
   const getNodeZoneColor = useCallback(
