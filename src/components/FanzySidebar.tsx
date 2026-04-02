@@ -60,7 +60,7 @@ export function FanzySidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <NavLink to="/" end activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
-                    <FolderOpen className="mr-2 h-4 w-4" />
+                    <FolderOpen className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
                     {!collapsed && <span>All Projects</span>}
                   </NavLink>
                 </SidebarMenuButton>
@@ -69,38 +69,36 @@ export function FanzySidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink to="/cast" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Cast</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink to="/locations" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
-                      <MapPin className="mr-2 h-4 w-4" />
-                      <span>Locations</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink to="/gallery" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
-                      <Image className="mr-2 h-4 w-4" />
-                      <span>Gallery</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/cast" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                    <Users className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
+                    {!collapsed && <span>Cast</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/locations" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                    <MapPin className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
+                    {!collapsed && <span>Locations</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/gallery" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
+                    <Image className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
+                    {!collapsed && <span>Gallery</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {isInsideProject && (
           <>
@@ -125,7 +123,7 @@ export function FanzySidebar() {
                           activeClassName="bg-sidebar-accent text-foreground font-medium"
                           className="hover:bg-sidebar-accent/50"
                         >
-                          <stage.icon className="mr-2 h-4 w-4" />
+                          <stage.icon className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
                           {!collapsed && <span>{stage.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
