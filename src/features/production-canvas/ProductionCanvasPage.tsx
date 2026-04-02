@@ -178,6 +178,7 @@ function ProductionCanvasPageInner() {
                   onLabelEditCancel={() => cs.setEditingZoneLabel(null)}
                   onStartConnect={(e, portId) => cs.startConnect(e, portId)}
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
+                  onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
                   onToolAction={{ autoGrid: () => cs.autoGridZone(zone.id) }}
                 />
               );
