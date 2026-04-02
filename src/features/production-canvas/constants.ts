@@ -60,6 +60,8 @@ export const TIMELINE_H = 300;
 export const TIMELINE_TRACK_H = 44;
 export const TIMELINE_HEADER_H = 36;
 export const TIMELINE_RULER_H = 24;
+export const PREVIEW_MON_W = 640;
+export const PREVIEW_MON_H = 480;
 
 // ─── Zone Layout ────────────────────────────────────────────
 export const ZONE_PAD = 40;
