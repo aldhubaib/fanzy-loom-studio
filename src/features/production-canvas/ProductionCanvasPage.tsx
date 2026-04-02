@@ -190,7 +190,7 @@ function ProductionCanvasPageInner() {
                   bounds={b}
                   isSelected={cs.selected?.type === "zone" && cs.selected.id === zone.id}
                   isEditingLabel={cs.editingZoneLabel === zone.id}
-                  isPageView={pageViewZones.has(zone.id)}
+                  isPageView={stackViewZones.has(zone.id)}
                   onZoneDragStart={(e) => cs.startZoneDrag(e, zone.id)}
                   onLabelDoubleClick={() => cs.setEditingZoneLabel(zone.id)}
                   onLabelRename={(val) => cs.setZones((prev) => prev.map((z) => (z.id === zone.id ? { ...z, label: val } : z)))}
