@@ -38,14 +38,17 @@ export function computeZoneBounds(
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
   previewNodes: PreviewNodeData[] = [],
+  stackZoneIds: Set<string> = new Set(),
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
+
+  const isStack = stackZoneIds.has(zone.id) && zone.type === "script";
 
   const sizeMap: Record<string, { w: number; h: number }> = {
     shots: { w: FRAME_W, h: FRAME_H },
     casting: { w: CAST_W, h: CAST_H },
     locations: { w: LOC_W, h: LOC_H },
-    script: { w: SCRIPT_W, h: SCRIPT_H },
+    script: { w: isStack ? SCRIPT_W * 3 : SCRIPT_W, h: SCRIPT_H },
     production: { w: TIMELINE_W, h: TIMELINE_H },
   };
 

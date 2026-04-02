@@ -25,7 +25,7 @@ import {
   getPortPosition, getZoneColor as resolveZoneColor,
 } from "../utils";
 
-export function useCanvasState(projectId: string | undefined) {
+export function useCanvasState(projectId: string | undefined, stackZoneIds: Set<string> = new Set()) {
   const containerRef = useRef<HTMLDivElement>(null);
   const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
@@ -81,10 +81,10 @@ export function useCanvasState(projectId: string | undefined) {
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, stackZoneIds);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, stackZoneIds]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
@@ -433,7 +433,7 @@ export function useCanvasState(projectId: string | undefined) {
       const zone = zones.find((z) => z.id === zoneId);
       if (!zone) return;
 
-      const GAP = 24;
+      const GAP = overrideCols === 1 ? 12 : 24;
       const sizeMap: Partial<Record<ZoneType, { w: number; h: number }>> = {
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },

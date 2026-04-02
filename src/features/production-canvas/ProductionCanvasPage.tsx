@@ -36,7 +36,7 @@ interface PendingDelete {
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
   const [stackViewZones, setStackViewZones] = useState<Set<string>>(new Set());
-  const cs = useCanvasState(projectId);
+  const cs = useCanvasState(projectId, stackViewZones);
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
