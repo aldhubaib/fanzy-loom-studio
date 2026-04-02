@@ -83,6 +83,7 @@ function ProductionCanvasPageInner() {
           onFitToScreen={cs.fitToScreen}
           onZoomIn={() => cs.setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
           onZoomOut={() => cs.setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+          onResetCanvas={cs.resetCanvas}
         />
 
         {/* Canvas surface */}

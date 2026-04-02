@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, ArrowLeft, Film } from "lucide-react";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, ArrowLeft, Film, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { Tool } from "../types";
@@ -14,11 +14,12 @@ interface CanvasToolbarProps {
   onFitToScreen: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onResetCanvas: () => void;
 }
 
 export const CanvasToolbar = memo(function CanvasToolbar({
   projectId, tool, zoom,
-  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut,
+  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
 }: CanvasToolbarProps) {
   return (
     <>
@@ -53,6 +54,9 @@ export const CanvasToolbar = memo(function CanvasToolbar({
         <div className="w-6 h-px bg-border my-0.5" />
         <button onClick={onFitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
           <Maximize className="w-4 h-4" />
+        </button>
+        <button onClick={onResetCanvas} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Reset Canvas">
+          <RotateCcw className="w-4 h-4" />
         </button>
       </div>
 
