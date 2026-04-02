@@ -166,27 +166,27 @@ export const ShotDrawer = memo(function ShotDrawer({
       </div>
 
       <Dialog open={locationModalOpen} onOpenChange={setLocationModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-sm">Select Location</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 gap-2 pt-2">
+          <div className="flex gap-3 overflow-x-auto pb-2 pt-2 scrollbar-thin">
             {locationDetailOptions.map((loc) => (
               <button
                 key={loc.value}
                 onClick={() => { setLocation(loc.value); setLocationModalOpen(false); }}
                 className={cn(
-                  "relative rounded-lg overflow-hidden aspect-[4/3] transition-all",
-                  location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground"
+                  "relative rounded-xl overflow-hidden flex-shrink-0 w-52 aspect-[3/4] transition-all",
+                  location === loc.value ? "ring-3 ring-primary scale-[1.02]" : "ring-1 ring-border hover:ring-muted-foreground"
                 )}
               >
                 <img src={loc.img} alt={loc.label} className="w-full h-full object-cover" />
-                <div className="absolute inset-x-0 bottom-0 bg-black/60 px-1.5 py-1">
-                  <span className="text-[10px] text-white font-medium">{loc.label}</span>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2.5">
+                  <span className="text-sm text-white font-semibold">{loc.label}</span>
                 </div>
                 {location === loc.value && (
-                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                  <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-3.5 h-3.5 text-primary-foreground" />
                   </div>
                 )}
               </button>
