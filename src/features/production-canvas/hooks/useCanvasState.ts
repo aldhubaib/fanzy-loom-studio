@@ -42,6 +42,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   const [timelineNodes, setTimelineNodes] = useState<TimelineNodeData[]>(saved?.timelineNodes ?? initialTimelineNodes);
   const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>([]);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
+  const [zoneCols, setZoneCols] = useState<Record<string, number>>(saved?.zoneCols ?? {});
 
   // ── Viewport ────────────────────────────────────────────
   const [zoom, setZoom] = useState(saved?.zoom ?? 1);
