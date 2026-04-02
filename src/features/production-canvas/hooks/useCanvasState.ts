@@ -12,7 +12,7 @@ import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
   SCRIPT_W, SCRIPT_H, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H, DRAWER_W,
   ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, AUTOSAVE_DEBOUNCE_MS, FIT_DELAY_MS,
-  ZONE_CONNECTOR_CONFIGS, actorRoster,
+  ZONE_CONNECTOR_CONFIGS, actorRoster, locationRoster,
   initialZones, initialFrames, initialCastNodes,
   initialLocationNodes, initialScriptNodes, initialConnections,
   initialTimelineNodes, initialPreviewNodes,
