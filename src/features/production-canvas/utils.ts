@@ -41,15 +41,7 @@ export function computeZoneBounds(
   previewNodes: PreviewNodeData[] = [],
   pageViewZones?: Set<string>,
 ): ZoneBounds {
-  // If this is a script zone in page view, use A4 dimensions
-  if (zone.type === "script" && pageViewZones?.has(zone.id)) {
-    return {
-      x: zone.x,
-      y: zone.y,
-      w: A4_PAGE_W + ZONE_PAD * 2,
-      h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H,
-    };
-  }
+  const isPageView = zone.type === "script" && pageViewZones?.has(zone.id);
 
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -77,6 +69,9 @@ export function computeZoneBounds(
     .forEach((n) => children.push({ x: n.x, y: n.y, ...size }));
 
   if (children.length === 0) {
+    if (isPageView) {
+      return { x: zone.x, y: zone.y, w: A4_PAGE_W + ZONE_PAD * 2, h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H };
+    }
     return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
   }
 
@@ -84,6 +79,15 @@ export function computeZoneBounds(
   const minY = Math.min(...children.map((c) => c.y)) - ZONE_PAD - ZONE_LABEL_H;
   const maxX = Math.max(...children.map((c) => c.x + c.w)) + ZONE_PAD;
   const maxY = Math.max(...children.map((c) => c.y + c.h)) + ZONE_PAD;
+
+  if (isPageView) {
+    return {
+      x: minX,
+      y: minY,
+      w: A4_PAGE_W + ZONE_PAD * 2,
+      h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H,
+    };
+  }
 
   return {
     x: minX,
