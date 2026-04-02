@@ -151,7 +151,8 @@ function ProductionCanvasPageInner() {
     <div className="h-screen w-full relative bg-background overflow-hidden flex">
       <div className="flex-1 relative">
         <CanvasToolbar
-          projectId={projectId}
+           projectId={projectId}
+           projectName={projectName}
           tool={cs.tool}
           zoom={cs.zoom}
           onSetTool={cs.setTool}
