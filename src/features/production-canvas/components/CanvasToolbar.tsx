@@ -61,8 +61,8 @@ export const CanvasToolbar = memo(function CanvasToolbar({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" sideOffset={12} className="w-48">
-            <DropdownMenuItem onClick={() => navigate("/")}>
-              <ArrowLeft className="w-3.5 h-3.5 mr-2" />
+            <DropdownMenuItem onClick={() => navigate("/")} className="text-xs">
+              <ArrowLeft className="w-3 h-3 mr-2" />
               Back to Projects
             </DropdownMenuItem>
           </DropdownMenuContent>
