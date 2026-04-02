@@ -141,16 +141,59 @@ export const ShotDrawer = memo(function ShotDrawer({
 
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Location</Label>
-        <div className="grid grid-cols-4 gap-1.5">
-          {locationDetailOptions.map((loc) => (
-            <button key={loc.value} onClick={() => setLocation(location === loc.value ? "" : loc.value)}
-              className={cn("relative rounded-lg overflow-hidden aspect-[4/3] transition-all", location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground")}>
-              <img src={loc.img} alt={loc.label} className="w-full h-full object-cover" />
-              {location === loc.value && <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center"><Check className="w-2 h-2 text-primary-foreground" /></div>}
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={() => setLocationModalOpen(true)}
+          className={cn(
+            "w-full rounded-lg border border-border hover:border-muted-foreground/60 transition-all overflow-hidden",
+            location && locationDetailOptions.find((l) => l.value === location) ? "p-0" : "p-4 flex items-center justify-center gap-2 text-muted-foreground"
+          )}
+        >
+          {(() => {
+            const cur = locationDetailOptions.find((l) => l.value === location);
+            return cur ? (
+              <div className="flex items-center gap-3 p-2">
+                <img src={cur.img} alt={cur.label} className="w-16 h-12 rounded-md object-cover" />
+                <span className="text-sm font-medium text-foreground">{cur.label}</span>
+              </div>
+            ) : (
+              <>
+                <MapPin className="w-4 h-4" />
+                <span className="text-xs">Select location</span>
+              </>
+            );
+          })()}
+        </button>
       </div>
+
+      <Dialog open={locationModalOpen} onOpenChange={setLocationModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Select Location</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            {locationDetailOptions.map((loc) => (
+              <button
+                key={loc.value}
+                onClick={() => { setLocation(loc.value); setLocationModalOpen(false); }}
+                className={cn(
+                  "relative rounded-lg overflow-hidden aspect-[4/3] transition-all",
+                  location === loc.value ? "ring-2 ring-primary scale-[1.03]" : "ring-1 ring-border hover:ring-muted-foreground"
+                )}
+              >
+                <img src={loc.img} alt={loc.label} className="w-full h-full object-cover" />
+                <div className="absolute inset-x-0 bottom-0 bg-black/60 px-1.5 py-1">
+                  <span className="text-[10px] text-white font-medium">{loc.label}</span>
+                </div>
+                {location === loc.value && (
+                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Separator />
 
