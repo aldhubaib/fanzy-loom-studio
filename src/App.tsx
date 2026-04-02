@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import ProductionCanvasPage from "./features/production-canvas/ProductionCanvasPage.tsx";
 import CastPage from "./pages/CastPage.tsx";
+import LocationsPage from "./pages/LocationsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/cast" element={<CastPage />} />
+          <Route path="/locations" element={<LocationsPage />} />
           <Route path="/project/:projectId/canvas" element={<ProductionCanvasPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
