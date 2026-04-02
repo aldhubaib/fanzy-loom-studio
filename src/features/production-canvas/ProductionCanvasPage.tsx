@@ -251,8 +251,26 @@ function ProductionCanvasPageInner() {
                 onMouseDown={(e) => cs.startDrag(e, node)}
                 onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
                 onDelete={() => {
-                  cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
-                  if (cs.selected?.id === node.id) cs.setSelected(null);
+                  const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
+                  const doDelete = () => {
+                    cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                    if (cs.selected?.id === node.id) cs.setSelected(null);
+                  };
+                  if (linkedFrames.length > 0) {
+                    setPendingDelete({
+                      severity: "destructive",
+                      title: "Delete Script Node",
+                      description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
+                      onConfirm: doDelete,
+                    });
+                  } else {
+                    setPendingDelete({
+                      severity: "warning",
+                      title: "Delete Script Node",
+                      description: `Are you sure you want to delete this script block?`,
+                      onConfirm: doDelete,
+                    });
+                  }
                 }}
                 onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
               />
