@@ -291,17 +291,24 @@ function ProductionCanvasPageInner() {
             />
 
             {/* Shot frames */}
-            {cs.frames.map((frame, idx) => (
-              <ShotFrameNode
-                key={frame.id}
-                frame={frame}
-                index={idx}
-                actors={cs.actors}
-                isSelected={cs.selected?.id === frame.id}
-                onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
-                onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
-              />
-            ))}
+            {(() => {
+              const sorted = [...cs.frames].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              return sorted.map((frame, idx) => (
+                <ShotFrameNode
+                  key={frame.id}
+                  frame={frame}
+                  index={idx}
+                  actors={cs.actors}
+                  isSelected={cs.selected?.id === frame.id}
+                  isFirst={idx === 0}
+                  isLast={idx === sorted.length - 1}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
+                  onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
+                  onMoveLeft={() => cs.reorderNode(frame.id, "left", "frame")}
+                  onMoveRight={() => cs.reorderNode(frame.id, "right", "frame")}
+                />
+              ));
+            })()}
 
             {/* Cast nodes */}
             {cs.castNodes.map((node) => {
