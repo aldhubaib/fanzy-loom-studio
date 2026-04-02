@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LocationNode } from "../types";
 import { LOC_W, locationImages } from "../constants";
@@ -8,18 +8,13 @@ interface LocationNodeCardProps {
   node: LocationNode;
   isSelected: boolean;
   shotCount: number;
-  isFirst: boolean;
-  isLast: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onDelete: () => void;
-  onMoveLeft: () => void;
-  onMoveRight: () => void;
 }
 
 export const LocationNodeCard = memo(function LocationNodeCard({
-  node, isSelected, shotCount, isFirst, isLast,
-  onMouseDown, onSettingsClick, onDelete, onMoveLeft, onMoveRight,
+  node, isSelected, shotCount, onMouseDown, onSettingsClick, onDelete,
 }: LocationNodeCardProps) {
   const img = locationImages[node.locationName];
 
@@ -27,7 +22,7 @@ export const LocationNodeCard = memo(function LocationNodeCard({
     <div
       data-node
       className={cn(
-        "absolute rounded-xl border-2 bg-card overflow-hidden select-none group",
+        "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab active:cursor-grabbing",
         isSelected
           ? "border-emerald-500 shadow-lg shadow-emerald-500/20"
           : "border-border hover:border-emerald-500/40",
@@ -51,30 +46,8 @@ export const LocationNodeCard = memo(function LocationNodeCard({
       ) : (
         <div className="w-full aspect-video bg-muted flex items-center justify-center text-muted-foreground text-xs">No Image</div>
       )}
-      <div className="p-2 flex items-center justify-between">
-        <p className="text-xs font-bold text-foreground truncate flex-1">{node.locationName}</p>
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!isFirst && (
-            <button
-              className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              onClick={(e) => { e.stopPropagation(); onMoveLeft(); }}
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Move left"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-          )}
-          {!isLast && (
-            <button
-              className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              onClick={(e) => { e.stopPropagation(); onMoveRight(); }}
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Move right"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
+      <div className="p-2">
+        <p className="text-xs font-bold text-foreground">{node.locationName}</p>
       </div>
     </div>
   );
