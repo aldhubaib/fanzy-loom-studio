@@ -1,10 +1,18 @@
 import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, FileText, Plus, Copy, Columns, type LucideIcon } from "lucide-react";
+import { LayoutGrid, FileText, Plus, Copy, Columns, RectangleHorizontal, ChevronDown, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Zone, ZoneBounds, ZoneType } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
 import { makeZonePortId } from "../utils";
+
+const ASPECT_RATIOS = ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "1:2", "2:1", "4:5"] as const;
 
 // ─── Zone Tool Definition ───────────────────────────────────
 // Shared and zone-specific tools are declared here.
