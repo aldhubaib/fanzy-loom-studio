@@ -1,7 +1,13 @@
 import { memo, useState, useRef, useEffect } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, Film, RotateCcw, ChevronDown, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Tool } from "../types";
 import { ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from "../constants";
 
