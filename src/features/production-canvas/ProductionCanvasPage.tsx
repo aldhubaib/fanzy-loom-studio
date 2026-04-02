@@ -316,21 +316,6 @@ function ProductionCanvasPageInner() {
               const elements: React.ReactNode[] = [];
 
               scriptByZone.forEach((nodes, zoneId) => {
-                if (pageViewZones.has(zoneId)) {
-                  // Page view — render inside zone bounds
-                  const b = cs.zoneBounds[zoneId];
-                  if (b) {
-                    elements.push(
-                      <ScriptPageView
-                        key={`page-${zoneId}`}
-                        zoneId={zoneId}
-                        nodes={nodes}
-                        bounds={b}
-                        onUpdateNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-                      />
-                    );
-                  }
-                } else {
                   // Card view — connector arrows first (behind cards)
                   if (nodes.length > 1) {
                     const CARD_H = 80;
