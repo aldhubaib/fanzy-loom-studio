@@ -12,6 +12,7 @@ interface CanvasContextMenuProps {
   onAddScriptNode: () => void;
   onAddTimeline: () => void;
   onAddZone: (type: ZoneType) => void;
+  onDeleteZone: (zoneId: string) => void;
   onFitToScreen: () => void;
   onClose: () => void;
 }
