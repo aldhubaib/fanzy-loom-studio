@@ -29,9 +29,15 @@ export const ZoneBackground = memo(function ZoneBackground({
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <div className="absolute pointer-events-none" style={{ left: b.x, top: b.y, width: b.w, height: b.h }}>
+    <div
+      className="absolute pointer-events-none"
+      style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {/* Dashed border */}
       <div
         className={cn(
