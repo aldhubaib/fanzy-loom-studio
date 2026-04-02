@@ -35,11 +35,11 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const cs = useCanvasState(projectId);
+  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
+  const cs = useCanvasState(projectId, pageViewZones);
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
 
   const togglePageView = useCallback((zoneId: string) => {
     setPageViewZones((prev) => {
