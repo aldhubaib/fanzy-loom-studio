@@ -54,6 +54,8 @@ interface ZoneBackgroundProps {
   onSelect?: () => void;
   /** Handler map: tool key → callback. Only tools with a handler are rendered. */
   onToolAction?: Record<string, () => void>;
+  onAddItem?: () => void;
+  onDuplicateZone?: () => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
