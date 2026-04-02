@@ -454,11 +454,11 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const effectiveSize = size;
 
       // Collect nodes for this zone, sorted by logical order when available
-      const getNodes = (): { x: number; y: number; id: string }[] => {
-        if (zone.type === "casting") return castNodes.filter((n) => n.zoneId === zoneId);
-        if (zone.type === "locations") return locationNodes.filter((n) => n.zoneId === zoneId);
+      const getNodes = (): { x: number; y: number; id: string; order?: number }[] => {
+        if (zone.type === "casting") return [...castNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        if (zone.type === "locations") return [...locationNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (zone.type === "script") return [...scriptNodes.filter((n) => n.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        if (zone.type === "shots") return frames.filter((f) => f.zoneId === zoneId);
+        if (zone.type === "shots") return [...frames.filter((f) => f.zoneId === zoneId)].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         return [];
       };
 
