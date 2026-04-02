@@ -115,7 +115,9 @@ export const ScriptPageView = memo(function ScriptPageView({
       sectionIds.push(id);
       const headingEl = section.querySelector("h1, h2, h3, .section-heading");
       const bodyEl = section.querySelector(".section-body");
-      const heading = headingEl?.textContent?.trim() || "";
+      let heading = headingEl?.textContent?.trim() || "";
+      // Strip the non-editable "SC X" prefix from the text content
+      heading = heading.replace(/^SC\s*\d+\s*/, "");
       const body = bodyEl?.textContent?.trim() || "";
       const node = nodes.find((n) => n.id === id);
       if (node && (heading !== node.heading || body !== node.body)) {
