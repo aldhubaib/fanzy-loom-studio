@@ -782,6 +782,7 @@ function ProductionCanvasPageInner() {
           selected={cs.selected}
           frames={cs.frames}
           actors={cs.actors}
+          locations={cs.locations}
           castNodes={cs.castNodes}
           locationNodes={cs.locationNodes}
           scriptNodes={cs.scriptNodes}
