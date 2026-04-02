@@ -364,41 +364,6 @@ function ProductionCanvasPageInner() {
               const elements: React.ReactNode[] = [];
 
               scriptByZone.forEach((nodes, zoneId) => {
-                  const isStack = stackViewZones.has(zoneId);
-                  // Card view — connector arrows first (behind cards), skip in stack view
-                  if (nodes.length > 1 && !isStack) {
-                    const CARD_H = 80;
-                    for (let i = 0; i < nodes.length - 1; i++) {
-                      const from = nodes[i];
-                      const to = nodes[i + 1];
-                      const x1 = from.x + SCRIPT_W;
-                      const y1 = from.y + CARD_H / 2;
-                      const x2 = to.x;
-                      const y2 = to.y + CARD_H / 2;
-                      const midX = (x1 + x2) / 2;
-                      elements.push(
-                        <svg
-                          key={`sc-arrow-${from.id}-${to.id}`}
-                          className="absolute top-0 left-0 pointer-events-none"
-                          style={{ overflow: "visible" }}
-                          width="1"
-                          height="1"
-                        >
-                          <path
-                            d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`}
-                            fill="none"
-                            className="stroke-purple-500/60"
-                            strokeWidth="2"
-                            strokeDasharray="6 4"
-                          />
-                          <circle cx={x2} cy={y2} r="4" className="fill-purple-500/80" />
-                        </svg>
-                      );
-                    }
-                  }
-
-                  if (isStack) {
-                    // Stack view: use CSS flow layout so cards auto-size based on content
                     const b = cs.zoneBounds[zoneId];
                     if (!b) return;
                     elements.push(
@@ -447,45 +412,6 @@ function ProductionCanvasPageInner() {
                         ))}
                       </div>
                     );
-                  } else {
-                    // Grid view: absolute positioned cards
-                    nodes.forEach((node, idx) => {
-                      elements.push(
-                        <ScriptNodeCard
-                          key={node.id}
-                          node={node}
-                          sceneNumber={idx + 1}
-                          isSelected={cs.selected?.id === node.id}
-                          isStackView={false}
-                          onMouseDown={(e) => cs.startDrag(e, node)}
-                          onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
-                          onDelete={() => {
-                            const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
-                            const doDelete = () => {
-                              cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
-                              if (cs.selected?.id === node.id) cs.setSelected(null);
-                            };
-                            if (linkedFrames.length > 0) {
-                              setPendingDelete({
-                                severity: "destructive",
-                                title: "Delete Script Node",
-                                description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
-                                onConfirm: doDelete,
-                              });
-                            } else {
-                              setPendingDelete({
-                                severity: "warning",
-                                title: "Delete Script Node",
-                                description: `Are you sure you want to delete this script block?`,
-                                onConfirm: doDelete,
-                              });
-                            }
-                          }}
-                          onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-                        />
-                      );
-                    });
-                  }
               });
 
               return elements;
