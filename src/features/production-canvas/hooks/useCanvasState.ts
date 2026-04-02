@@ -456,7 +456,7 @@ export function useCanvasState(projectId: string | undefined) {
       if (nodes.length === 0) return;
 
       // Always use 3 columns
-      const cols = 3;
+      const cols = overrideCols ?? 3;
       
       // Use current zone bounds as starting point to avoid shifting
       const b = zoneBounds[zoneId];
