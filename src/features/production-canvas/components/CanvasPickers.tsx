@@ -14,20 +14,15 @@ interface CastPickerProps {
 export const CastPicker = memo(function CastPicker({
   position, actors, existingActorIds = [], onSelect, onClose,
 }: CastPickerProps) {
-  const [isCreating, setIsCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newRole, setNewRole] = useState("");
-
   const availableActors = actors.filter((a) => !existingActorIds.includes(a.id));
 
   const handleCreateNew = () => {
-    if (!newName.trim()) return;
     const newActor: Actor = {
       id: `actor-${Date.now()}`,
-      name: newName.trim(),
-      role: newRole.trim() || "New Role",
+      name: "New Actor",
+      role: "New Role",
       description: "",
-      portrait: `https://ui-avatars.com/api/?name=${encodeURIComponent(newName.trim())}&background=1a1a2e&color=8b5cf6&size=200`,
+      portrait: `https://ui-avatars.com/api/?name=New+Actor&background=1a1a2e&color=8b5cf6&size=200`,
       gender: "",
       ageRange: "",
       ethnicity: "",
