@@ -43,14 +43,6 @@ export interface ScriptNode {
   zoneId: string;
 }
 
-export interface ScreenplayNode {
-  id: string;
-  content: string; // HTML content from contentEditable
-  x: number;
-  y: number;
-  zoneId: string;
-}
-
 export interface Zone {
   id: string;
   label: string;
@@ -60,7 +52,7 @@ export interface Zone {
   color: string;
 }
 
-export type ZoneType = "casting" | "shots" | "locations" | "script" | "production" | "screenplay";
+export type ZoneType = "casting" | "shots" | "locations" | "script" | "production";
 
 export interface Connection {
   from: string;
@@ -68,7 +60,7 @@ export interface Connection {
 }
 
 export interface ZoneConnectorConfig {
-  key: "casting" | "script" | "locations" | "production" | "screenplay";
+  key: "casting" | "script" | "locations" | "production";
   color: string;
   label: string;
   side: "left" | "right";
@@ -80,7 +72,6 @@ export type SelectedItem =
   | { type: "cast"; id: string }
   | { type: "location"; id: string }
   | { type: "script"; id: string }
-  | { type: "screenplay"; id: string }
   | { type: "zone"; id: string }
   | { type: "preview"; id: string }
   | null;
@@ -129,7 +120,6 @@ export interface CanvasState {
   castNodes: CastNode[];
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
-  screenplayNodes: import("./components/ScreenplayEditorNode").ScreenplayNodeData[];
   timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
   previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
