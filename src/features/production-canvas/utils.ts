@@ -29,6 +29,13 @@ export const getConnectionPortKey = (
   return endpoint.split(CONNECTION_PORT_SEPARATOR)[1] as ZoneConnectorConfig["key"];
 };
 
+// ─── Aspect Ratio Helper ────────────────────────────────────
+export function getFrameHForAspect(ratio: string = "16:9"): number {
+  const [w, h] = ratio.split(":").map(Number);
+  const ar = (w && h) ? w / h : 16 / 9;
+  return Math.round(FRAME_W / ar) + 135; // image height + info section
+}
+
 // ─── Zone Bounds ────────────────────────────────────────────
 export function computeZoneBounds(
   zone: Zone,
@@ -39,6 +46,7 @@ export function computeZoneBounds(
   timelineNodes: TimelineNodeData[] = [],
   previewNodes: PreviewNodeData[] = [],
   scriptStackHeights: Record<string, number> = {},
+  shotAspectRatio: string = "16:9",
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
