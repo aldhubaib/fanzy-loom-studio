@@ -93,7 +93,7 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
     { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
     { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
-    { key: "production", color: "30 90% 55%", label: "Production", side: "right", yFrac: 0.5 },
+    { key: "production", color: "350 75% 55%", label: "Production", side: "right", yFrac: 0.5 },
   ],
   locations: [
     { key: "locations", color: "150 60% 45%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
