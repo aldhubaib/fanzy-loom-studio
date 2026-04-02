@@ -697,7 +697,7 @@ function ProductionCanvasPageInner() {
                 const zoneId = cs.locationPickerPos!.zoneId;
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
-                const cols = 3;
+                const cols = cs.zoneCols[zoneId] ?? 3;
                 const gap = 20;
                 const idx = existing.length;
                 const col = idx % cols;
