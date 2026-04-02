@@ -102,61 +102,92 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         </div>
       </div>
 
-      {/* Image Gallery Overlay */}
+      {/* Full-screen Image Gallery Modal */}
       {galleryOpen && (
         <div
-          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex"
           onClick={() => setGalleryOpen(false)}
         >
+          {/* Close button */}
+          <button
+            onClick={() => setGalleryOpen(false)}
+            className="absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-background/20 hover:bg-background/40 text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Image counter */}
+          <div className="absolute top-4 right-4 z-10 bg-background/20 backdrop-blur-sm text-foreground text-sm font-medium px-3 py-1.5 rounded-full">
+            {(selectedPreview ?? 0) + 1} / {imageCount}
+          </div>
+
+          {/* Main preview area */}
           <div
-            className="bg-card border border-border rounded-2xl p-4 max-w-lg w-full mx-4 shadow-2xl"
+            className="flex-1 flex items-center justify-center p-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Images className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground">
-                  {frame.scene} — Generated Images
-                </span>
-                <span className="text-xs text-muted-foreground">({imageCount})</span>
-              </div>
-              <button
-                onClick={() => setGalleryOpen(false)}
-                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {frame.generatedImages?.map((img, i) => {
-                const isActive = img === frame.image;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      onSelectImage?.(frame.id, img);
-                      setGalleryOpen(false);
-                    }}
-                    className={cn(
-                      "relative rounded-lg overflow-hidden border-2 transition-all aspect-video",
-                      isActive
-                        ? "border-primary shadow-lg shadow-primary/20"
-                        : "border-border hover:border-primary/40",
-                    )}
-                  >
-                    <img src={img} alt={`Generated ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
-                    {isActive && (
-                      <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="w-3 h-3 text-primary-foreground" />
-                      </div>
-                    )}
-                    <div className="absolute bottom-1.5 left-1.5 bg-background/80 backdrop-blur-sm text-[10px] font-bold px-1.5 py-0.5 rounded text-foreground">
-                      {i + 1}
+            {frame.generatedImages && frame.generatedImages[selectedPreview ?? 0] && (
+              <img
+                src={frame.generatedImages[selectedPreview ?? 0]}
+                alt={`Generated ${(selectedPreview ?? 0) + 1}`}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                draggable={false}
+              />
+            )}
+          </div>
+
+          {/* Right-side thumbnail strip */}
+          <div
+            className="w-20 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {frame.generatedImages?.map((img, i) => {
+              const isViewing = i === (selectedPreview ?? 0);
+              const isActive = img === frame.image;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedPreview(i)}
+                  onDoubleClick={() => {
+                    onSelectImage?.(frame.id, img);
+                    setGalleryOpen(false);
+                  }}
+                  className={cn(
+                    "relative rounded-lg overflow-hidden border-2 transition-all aspect-[3/4] flex-shrink-0",
+                    isViewing
+                      ? "border-primary shadow-lg shadow-primary/30"
+                      : "border-transparent hover:border-primary/40 opacity-60 hover:opacity-100",
+                  )}
+                >
+                  <img src={img} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
+                  {isActive && (
+                    <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-primary-foreground" />
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom bar */}
+          <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                const img = frame.generatedImages?.[selectedPreview ?? 0];
+                if (img) {
+                  onSelectImage?.(frame.id, img);
+                  setGalleryOpen(false);
+                }
+              }}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold px-4 py-2 rounded-full transition-colors flex items-center gap-1.5"
+            >
+              <Check className="w-3.5 h-3.5" />
+              Use this image
+            </button>
           </div>
         </div>
       )}
