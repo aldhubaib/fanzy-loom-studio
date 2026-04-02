@@ -60,6 +60,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   const [selected, setSelected] = useState<SelectedItem>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingMouse, setConnectingMouse] = useState({ x: 0, y: 0 });
+  const [frozenDragZoneBounds, setFrozenDragZoneBounds] = useState<{ zoneId: string; bounds: ZoneBounds } | null>(null);
 
   // ── Menus ───────────────────────────────────────────────
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null);
@@ -82,15 +83,19 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
-    // Exclude the currently-dragged node so zone border stays fixed during drag
+    // Exclude the currently-dragged node so zone border does not stretch to the cursor
     const filteredFrames = dragging ? frames.filter((f) => f.id !== dragging) : frames;
     const filteredCast = dragging ? castNodes.filter((n) => n.id !== dragging) : castNodes;
     const filteredLoc = dragging ? locationNodes.filter((n) => n.id !== dragging) : locationNodes;
     zones.forEach((z) => {
       map[z.id] = computeZoneBounds(z, filteredFrames, filteredCast, filteredLoc, scriptNodes, timelineNodes, previewNodes, scriptStackHeights);
     });
+    // Freeze the dragged zone's bounds so configured columns stay visually fixed while dragging
+    if (frozenDragZoneBounds) {
+      map[frozenDragZoneBounds.zoneId] = frozenDragZoneBounds.bounds;
+    }
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, scriptStackHeights, dragging]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, scriptStackHeights, dragging, frozenDragZoneBounds]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
@@ -311,11 +316,12 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     setDraggingZone(null);
     setZoneDragStart(null);
     setConnectingFrom(null);
+    setFrozenDragZoneBounds(null);
   }, [dragging, castNodes, locationNodes, frames, scriptNodes]);
 
   // ── Drag start ────────────────────────────────────────
   const startDrag = useCallback(
-    (e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
+    (e: React.MouseEvent, node: { id: string; x: number; y: number; zoneId?: string }) => {
       if (tool !== "select" || e.button !== 0) return;
       e.stopPropagation();
       const rect = containerRef.current?.getBoundingClientRect();
@@ -324,9 +330,12 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const my = (e.clientY - rect.top - pan.y) / zoom;
       setDragOffset({ x: mx - node.x, y: my - node.y });
       setDragging(node.id);
+      if (node.zoneId && zoneBounds[node.zoneId]) {
+        setFrozenDragZoneBounds({ zoneId: node.zoneId, bounds: zoneBounds[node.zoneId] });
+      }
       setSelected(null);
     },
-    [tool, pan, zoom],
+    [tool, pan, zoom, zoneBounds],
   );
 
   // ── Connection drag ───────────────────────────────────
