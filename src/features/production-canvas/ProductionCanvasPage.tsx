@@ -36,7 +36,9 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const projectName = mockProjects.find(p => p.id === projectId)?.title;
+  const [projectName, setProjectName] = useState(
+    () => mockProjects.find(p => p.id === projectId)?.title || "Untitled"
+  );
   const [scriptStackHeights, setScriptStackHeights] = useState<Record<string, number>>({});
   const cs = useCanvasState(projectId, scriptStackHeights);
 
@@ -153,6 +155,7 @@ function ProductionCanvasPageInner() {
         <CanvasToolbar
            projectId={projectId}
            projectName={projectName}
+           onProjectNameChange={setProjectName}
           tool={cs.tool}
           zoom={cs.zoom}
           onSetTool={cs.setTool}
