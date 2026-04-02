@@ -1,25 +1,27 @@
-## Unified Production Canvas
 
-### New Node Types
-1. **Cast Card** — Actor portrait (like the Jack Marlowe reference), name, description, scene count badge, generated images count. Draggable on canvas.
-2. **Location Card** — Location image, name. Draggable on canvas.
-3. **Shot Frame** — Existing frame cards (unchanged).
+# Collaboration UI (Mock Data)
 
-### Canvas Menu Update
-Add to the right-click context menu:
-- **Add Cast Member** — opens a picker to choose from the actor roster, places a cast card at the click position
-- **Add Location** — opens a picker to choose from available locations, places a location card at the click position
+## 1. Live User Presence
+- Floating avatar stack in the top-right area of the canvas (as a floating toolbar per memory rule)
+- Show 3-4 mock users with colored rings indicating online status
+- Tooltip on hover showing user name
+- "+2 more" overflow indicator
 
-### Connections
-- Cast cards can connect to Shot frames (showing which actor appears in which shot)
-- Location cards can connect to Shot frames (showing where each shot takes place)
-- Connection lines are color-coded: amber for shots, a different color for cast/location links
+## 2. Comments & Notes Panel
+- Floating comment button in the toolbar
+- Opens a slide-out panel with mock comments
+- Each comment: user avatar, name, timestamp, text, and optional "pinned to element" tag
+- Add comment input at bottom
 
-### Visual Design
-- Cast cards: Portrait-heavy (like reference), ~200px wide, rounded corners, dark card style
-- Location cards: Landscape image, ~200px wide, similar card style
-- Both types are draggable, selectable, and deletable like shot frames
+## 3. Share Link Dialog
+- Share button next to the presence avatars
+- Dialog with a mock link and copy button
+- Permission dropdown (View / Edit)
+- Mock invited users list
 
-### Pipeline Impact
-- Casting and Locations pages remain as dedicated editors
-- The Shots canvas becomes the unified "production board" view
+## 4. Activity Feed
+- Small floating panel (toggleable) showing recent actions
+- "Jack added Shot SC 7", "Vivian commented on SC 3", etc.
+- Timestamps and user avatars
+
+All data is hardcoded mock — no backend needed. Components will be floating overlays (per project memory: no docked toolbars).
