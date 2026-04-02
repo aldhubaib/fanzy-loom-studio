@@ -397,43 +397,95 @@ function ProductionCanvasPageInner() {
                     }
                   }
 
-                  // Cards on top
-                  nodes.forEach((node, idx) => {
+                  if (isStack) {
+                    // Stack view: use CSS flow layout so cards auto-size based on content
+                    const b = cs.zoneBounds[zoneId];
+                    if (!b) return;
                     elements.push(
-                      <ScriptNodeCard
-                        key={node.id}
-                        node={node}
-                        sceneNumber={idx + 1}
-                        isSelected={cs.selected?.id === node.id}
-                        isStackView={isStack}
-                        onMouseDown={(e) => cs.startDrag(e, node)}
-                        onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
-                        onDelete={() => {
-                          const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
-                          const doDelete = () => {
-                            cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
-                            if (cs.selected?.id === node.id) cs.setSelected(null);
-                          };
-                          if (linkedFrames.length > 0) {
-                            setPendingDelete({
-                              severity: "destructive",
-                              title: "Delete Script Node",
-                              description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
-                              onConfirm: doDelete,
-                            });
-                          } else {
-                            setPendingDelete({
-                              severity: "warning",
-                              title: "Delete Script Node",
-                              description: `Are you sure you want to delete this script block?`,
-                              onConfirm: doDelete,
-                            });
-                          }
+                      <div
+                        key={`stack-${zoneId}`}
+                        className="absolute flex flex-col"
+                        style={{
+                          left: b.x + 40,
+                          top: b.y + 50,
+                          width: SCRIPT_W * 3,
                         }}
-                        onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
-                      />
+                      >
+                        {nodes.map((node, idx) => (
+                          <ScriptNodeCard
+                            key={node.id}
+                            node={node}
+                            sceneNumber={idx + 1}
+                            isSelected={cs.selected?.id === node.id}
+                            isStackView
+                            onMouseDown={(e) => cs.startDrag(e, node)}
+                            onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                            onDelete={() => {
+                              const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
+                              const doDelete = () => {
+                                cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                                if (cs.selected?.id === node.id) cs.setSelected(null);
+                              };
+                              if (linkedFrames.length > 0) {
+                                setPendingDelete({
+                                  severity: "destructive",
+                                  title: "Delete Script Node",
+                                  description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
+                                  onConfirm: doDelete,
+                                });
+                              } else {
+                                setPendingDelete({
+                                  severity: "warning",
+                                  title: "Delete Script Node",
+                                  description: `Are you sure you want to delete this script block?`,
+                                  onConfirm: doDelete,
+                                });
+                              }
+                            }}
+                            onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+                          />
+                        ))}
+                      </div>
                     );
-                  });
+                  } else {
+                    // Grid view: absolute positioned cards
+                    nodes.forEach((node, idx) => {
+                      elements.push(
+                        <ScriptNodeCard
+                          key={node.id}
+                          node={node}
+                          sceneNumber={idx + 1}
+                          isSelected={cs.selected?.id === node.id}
+                          isStackView={false}
+                          onMouseDown={(e) => cs.startDrag(e, node)}
+                          onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
+                          onDelete={() => {
+                            const linkedFrames = cs.frames.filter((f) => f.zoneId === node.zoneId);
+                            const doDelete = () => {
+                              cs.setScriptNodes((prev) => prev.filter((n) => n.id !== node.id));
+                              if (cs.selected?.id === node.id) cs.setSelected(null);
+                            };
+                            if (linkedFrames.length > 0) {
+                              setPendingDelete({
+                                severity: "destructive",
+                                title: "Delete Script Node",
+                                description: `This script block is in a zone with ${linkedFrames.length} shot${linkedFrames.length > 1 ? "s" : ""}. Deleting it may break your scene continuity.`,
+                                onConfirm: doDelete,
+                              });
+                            } else {
+                              setPendingDelete({
+                                severity: "warning",
+                                title: "Delete Script Node",
+                                description: `Are you sure you want to delete this script block?`,
+                                onConfirm: doDelete,
+                              });
+                            }
+                          }}
+                          onUpdate={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
+                        />
+                      );
+                    });
+                  }
               });
 
               return elements;
