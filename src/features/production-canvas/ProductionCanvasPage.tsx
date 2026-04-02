@@ -351,10 +351,17 @@ function ProductionCanvasPageInner() {
                   }];
                 });
                 if (type === "production") {
+                  const tsNow = Date.now();
                   cs.setTimelineNodes((prev) => [...prev, {
-                    id: `tn-${Date.now()}`,
+                    id: `tn-${tsNow}`,
                     x: wx + 40,
                     y: wy + 40,
+                    zoneId,
+                  }]);
+                  cs.setPreviewNodes((prev) => [...prev, {
+                    id: `pv-${tsNow + 1}`,
+                    x: wx + 40,
+                    y: wy + 400,
                     zoneId,
                   }]);
                 }
