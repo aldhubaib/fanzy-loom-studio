@@ -22,6 +22,7 @@ import { ShotFrameNode } from "./components/ShotFrameNode";
 import { CastNodeCard } from "./components/CastNodeCard";
 import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
+import { TimelineNode } from "./components/TimelineNode";
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
