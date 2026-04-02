@@ -26,6 +26,7 @@ import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
 import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
+import { CollabPresence, CommentsPanel, ActivityFeed, ShareDialog } from "./components/CollabOverlay";
 
 
 interface PendingDelete {
