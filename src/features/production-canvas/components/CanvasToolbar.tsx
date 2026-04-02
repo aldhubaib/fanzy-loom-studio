@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, ArrowLeft, Film } from "lucide-react";
+import { Plus, MousePointer, Hand, Maximize, ZoomIn, ZoomOut, ArrowLeft, Film, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { Tool } from "../types";
