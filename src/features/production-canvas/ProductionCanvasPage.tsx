@@ -676,7 +676,7 @@ function ProductionCanvasPageInner() {
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.castNodes.filter((n) => n.zoneId === zoneId);
                 const cols = cs.zoneCols[zoneId] ?? 3;
-                const gap = 20;
+                const gap = 24;
                 const idx = existing.length;
                 const col = idx % cols;
                 const row = Math.floor(idx / cols);
