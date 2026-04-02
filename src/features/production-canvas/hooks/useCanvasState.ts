@@ -424,6 +424,7 @@ export function useCanvasState(projectId: string | undefined) {
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },
         script: { w: SCRIPT_W, h: SCRIPT_H },
+        shots: { w: FRAME_W, h: FRAME_H },
       };
       const size = sizeMap[zone.type];
       if (!size) return;
@@ -433,6 +434,7 @@ export function useCanvasState(projectId: string | undefined) {
         if (zone.type === "casting") return castNodes.filter((n) => n.zoneId === zoneId);
         if (zone.type === "locations") return locationNodes.filter((n) => n.zoneId === zoneId);
         if (zone.type === "script") return scriptNodes.filter((n) => n.zoneId === zoneId);
+        if (zone.type === "shots") return frames.filter((f) => f.zoneId === zoneId);
         return [];
       };
 
@@ -463,8 +465,9 @@ export function useCanvasState(projectId: string | undefined) {
       if (zone.type === "casting") setCastNodes(applyPositions);
       else if (zone.type === "locations") setLocationNodes(applyPositions);
       else if (zone.type === "script") setScriptNodes(applyPositions);
+      else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, castNodes, locationNodes, scriptNodes],
+    [zones, frames, castNodes, locationNodes, scriptNodes],
   );
 
   // ── Reset canvas ──────────────────────────────────────
