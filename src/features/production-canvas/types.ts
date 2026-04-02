@@ -52,7 +52,7 @@ export interface Zone {
   color: string;
 }
 
-export type ZoneType = "casting" | "shots" | "locations" | "script" | "production" | "screenplay";
+export type ZoneType = "casting" | "shots" | "locations" | "script" | "production";
 
 export interface Connection {
   from: string;
