@@ -311,6 +311,7 @@ function ProductionCanvasPageInner() {
                   onMouseDown={(e) => { cs.setSelected({ type: "frame", id: frame.id }); cs.startDrag(e, frame); }}
                   onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
                   onSelectImage={(frameId, image) => cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, image } : f))}
+                  aspectRatio={cs.shotAspectRatio}
                 />
               ));
             })()}
