@@ -571,7 +571,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const zId = findZoneId();
       if (zId) {
         // Defer auto-grid to after state update
-        setTimeout(() => autoGridZone(zId), 0);
+        setTimeout(() => autoGridZoneRef.current(zId), 0);
       }
     },
     [castNodes, locationNodes, frames, autoGridZone],
