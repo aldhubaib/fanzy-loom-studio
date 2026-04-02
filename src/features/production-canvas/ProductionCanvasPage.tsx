@@ -325,7 +325,39 @@ function ProductionCanvasPageInner() {
                     );
                   }
                 } else {
-                  // Card view — render cards with scene numbers and connector arrows
+                  // Card view — connector arrows first (behind cards)
+                  if (nodes.length > 1) {
+                    const CARD_H = 80;
+                    for (let i = 0; i < nodes.length - 1; i++) {
+                      const from = nodes[i];
+                      const to = nodes[i + 1];
+                      const x1 = from.x + SCRIPT_W;
+                      const y1 = from.y + CARD_H / 2;
+                      const x2 = to.x;
+                      const y2 = to.y + CARD_H / 2;
+                      const midX = (x1 + x2) / 2;
+                      elements.push(
+                        <svg
+                          key={`sc-arrow-${from.id}-${to.id}`}
+                          className="absolute top-0 left-0 pointer-events-none"
+                          style={{ overflow: "visible" }}
+                          width="1"
+                          height="1"
+                        >
+                          <path
+                            d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`}
+                            fill="none"
+                            className="stroke-purple-500/60"
+                            strokeWidth="2"
+                            strokeDasharray="6 4"
+                          />
+                          <circle cx={x2} cy={y2} r="4" className="fill-purple-500/80" />
+                        </svg>
+                      );
+                    }
+                  }
+
+                  // Cards on top
                   nodes.forEach((node, idx) => {
                     elements.push(
                       <ScriptNodeCard
@@ -361,39 +393,6 @@ function ProductionCanvasPageInner() {
                       />
                     );
                   });
-
-                  // Connector arrows between ordered script cards
-                  if (nodes.length > 1) {
-                    const CARD_H = 80; // approximate card height for connector midpoint
-                    for (let i = 0; i < nodes.length - 1; i++) {
-                      const from = nodes[i];
-                      const to = nodes[i + 1];
-                      const x1 = from.x + SCRIPT_W;
-                      const y1 = from.y + CARD_H / 2;
-                      const x2 = to.x;
-                      const y2 = to.y + CARD_H / 2;
-                      const midX = (x1 + x2) / 2;
-                      elements.push(
-                        <svg
-                          key={`sc-arrow-${from.id}-${to.id}`}
-                          className="absolute top-0 left-0 pointer-events-none"
-                          style={{ overflow: "visible" }}
-                          width="1"
-                          height="1"
-                        >
-                          <path
-                            d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`}
-                            fill="none"
-                            stroke="hsl(var(--purple-500, 168 85% 57%))"
-                            className="stroke-purple-500/60"
-                            strokeWidth="2"
-                            strokeDasharray="6 4"
-                          />
-                          <circle cx={x2} cy={y2} r="4" className="fill-purple-500/80" />
-                        </svg>
-                      );
-                    }
-                  }
                 }
               });
 
