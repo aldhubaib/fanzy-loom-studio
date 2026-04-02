@@ -43,6 +43,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>([]);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
   const [zoneCols, setZoneCols] = useState<Record<string, number>>(saved?.zoneCols ?? {});
+  const [shotAspectRatio, setShotAspectRatio] = useState<string>(saved?.shotAspectRatio ?? "16:9");
 
   // ── Viewport ────────────────────────────────────────────
   const [zoom, setZoom] = useState(saved?.zoom ?? 1);
