@@ -442,6 +442,9 @@ export function useCanvasState(projectId: string | undefined) {
       };
       const size = sizeMap[zone.type];
       if (!size) return;
+      // In stack view (1 col), script cards are 3x wider
+      const isStack = overrideCols === 1 && zone.type === "script";
+      const effectiveSize = isStack ? { w: size.w * 3, h: size.h } : size;
 
       // Collect nodes for this zone, sorted by logical order when available
       const getNodes = (): { x: number; y: number; id: string }[] => {
@@ -465,8 +468,8 @@ export function useCanvasState(projectId: string | undefined) {
 
       const positions = nodes.map((n, i) => ({
         id: n.id,
-        x: startX + (i % cols) * (size.w + GAP),
-        y: startY + Math.floor(i / cols) * (size.h + GAP),
+        x: startX + (i % cols) * (effectiveSize.w + GAP),
+        y: startY + Math.floor(i / cols) * (effectiveSize.h + GAP),
       }));
 
       const applyPositions = <T extends { id: string; x: number; y: number }>(

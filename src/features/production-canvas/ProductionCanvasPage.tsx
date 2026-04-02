@@ -364,8 +364,9 @@ function ProductionCanvasPageInner() {
               const elements: React.ReactNode[] = [];
 
               scriptByZone.forEach((nodes, zoneId) => {
-                  // Card view — connector arrows first (behind cards)
-                  if (nodes.length > 1) {
+                  const isStack = stackViewZones.has(zoneId);
+                  // Card view — connector arrows first (behind cards), skip in stack view
+                  if (nodes.length > 1 && !isStack) {
                     const CARD_H = 80;
                     for (let i = 0; i < nodes.length - 1; i++) {
                       const from = nodes[i];
@@ -404,6 +405,7 @@ function ProductionCanvasPageInner() {
                         node={node}
                         sceneNumber={idx + 1}
                         isSelected={cs.selected?.id === node.id}
+                        isStackView={isStack}
                         onMouseDown={(e) => cs.startDrag(e, node)}
                         onSettingsClick={() => cs.setSelected({ type: "script", id: node.id })}
                         onDelete={() => {
