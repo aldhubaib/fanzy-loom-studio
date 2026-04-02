@@ -109,6 +109,7 @@ export const ZONE_COLORS: Record<ZoneType, string> = {
   shots: "220 70% 55%",
   locations: "150 60% 45%",
   script: "280 60% 55%",
+  production: "30 90% 55%",
 };
 
 export const ZONE_LABELS: Record<ZoneType, string> = {
@@ -116,6 +117,7 @@ export const ZONE_LABELS: Record<ZoneType, string> = {
   shots: "Shots",
   locations: "Locations",
   script: "Script",
+  production: "Production",
 };
 
 // ─── Assets Maps ────────────────────────────────────────────
