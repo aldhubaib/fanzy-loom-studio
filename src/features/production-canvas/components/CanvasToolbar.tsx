@@ -60,7 +60,7 @@ export const CanvasToolbar = memo(function CanvasToolbar({
               <ChevronDown className="w-3 h-3 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48 mt-1">
+          <DropdownMenuContent align="start" sideOffset={12} className="w-48">
             <DropdownMenuItem onClick={() => navigate("/")}>
               <ArrowLeft className="w-3.5 h-3.5 mr-2" />
               Back to Projects
