@@ -61,6 +61,11 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
               <FileText className="w-4 h-4" /> Add Scene
             </button>
           )}
+          {zone.type === "production" && (
+            <button className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground" onClick={onAddTimeline}>
+              <Film className="w-4 h-4" /> Add Timeline
+            </button>
+          )}
         </>
       ) : (
         <>
