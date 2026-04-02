@@ -29,6 +29,7 @@ export const CanvasToolbar = memo(function CanvasToolbar({
   projectId, projectName, onProjectNameChange, tool, zoom,
   onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
 }: CanvasToolbarProps) {
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(projectName || "");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,10 +53,20 @@ export const CanvasToolbar = memo(function CanvasToolbar({
     <>
       {/* Logo + Project Name */}
       <div className="absolute top-3 left-3 z-30 flex items-center gap-3 px-3 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg text-sm">
-        <Link to={`/project/${projectId}/storyboard`} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-          <Film className="w-4 h-4 text-primary" />
-          <ChevronDown className="w-3 h-3 text-muted-foreground" />
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity outline-none">
+              <Film className="w-4 h-4 text-primary" />
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48 mt-1">
+            <DropdownMenuItem onClick={() => navigate("/")}>
+              <ArrowLeft className="w-3.5 h-3.5 mr-2" />
+              Back to Projects
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {editing ? (
           <input
             ref={inputRef}
