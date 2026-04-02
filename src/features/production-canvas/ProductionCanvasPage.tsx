@@ -85,32 +85,61 @@ function ProductionCanvasPageInner() {
     : [];
 
   // ── Animation Callbacks ────────────────────────────────
-  const handleAnimateShot = useCallback((frameId: string) => {
-    // Set to animating
+  const animationTimersRef = useRef<Set<ReturnType<typeof setInterval | typeof setTimeout>>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      animationTimersRef.current.forEach((t) => clearInterval(t));
+      animationTimersRef.current.clear();
+    };
+  }, []);
+
+  const handleAnimateShot = useCallback((frameId: string, onComplete?: () => void) => {
     cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "animating" as ShotStatus, animationProgress: 0 } : f));
-    // Simulate progress
     const steps = 30;
-    const interval = 100; // 3s total
     let step = 0;
     const timer = setInterval(() => {
       step++;
-      cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, animationProgress: Math.round((step / steps) * 100) } : f));
+      const progress = Math.round((step / steps) * 100);
+      cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, animationProgress: progress } : f));
       if (step >= steps) {
         clearInterval(timer);
-        const frame = cs.frames.find((f) => f.id === frameId);
-        cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "video_ready" as ShotStatus, animationProgress: 100, videoDuration: f.duration } : f));
-        toast.success(`Shot ${frame?.scene || ""} animated`);
+        animationTimersRef.current.delete(timer);
+        cs.setFrames((prev) => {
+          const frame = prev.find((f) => f.id === frameId);
+          return prev.map((f) => f.id === frameId ? { ...f, shotStatus: "video_ready" as ShotStatus, animationProgress: undefined, videoDuration: f.duration || "4s" } : f);
+        });
+        if (onComplete) onComplete();
+        else {
+          cs.setFrames((prev) => {
+            const frame = prev.find((f) => f.id === frameId);
+            toast.success(`Shot ${frame?.scene || ""} animated`);
+            return prev;
+          });
+        }
       }
-    }, interval);
-  }, [cs.frames]);
+    }, 100);
+    animationTimersRef.current.add(timer);
+  }, []);
 
   const handleAnimateAll = useCallback(() => {
     const approvedFrames = cs.frames.filter((f) => f.shotStatus === "approved");
     if (approvedFrames.length === 0) return;
+    const total = approvedFrames.length;
+    let completed = 0;
+    toast(`Animating ${total} shots...`);
     approvedFrames.forEach((frame, idx) => {
-      setTimeout(() => handleAnimateShot(frame.id), idx * 500);
+      const t = setTimeout(() => {
+        animationTimersRef.current.delete(t);
+        handleAnimateShot(frame.id, () => {
+          completed++;
+          if (completed >= total) {
+            toast.success(`${total} shots animated successfully`);
+          }
+        });
+      }, idx * 500);
+      animationTimersRef.current.add(t);
     });
-    toast(`Animating ${approvedFrames.length} shots...`);
   }, [cs.frames, handleAnimateShot]);
 
   // ── Callbacks ─────────────────────────────────────────
