@@ -917,6 +917,7 @@ function ProductionCanvasPageInner() {
             }
           }}
           onDeleteConnection={handleDeleteConnection}
+          onApproveShot={(frameId) => cs.setFrames((prev) => prev.map((f) => f.id === frameId ? { ...f, shotStatus: "approved" } : f))}
         />
       )}
 
