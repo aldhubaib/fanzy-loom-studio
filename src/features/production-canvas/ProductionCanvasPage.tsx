@@ -649,12 +649,22 @@ function ProductionCanvasPageInner() {
                 if (!cs.actors.find((a) => a.id === actor.id)) {
                   cs.setActors((prev) => [...prev, actor]);
                 }
+                const zoneId = cs.castPickerPos!.zoneId;
+                const b = cs.zoneBounds[zoneId];
+                const existing = cs.castNodes.filter((n) => n.zoneId === zoneId);
+                const cols = 3;
+                const gap = 20;
+                const idx = existing.length;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const startX = b ? b.x + ZONE_PAD : cs.castPickerPos!.worldX;
+                const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.castPickerPos!.worldY;
                 cs.setCastNodes((prev) => [...prev, {
                   id: `cn-${Date.now()}`,
                   actorId: actor.id,
-                  x: cs.castPickerPos!.worldX - CAST_W / 2,
-                  y: cs.castPickerPos!.worldY,
-                  zoneId: cs.castPickerPos!.zoneId,
+                  x: startX + col * (CAST_W + gap),
+                  y: startY + row * (CAST_H + gap),
+                  zoneId,
                 }]);
                 cs.setCastPickerPos(null);
               }}
