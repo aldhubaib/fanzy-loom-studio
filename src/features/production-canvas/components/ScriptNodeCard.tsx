@@ -1,7 +1,7 @@
-import { memo } from "react";
+import { memo, useRef, useCallback } from "react";
 import { Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ScriptNode, SelectedItem } from "../types";
+import type { ScriptNode } from "../types";
 import { SCRIPT_W } from "../constants";
 
 interface ScriptNodeCardProps {
@@ -10,11 +10,27 @@ interface ScriptNodeCardProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onDelete: () => void;
+  onUpdate?: (id: string, updates: Partial<ScriptNode>) => void;
 }
 
 export const ScriptNodeCard = memo(function ScriptNodeCard({
-  node, isSelected, onMouseDown, onSettingsClick, onDelete,
+  node, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
 }: ScriptNodeCardProps) {
+  const headingRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  const handleHeadingBlur = useCallback(() => {
+    const text = headingRef.current?.textContent?.trim() || node.heading;
+    if (text !== node.heading) onUpdate?.(node.id, { heading: text });
+  }, [node.id, node.heading, onUpdate]);
+
+  const handleBodyBlur = useCallback(() => {
+    const text = bodyRef.current?.textContent?.trim() || node.body;
+    if (text !== node.body) onUpdate?.(node.id, { body: text });
+  }, [node.id, node.body, onUpdate]);
+
+  const stopDrag = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
     <div
       data-node
@@ -39,11 +55,31 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       <div className="p-3 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-          <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider truncate">
+          <div
+            ref={headingRef}
+            contentEditable
+            suppressContentEditableWarning
+            spellCheck={false}
+            className="text-[10px] font-bold text-purple-400 uppercase tracking-wider outline-none cursor-text select-text min-w-[20px]"
+            onMouseDown={stopDrag}
+            onBlur={handleHeadingBlur}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); headingRef.current?.blur(); } }}
+          >
             {node.heading}
-          </p>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed">{node.body}</p>
+        <div
+          ref={bodyRef}
+          contentEditable
+          suppressContentEditableWarning
+          spellCheck={false}
+          className="text-xs text-muted-foreground leading-relaxed outline-none cursor-text select-text min-h-[1.25em]"
+          onMouseDown={stopDrag}
+          onBlur={handleBodyBlur}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { /* allow newlines */ } }}
+        >
+          {node.body}
+        </div>
       </div>
     </div>
   );
