@@ -377,6 +377,7 @@ function ProductionCanvasPageInner() {
                     elements.push(
                       <div
                         key={`stack-${zoneId}`}
+                        ref={(el) => setStackRef(zoneId, el)}
                         className="absolute flex flex-col gap-2"
                         style={{
                           left: b.x + 40,
