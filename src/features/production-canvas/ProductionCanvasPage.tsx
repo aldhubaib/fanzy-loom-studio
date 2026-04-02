@@ -38,6 +38,31 @@ function ProductionCanvasPageInner() {
   const cs = useCanvasState(projectId);
 
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [scriptStackHeights, setScriptStackHeights] = useState<Record<string, number>>({});
+  const stackRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const stackObservers = useRef<Record<string, ResizeObserver>>({});
+
+  const setStackRef = useCallback((zoneId: string, el: HTMLDivElement | null) => {
+    // Cleanup old observer
+    if (stackObservers.current[zoneId]) {
+      stackObservers.current[zoneId].disconnect();
+      delete stackObservers.current[zoneId];
+    }
+    stackRefs.current[zoneId] = el;
+    if (el) {
+      const obs = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const h = entry.contentRect.height;
+          setScriptStackHeights((prev) => {
+            if (prev[zoneId] === h) return prev;
+            return { ...prev, [zoneId]: h };
+          });
+        }
+      });
+      obs.observe(el);
+      stackObservers.current[zoneId] = obs;
+    }
+  }, []);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
