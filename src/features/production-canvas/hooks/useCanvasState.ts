@@ -693,6 +693,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     containerRef,
     // Core state
     actors, setActors,
+    locations, setLocations,
     zones, setZones,
     frames, setFrames,
     castNodes, setCastNodes,
