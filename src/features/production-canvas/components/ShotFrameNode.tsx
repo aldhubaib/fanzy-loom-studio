@@ -374,7 +374,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
       , document.body)}
 
       {/* Location image lightbox */}
-      {locationLightbox && frame.location && locationImages[frame.location] && typeof document !== "undefined" && document.body && createPortal(
+      {locationLightbox && frame.location && typeof document !== "undefined" && document.body && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center"
           onClick={() => setLocationLightbox(false)}
@@ -385,14 +385,18 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="p-8" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={locationImages[frame.location]}
-              alt={frame.location}
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              draggable={false}
-            />
-            <p className="text-center text-sm text-foreground/70 mt-3">{frame.location}</p>
+          <div className="p-8 flex gap-6 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+            {(Array.isArray(frame.location) ? frame.location : [frame.location]).filter(l => locationImages[l]).map((loc, i) => (
+              <div key={loc + i} className="text-center">
+                <img
+                  src={locationImages[loc]}
+                  alt={loc}
+                  className="max-w-[300px] max-h-[60vh] object-contain rounded-lg"
+                  draggable={false}
+                />
+                <p className="text-sm text-foreground/70 mt-2">{loc}</p>
+              </div>
+            ))}
           </div>
         </div>
       , document.body)}

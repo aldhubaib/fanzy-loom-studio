@@ -38,10 +38,16 @@ function loadAllLocations(): LocationWithStats[] {
         const ld = locDataMap.get(ln.locationId);
         if (ld) locationNames.add(ld.name);
       });
-      frames.forEach((f: FrameData) => { if (f.location) locationNames.add(f.location); });
+      frames.forEach((f: FrameData) => {
+        const locs = Array.isArray(f.location) ? f.location : (f.location ? [f.location] : []);
+        locs.forEach(l => locationNames.add(l));
+      });
 
       for (const locName of locationNames) {
-        const shotCount = frames.filter((f: FrameData) => f.location === locName).length;
+        const shotCount = frames.filter((f: FrameData) => {
+          const locs = Array.isArray(f.location) ? f.location : (f.location ? [f.location] : []);
+          return locs.includes(locName);
+        }).length;
         // Find image from location data first, then fallback to detail options
         const locData = locations.find((l: LocationData) => l.name === locName);
         const opt = locationDetailOptions.find((l) => l.value === locName);
