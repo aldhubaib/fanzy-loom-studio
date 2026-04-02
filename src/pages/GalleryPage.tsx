@@ -96,7 +96,7 @@ const GalleryPage = () => {
                   </p>
                 </div>
               ) : (
-                <div className="columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                   {allImages.map((img, i) => (
                     <motion.div
                       key={`${img.src}-${i}`}
