@@ -6,7 +6,7 @@ import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
-import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
+import { GRID_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, CAST_W, CAST_H, LOC_W, LOC_H, FRAME_W, FRAME_H, SCRIPT_W, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H } from "./constants";
 import { ZONE_COLORS, ZONE_LABELS } from "./constants";
 import { useCanvasState } from "./hooks/useCanvasState";
 
@@ -213,10 +213,16 @@ function ProductionCanvasPageInner() {
                   onAddItem={() => {
                     const b2 = cs.zoneBounds[zone.id];
                     if (!b2) return;
-                    const wx = b2.x + b2.w / 2;
-                    const wy = b2.y + b2.h / 2;
                     if (zone.type === "shots") {
-                      cs.addFrame(wx, wy, zone.id);
+                      const existing = cs.frames.filter((f) => f.zoneId === zone.id);
+                      const cols = 3;
+                      const gap = 20;
+                      const idx = existing.length;
+                      const col = idx % cols;
+                      const row = Math.floor(idx / cols);
+                      const startX = b2.x + ZONE_PAD;
+                      const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
+                      cs.addFrame(startX + col * (FRAME_W + gap), startY + row * (FRAME_H + gap), zone.id);
                     } else if (zone.type === "casting") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
@@ -235,13 +241,16 @@ function ProductionCanvasPageInner() {
                       const sy = btnY * cs.zoom + cs.pan.y;
                       cs.setLocationPickerPos({ x: sx, y: sy, worldX: btnX, worldY: btnY, zoneId: zone.id });
                     } else if (zone.type === "script") {
-                      const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
+                      const zoneScripts = cs.scriptNodes.filter((n) => n.zoneId === zone.id);
+                      const maxOrder = zoneScripts.reduce((max, n) => Math.max(max, n.order ?? 0), -1);
+                      const startX = b2.x + ZONE_PAD;
+                      const startY = b2.y + ZONE_PAD + ZONE_LABEL_H;
                       cs.setScriptNodes((prev) => [...prev, {
                         id: `sn-${Date.now()}`,
                         heading: "New Scene",
                         body: "Description of the scene...",
-                        x: wx - SCRIPT_W / 2,
-                        y: wy,
+                        x: startX,
+                        y: startY + zoneScripts.length * (160 + 8),
                         zoneId: zone.id,
                         order: maxOrder + 1,
                       }]);
