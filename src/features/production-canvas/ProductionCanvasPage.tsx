@@ -174,7 +174,7 @@ function ProductionCanvasPageInner() {
                   bounds={b}
                   isSelected={cs.selected?.type === "zone" && cs.selected.id === zone.id}
                   isEditingLabel={cs.editingZoneLabel === zone.id}
-                  isStackView={stackViewZones.has(zone.id)}
+                  isStackView={zone.type === "script"}
                   onZoneDragStart={(e) => cs.startZoneDrag(e, zone.id)}
                   onLabelDoubleClick={() => cs.setEditingZoneLabel(zone.id)}
                   onLabelRename={(val) => cs.setZones((prev) => prev.map((z) => (z.id === zone.id ? { ...z, label: val } : z)))}
@@ -183,8 +183,7 @@ function ProductionCanvasPageInner() {
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
                   onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
                   onToolAction={{
-                    autoGrid: () => cs.autoGridZone(zone.id, stackViewZones.has(zone.id) ? 1 : 3),
-                    ...(zone.type === "script" ? { stackView: () => toggleStackView(zone.id) } : {}),
+                    autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : 3),
                   }}
                   onAddItem={() => {
                     const b2 = cs.zoneBounds[zone.id];
