@@ -276,14 +276,8 @@ function ProductionCanvasPageInner() {
               );
             })}
 
-            {/* Connection lines */}
-            <CanvasConnectors
-              connectors={cs.connectors}
-              connectingFrom={cs.connectingFrom}
-              connectingFromPos={cs.connectingFrom ? cs.getPortPos(cs.connectingFrom, "right") : null}
-              connectingMouse={cs.connectingMouse}
-              onDeleteConnection={handleDeleteConnection}
-            />
+
+
 
             {/* Shot frames */}
             {cs.frames.map((frame, idx) => (
