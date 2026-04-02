@@ -690,6 +690,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     previewNodes, setPreviewNodes,
     connections, setConnections,
     zoneCols, setZoneCols,
+    shotAspectRatio, setShotAspectRatio,
     // Viewport
     zoom, setZoom, pan, setPan, tool, setTool,
     // Interaction
