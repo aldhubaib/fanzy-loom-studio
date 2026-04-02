@@ -287,6 +287,7 @@ export const ScriptPageView = memo(function ScriptPageView({
           ref={editorRef}
           className="p-8 min-h-full"
           onMouseDown={(e) => e.stopPropagation()}
+          onClick={() => setSelectedSection(null)}
         >
           {nodes.length > 0 ? (
             nodes.map((n, i) => (
