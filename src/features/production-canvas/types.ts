@@ -41,6 +41,7 @@ export interface ScriptNode {
   x: number;
   y: number;
   zoneId: string;
+  order: number;
 }
 
 export interface Zone {

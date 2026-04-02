@@ -198,9 +198,9 @@ export const initialLocationNodes: LocationNode[] = [
 ];
 
 export const initialScriptNodes: ScriptNode[] = [
-  { id: "sn1", heading: "INT. MARLOWE'S OFFICE - NIGHT", body: "Marlowe sits at his desk, the room thick with cigarette smoke. A knock at the door.", x: 80, y: -460, zoneId: "z-script" },
-  { id: "sn2", heading: "EXT. RAIN-SLICKED ALLEY - NIGHT", body: "Vivian emerges from the shadows, heels clicking on wet pavement.", x: 400, y: -460, zoneId: "z-script" },
-  { id: "sn3", heading: "INT. THE BLUE NOTE JAZZ CLUB - NIGHT", body: "A saxophone wails. Eddie leans against the bar, watching the door.", x: 720, y: -460, zoneId: "z-script" },
+  { id: "sn1", heading: "INT. MARLOWE'S OFFICE - NIGHT", body: "Marlowe sits at his desk, the room thick with cigarette smoke. A knock at the door.", x: 80, y: -460, zoneId: "z-script", order: 0 },
+  { id: "sn2", heading: "EXT. RAIN-SLICKED ALLEY - NIGHT", body: "Vivian emerges from the shadows, heels clicking on wet pavement.", x: 400, y: -460, zoneId: "z-script", order: 1 },
+  { id: "sn3", heading: "INT. THE BLUE NOTE JAZZ CLUB - NIGHT", body: "A saxophone wails. Eddie leans against the bar, watching the door.", x: 720, y: -460, zoneId: "z-script", order: 2 },
 ];
 
 export const initialConnections: Connection[] = [
