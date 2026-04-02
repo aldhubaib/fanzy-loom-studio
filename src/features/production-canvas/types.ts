@@ -4,6 +4,8 @@ import type { CharacterData } from "./components/CharacterDetailsPanel";
 // Actor type aliases CharacterData from the shared panel
 export type Actor = CharacterData;
 
+export type ShotStatus = "empty" | "generating" | "preview" | "approved" | "animating" | "video_ready";
+
 export interface FrameData {
   id: string;
   x: number;
@@ -18,6 +20,9 @@ export interface FrameData {
   zoneId: string;
   order?: number;
   generatedImages?: string[];
+  shotStatus?: ShotStatus;
+  animationProgress?: number;
+  videoDuration?: string;
 }
 
 export interface CastNode {
