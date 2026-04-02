@@ -2,7 +2,7 @@
 // Composed from isolated sub-components. All constants, types,
 // and logic are extracted — this file is purely composition.
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
@@ -23,6 +23,14 @@ import { CastNodeCard } from "./components/CastNodeCard";
 import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
+import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
+
+interface PendingDelete {
+  severity: DeleteSeverity;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
