@@ -458,9 +458,10 @@ export function useCanvasState(projectId: string | undefined, pageViewZones?: Se
       // Calculate grid columns based on count
       const cols = Math.ceil(Math.sqrt(nodes.length));
       
-      // Use the zone's anchor position as the starting point
-      const startX = zone.x + ZONE_PAD;
-      const startY = zone.y + ZONE_PAD + ZONE_LABEL_H;
+      // Use current zone bounds as starting point to avoid shifting
+      const b = zoneBounds[zoneId];
+      const startX = b ? b.x + ZONE_PAD : zone.x + ZONE_PAD;
+      const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : zone.y + ZONE_PAD + ZONE_LABEL_H;
 
       const positions = nodes.map((n, i) => ({
         id: n.id,
