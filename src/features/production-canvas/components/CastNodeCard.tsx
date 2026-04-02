@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Actor, CastNode } from "../types";
 import { CAST_W } from "../constants";
@@ -9,24 +9,20 @@ interface CastNodeCardProps {
   actor: Actor;
   sceneCount: number;
   isSelected: boolean;
-  isFirst: boolean;
-  isLast: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onDelete: () => void;
-  onMoveLeft: () => void;
-  onMoveRight: () => void;
 }
 
 export const CastNodeCard = memo(function CastNodeCard({
-  node, actor, sceneCount, isSelected, isFirst, isLast,
-  onMouseDown, onSettingsClick, onDelete, onMoveLeft, onMoveRight,
+  node, actor, sceneCount, isSelected,
+  onMouseDown, onSettingsClick, onDelete,
 }: CastNodeCardProps) {
   return (
     <div
       data-node
       className={cn(
-        "absolute rounded-xl border-2 bg-card overflow-hidden select-none group",
+        "absolute rounded-xl border-2 bg-card overflow-hidden select-none group cursor-grab active:cursor-grabbing",
         isSelected
           ? "border-cyan-500 shadow-lg shadow-cyan-500/20"
           : "border-border hover:border-cyan-500/40",
@@ -46,30 +42,8 @@ export const CastNodeCard = memo(function CastNodeCard({
         <Settings className="w-3 h-3" />
       </button>
       <img src={actor.portrait} alt={actor.name} className="w-full aspect-[3/4] object-cover" draggable={false} />
-      <div className="p-2 flex items-center justify-between">
-        <p className="text-xs font-bold text-foreground truncate flex-1">{actor.name}</p>
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!isFirst && (
-            <button
-              className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              onClick={(e) => { e.stopPropagation(); onMoveLeft(); }}
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Move left"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-          )}
-          {!isLast && (
-            <button
-              className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              onClick={(e) => { e.stopPropagation(); onMoveRight(); }}
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Move right"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
+      <div className="p-2">
+        <p className="text-xs font-bold text-foreground">{actor.name}</p>
       </div>
     </div>
   );
