@@ -221,7 +221,7 @@ function ProductionCanvasPageInner() {
                     if (zone.type === "shots") {
                       const existing = cs.frames.filter((f) => f.zoneId === zone.id);
                       const cols = cs.zoneCols[zone.id] ?? 3;
-                      const gap = 20;
+                      const gap = 24;
                       const idx = existing.length;
                       const col = idx % cols;
                       const row = Math.floor(idx / cols);
