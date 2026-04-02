@@ -622,7 +622,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     // Callbacks
     handleWheel, handleMouseDown, handleMouseMove, handleMouseUp,
     startDrag, startConnect, endConnect, startZoneDrag,
-    fitToScreen, addFrame, resetCanvas, autoGridZone,
+    fitToScreen, addFrame, resetCanvas, autoGridZone, reorderNode,
     getConnectedActors, findZoneAt, getPortPos,
   };
 }

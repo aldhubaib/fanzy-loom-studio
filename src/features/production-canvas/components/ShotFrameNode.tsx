@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import type { Actor, FrameData, SelectedItem } from "../types";
+import type { Actor, FrameData } from "../types";
 import { FRAME_W, IMAGE_H, locationImages } from "../constants";
 
 interface ShotFrameNodeProps {
@@ -10,12 +10,17 @@ interface ShotFrameNodeProps {
   index: number;
   actors: Actor[];
   isSelected: boolean;
+  isFirst: boolean;
+  isLast: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
+  onMoveLeft: () => void;
+  onMoveRight: () => void;
 }
 
 export const ShotFrameNode = memo(function ShotFrameNode({
-  frame, index, actors, isSelected, onMouseDown, onSettingsClick,
+  frame, index, actors, isSelected, isFirst, isLast,
+  onMouseDown, onSettingsClick, onMoveLeft, onMoveRight,
 }: ShotFrameNodeProps) {
   return (
     <div
@@ -38,7 +43,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); onSettingsClick(); }}
           aria-label="Open shot settings"
-          title="Open shot settings"
         >
           <Settings className="w-3 h-3" />
         </button>
@@ -85,7 +89,31 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             </div>
           )}
         </div>
-        <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2">{frame.description}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-foreground/70 leading-tight line-clamp-2 flex-1">{frame.description}</p>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+            {!isFirst && (
+              <button
+                className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={(e) => { e.stopPropagation(); onMoveLeft(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Move left"
+              >
+                <ChevronLeft className="w-3 h-3" />
+              </button>
+            )}
+            {!isLast && (
+              <button
+                className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={(e) => { e.stopPropagation(); onMoveRight(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Move right"
+              >
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
