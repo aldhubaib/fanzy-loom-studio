@@ -220,15 +220,20 @@ function ProductionCanvasPageInner() {
                     } else if (zone.type === "casting") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
-                      const sx = rect.left + (wx * cs.zoom + cs.pan.x);
-                      const sy = rect.top + (wy * cs.zoom + cs.pan.y);
-                      cs.setCastPickerPos({ x: sx - rect.left, y: sy - rect.top, worldX: wx, worldY: wy, zoneId: zone.id });
+                      // Position picker near the add button (top-right of zone)
+                      const btnX = b2.x + b2.w - 40;
+                      const btnY = b2.y + 60;
+                      const sx = btnX * cs.zoom + cs.pan.x;
+                      const sy = btnY * cs.zoom + cs.pan.y;
+                      cs.setCastPickerPos({ x: sx, y: sy, worldX: btnX, worldY: btnY, zoneId: zone.id });
                     } else if (zone.type === "locations") {
                       const rect = cs.containerRef.current?.getBoundingClientRect();
                       if (!rect) return;
-                      const sx = rect.left + (wx * cs.zoom + cs.pan.x);
-                      const sy = rect.top + (wy * cs.zoom + cs.pan.y);
-                      cs.setLocationPickerPos({ x: sx - rect.left, y: sy - rect.top, worldX: wx, worldY: wy, zoneId: zone.id });
+                      const btnX = b2.x + b2.w - 40;
+                      const btnY = b2.y + 60;
+                      const sx = btnX * cs.zoom + cs.pan.x;
+                      const sy = btnY * cs.zoom + cs.pan.y;
+                      cs.setLocationPickerPos({ x: sx, y: sy, worldX: btnX, worldY: btnY, zoneId: zone.id });
                     } else if (zone.type === "script") {
                       const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
                       cs.setScriptNodes((prev) => [...prev, {
