@@ -37,12 +37,13 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
     <div
       data-node
       className={cn(
-        "absolute rounded-xl border-2 bg-card overflow-visible select-none group cursor-grab",
+        "rounded-xl border-2 bg-card overflow-visible select-none group cursor-grab",
+        isStackView ? "relative" : "absolute",
         isSelected
           ? "border-purple-500 shadow-lg shadow-purple-500/20"
           : "border-border hover:border-purple-500/40",
       )}
-      style={{ left: node.x, top: node.y, width: isStackView ? SCRIPT_W * 3 : SCRIPT_W }}
+      style={isStackView ? { width: "100%" } : { left: node.x, top: node.y, width: SCRIPT_W }}
       onMouseDown={onMouseDown}
     >
       <button
