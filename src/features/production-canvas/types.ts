@@ -124,6 +124,7 @@ export interface CanvasState {
   timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
   previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
+  zoneCols?: Record<string, number>;
   zoom: number;
   pan: { x: number; y: number };
 }

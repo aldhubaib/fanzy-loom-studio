@@ -200,6 +200,7 @@ function ProductionCanvasPageInner() {
                   isSelected={cs.selected?.type === "zone" && cs.selected.id === zone.id}
                   isEditingLabel={cs.editingZoneLabel === zone.id}
                   isStackView={zone.type === "script"}
+                  zoneCols={cs.zoneCols[zone.id] ?? 3}
                   onZoneDragStart={(e) => cs.startZoneDrag(e, zone.id)}
                   onLabelDoubleClick={() => cs.setEditingZoneLabel(zone.id)}
                   onLabelRename={(val) => cs.setZones((prev) => prev.map((z) => (z.id === zone.id ? { ...z, label: val } : z)))}
@@ -207,15 +208,19 @@ function ProductionCanvasPageInner() {
                   onStartConnect={(e, portId) => cs.startConnect(e, portId)}
                   onEndConnect={(e, portId) => { e.stopPropagation(); cs.endConnect(portId); }}
                   onSelect={() => cs.setSelected({ type: "zone", id: zone.id })}
+                  onColsChange={(cols) => {
+                    cs.setZoneCols((prev) => ({ ...prev, [zone.id]: cols }));
+                    cs.autoGridZone(zone.id, zone.type === "script" ? 1 : cols);
+                  }}
                   onToolAction={{
-                    autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : 3),
+                    autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
                   onAddItem={() => {
                     const b2 = cs.zoneBounds[zone.id];
                     if (!b2) return;
                     if (zone.type === "shots") {
                       const existing = cs.frames.filter((f) => f.zoneId === zone.id);
-                      const cols = 3;
+                      const cols = cs.zoneCols[zone.id] ?? 3;
                       const gap = 20;
                       const idx = existing.length;
                       const col = idx % cols;
@@ -293,7 +298,7 @@ function ProductionCanvasPageInner() {
                 index={idx}
                 actors={cs.actors}
                 isSelected={cs.selected?.id === frame.id}
-                onMouseDown={(e) => cs.startDrag(e, frame)}
+                onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "frame", id: frame.id }); }}
                 onSettingsClick={() => cs.setSelected({ type: "frame", id: frame.id })}
               />
             ))}
@@ -310,7 +315,7 @@ function ProductionCanvasPageInner() {
                   actor={actor}
                   sceneCount={sceneCount}
                   isSelected={cs.selected?.id === node.id}
-                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "cast", id: node.id }); }}
                   onSettingsClick={() => cs.setSelected({ type: "cast", id: node.id })}
                   onDelete={() => {
                     const doDelete = () => {
@@ -346,7 +351,7 @@ function ProductionCanvasPageInner() {
                   node={node}
                   isSelected={cs.selected?.id === node.id}
                   shotCount={shotCount}
-                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "location", id: node.id }); }}
                   onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
                   onDelete={() => {
                     const doDelete = () => {
@@ -661,7 +666,7 @@ function ProductionCanvasPageInner() {
                 const zoneId = cs.castPickerPos!.zoneId;
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.castNodes.filter((n) => n.zoneId === zoneId);
-                const cols = 3;
+                const cols = cs.zoneCols[zoneId] ?? 3;
                 const gap = 20;
                 const idx = existing.length;
                 const col = idx % cols;
@@ -692,7 +697,7 @@ function ProductionCanvasPageInner() {
                 const zoneId = cs.locationPickerPos!.zoneId;
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
-                const cols = 3;
+                const cols = cs.zoneCols[zoneId] ?? 3;
                 const gap = 20;
                 const idx = existing.length;
                 const col = idx % cols;

@@ -42,6 +42,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   const [timelineNodes, setTimelineNodes] = useState<TimelineNodeData[]>(saved?.timelineNodes ?? initialTimelineNodes);
   const [previewNodes, setPreviewNodes] = useState<PreviewNodeData[]>([]);
   const [connections, setConnections] = useState<Connection[]>(saved?.connections ?? initialConnections);
+  const [zoneCols, setZoneCols] = useState<Record<string, number>>(saved?.zoneCols ?? {});
 
   // ── Viewport ────────────────────────────────────────────
   const [zoom, setZoom] = useState(saved?.zoom ?? 1);
@@ -71,11 +72,11 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveCanvasState(SAVE_KEY, {
-        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan,
+        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, zoom, pan,
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan, SAVE_KEY]);
+  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, zoom, pan, SAVE_KEY]);
 
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
@@ -565,6 +566,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     timelineNodes, setTimelineNodes,
     previewNodes, setPreviewNodes,
     connections, setConnections,
+    zoneCols, setZoneCols,
     // Viewport
     zoom, setZoom, pan, setPan, tool, setTool,
     // Interaction

@@ -1,6 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, FileText, Plus, Copy, type LucideIcon } from "lucide-react";
+import { LayoutGrid, FileText, Plus, Copy, Columns, type LucideIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { Zone, ZoneBounds, ZoneType } from "../types";
 import { ZONE_CONNECTOR_CONFIGS } from "../constants";
@@ -43,6 +43,7 @@ interface ZoneBackgroundProps {
   isSelected: boolean;
   isEditingLabel: boolean;
   isStackView?: boolean;
+  zoneCols?: number;
   onZoneDragStart: (e: React.MouseEvent) => void;
   onLabelDoubleClick: () => void;
   onLabelRename: (newLabel: string) => void;
@@ -54,12 +55,13 @@ interface ZoneBackgroundProps {
   onToolAction?: Record<string, () => void>;
   onAddItem?: () => void;
   onDuplicateZone?: () => void;
+  onColsChange?: (cols: number) => void;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
-  zone, bounds, isSelected, isEditingLabel, isStackView,
+  zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
-  onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone,
+  onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
@@ -135,6 +137,27 @@ export const ZoneBackground = memo(function ZoneBackground({
       {/* Top-right action buttons — visible on hover */}
       {(hovered || isSelected) && (
         <div className="absolute flex items-center gap-1 pointer-events-auto" style={{ right: 8, top: 48 }}>
+          {/* Column selector */}
+          {onColsChange && zone.type !== "script" && (
+            <div className="flex items-center gap-0.5 bg-card/80 border border-border/40 rounded-md px-1 py-0.5">
+              <Columns className="w-3 h-3 opacity-50 mr-0.5" style={{ color: `hsl(${zone.color} / 0.8)` }} />
+              {[3, 4, 5, 6, 7, 8].map((n) => (
+                <button
+                  key={n}
+                  className={cn(
+                    "w-5 h-5 text-[10px] font-bold rounded transition-colors",
+                    (zoneCols ?? 3) === n
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                  onClick={(e) => { e.stopPropagation(); onColsChange(n); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          )}
           {onAddItem && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
