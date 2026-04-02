@@ -18,6 +18,7 @@ import {
   initialTimelineNodes,
 } from "../constants";
 import type { TimelineNodeData } from "../components/TimelineNode";
+import type { PreviewNodeData } from "../components/PreviewMonitorNode";
 import {
   computeZoneBounds, loadCanvasState, saveCanvasState,
   makeZonePortId, getConnectionBaseId, getConnectionPortKey,
