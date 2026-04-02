@@ -202,4 +202,9 @@ export const initialConnections: Connection[] = [
   { from: `z-casting${CONNECTION_PORT_SEPARATOR}casting`, to: `z-shots${CONNECTION_PORT_SEPARATOR}casting` },
   { from: `z-locations${CONNECTION_PORT_SEPARATOR}locations`, to: `z-shots${CONNECTION_PORT_SEPARATOR}locations` },
   { from: `z-script${CONNECTION_PORT_SEPARATOR}script`, to: `z-shots${CONNECTION_PORT_SEPARATOR}script` },
+  { from: `z-shots${CONNECTION_PORT_SEPARATOR}production`, to: `z-production${CONNECTION_PORT_SEPARATOR}production` },
+];
+
+export const initialTimelineNodes: import("./components/TimelineNode").TimelineNodeData[] = [
+  { id: "tn1", x: 1240, y: 640, zoneId: "z-production" },
 ];

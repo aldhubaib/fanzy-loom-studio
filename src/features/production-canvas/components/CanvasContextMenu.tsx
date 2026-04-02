@@ -70,7 +70,7 @@ export const CanvasContextMenu = memo(function CanvasContextMenu({
       ) : (
         <>
           <p className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Zone</p>
-          {(["casting", "shots", "locations", "script"] as ZoneType[]).map((type) => (
+          {(["casting", "shots", "locations", "script", "production"] as ZoneType[]).map((type) => (
             <button
               key={type}
               className="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-secondary/60 text-foreground"
