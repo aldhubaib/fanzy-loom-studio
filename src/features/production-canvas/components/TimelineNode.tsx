@@ -267,7 +267,7 @@ export const TimelineNode = memo(function TimelineNode({
 
                   {currentFrame.location && (
                     <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                      {currentFrame.location}
+                      {Array.isArray(currentFrame.location) ? currentFrame.location.join(", ") : currentFrame.location}
                     </span>
                   )}
                 </div>

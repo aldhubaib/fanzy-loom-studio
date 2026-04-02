@@ -871,7 +871,7 @@ function ProductionCanvasPageInner() {
           onUpdateLocation={(updated) => cs.setLocations((prev) => prev.map((l) => (l.id === updated.id ? updated : l)))}
           onDeleteLocationNode={(locationId) => {
             const loc = cs.locations.find((l) => l.id === locationId);
-            const usedInShots = cs.frames.filter((f) => f.location === loc?.name).length;
+            const usedInShots = cs.frames.filter((f) => { const ls = Array.isArray(f.location) ? f.location : (f.location ? [f.location] : []); return ls.includes(loc?.name || ""); }).length;
             const doDelete = () => {
               cs.setLocationNodes((prev) => prev.filter((n) => n.locationId !== locationId));
               cs.setSelected(null);

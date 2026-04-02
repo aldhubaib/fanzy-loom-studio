@@ -125,7 +125,7 @@ export const CanvasDrawer = memo(function CanvasDrawer({
                 onChange={onUpdateLocation}
                 onDelete={() => onDeleteLocationNode(selectedLocation.id)}
                 appearances={frames
-                  .filter((f) => f.location === selectedLocation.name)
+                  .filter((f) => { const ls = Array.isArray(f.location) ? f.location : (f.location ? [f.location] : []); return ls.includes(selectedLocation.name); })
                   .map((f) => ({
                     id: f.id, scene: f.scene, shot: f.shot,
                     description: f.description, image: f.image,

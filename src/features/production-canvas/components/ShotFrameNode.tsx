@@ -349,10 +349,10 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                   })}
                 </div>
               </div>
-              {frame.location && (
+                {frame.location && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Eye className="w-3 h-3" />
-                  {frame.location}
+                  {Array.isArray(frame.location) ? frame.location.join(", ") : frame.location}
                 </div>
               )}
               <p className="text-sm text-foreground/60">{frame.description}</p>
