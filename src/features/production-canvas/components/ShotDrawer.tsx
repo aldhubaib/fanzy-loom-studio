@@ -198,12 +198,12 @@ export const ShotDrawer = memo(function ShotDrawer({
       <Separator />
 
       <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Duration</Label>
+        <Label className="text-xs text-muted-foreground">Images to Generate</Label>
         <div className="flex gap-1.5">
-          {DURATION_OPTIONS.map((d) => (
-            <button key={d} onClick={() => setDuration(d)}
-              className={cn("px-2.5 py-1 rounded-md text-xs font-medium transition-all", duration === d ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>
-              {d}
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <button key={n} onClick={() => setDuration(`${n}`)}
+              className={cn("px-2.5 py-1 rounded-md text-xs font-medium transition-all", duration === `${n}` ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>
+              {n}
             </button>
           ))}
         </div>
