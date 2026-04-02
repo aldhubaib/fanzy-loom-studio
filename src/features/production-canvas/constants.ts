@@ -39,7 +39,7 @@ import locDetailRestaurant from "@/assets/locations/interior-restaurant.jpg";
 import locDetailCar from "@/assets/locations/interior-car.jpg";
 
 import type {
-  Actor, FrameData, CastNode, LocationNode, ScriptNode,
+  Actor, FrameData, CastNode, LocationNode, LocationData, ScriptNode,
   Zone, Connection, ZoneConnectorConfig, ZoneType,
 } from "./types";
 
