@@ -120,6 +120,7 @@ export interface CanvasState {
   castNodes: CastNode[];
   locationNodes: LocationNode[];
   scriptNodes: ScriptNode[];
+  screenplayNodes: import("./components/ScreenplayEditorNode").ScreenplayNodeData[];
   timelineNodes: import("./components/TimelineNode").TimelineNodeData[];
   previewNodes: import("./components/PreviewMonitorNode").PreviewNodeData[];
   connections: Connection[];
