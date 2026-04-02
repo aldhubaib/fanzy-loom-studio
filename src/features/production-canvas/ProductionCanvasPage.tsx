@@ -380,11 +380,14 @@ function ProductionCanvasPageInner() {
             {(() => {
               const sorted = [...cs.locationNodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
               return sorted.map((node) => {
-                const shotCount = cs.frames.filter((f) => f.location === node.locationName).length;
+                const loc = cs.locations.find((l) => l.id === node.locationId);
+                if (!loc) return null;
+                const shotCount = cs.frames.filter((f) => f.location === loc.name).length;
                 return (
                   <LocationNodeCard
                     key={node.id}
                     node={node}
+                    location={loc}
                     isSelected={cs.selected?.id === node.id}
                     shotCount={shotCount}
                     onMouseDown={(e) => { cs.setSelected({ type: "location", id: node.id }); cs.startDrag(e, node); }}
@@ -398,14 +401,14 @@ function ProductionCanvasPageInner() {
                         setPendingDelete({
                           severity: "destructive",
                           title: "Delete Location Node",
-                          description: `"${node.locationName}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
+                          description: `"${loc.name}" is used in ${shotCount} shot${shotCount > 1 ? "s" : ""}. Deleting this node will remove the location reference from all connected shots.`,
                           onConfirm: doDelete,
                         });
                       } else {
                         setPendingDelete({
                           severity: "warning",
                           title: "Delete Location Node",
-                          description: `Are you sure you want to delete "${node.locationName}" from the canvas?`,
+                          description: `Are you sure you want to delete "${loc.name}" from the canvas?`,
                           onConfirm: doDelete,
                         });
                       }
@@ -725,12 +728,17 @@ function ProductionCanvasPageInner() {
 {cs.locationPickerPos && (
             <LocationPicker
               position={cs.locationPickerPos}
-              existingLocationNames={
+              locations={cs.locations}
+              existingLocationIds={
                 cs.locationNodes
                   .filter((n) => n.zoneId === cs.locationPickerPos!.zoneId)
-                  .map((n) => n.locationName)
+                  .map((n) => n.locationId)
               }
-              onSelect={(name) => {
+              onSelect={(loc) => {
+                // If it's a brand-new location, add to the roster
+                if (!cs.locations.find((l) => l.id === loc.id)) {
+                  cs.setLocations((prev) => [...prev, loc]);
+                }
                 const zoneId = cs.locationPickerPos!.zoneId;
                 const b = cs.zoneBounds[zoneId];
                 const existing = cs.locationNodes.filter((n) => n.zoneId === zoneId);
@@ -743,7 +751,7 @@ function ProductionCanvasPageInner() {
                 const startY = b ? b.y + ZONE_PAD + ZONE_LABEL_H : cs.locationPickerPos!.worldY;
                 cs.setLocationNodes((prev) => [...prev, {
                   id: `ln-${Date.now()}`,
-                  locationName: name,
+                  locationId: loc.id,
                   x: startX + col * (LOC_W + gap),
                   y: startY + row * (LOC_H + gap),
                   zoneId,
@@ -774,6 +782,7 @@ function ProductionCanvasPageInner() {
           selected={cs.selected}
           frames={cs.frames}
           actors={cs.actors}
+          locations={cs.locations}
           castNodes={cs.castNodes}
           locationNodes={cs.locationNodes}
           scriptNodes={cs.scriptNodes}
@@ -817,6 +826,30 @@ function ProductionCanvasPageInner() {
                 severity: "warning",
                 title: "Delete Cast Node",
                 description: `Are you sure you want to delete "${actor?.name || "this actor"}"?`,
+                onConfirm: doDelete,
+              });
+            }
+          }}
+          onUpdateLocation={(updated) => cs.setLocations((prev) => prev.map((l) => (l.id === updated.id ? updated : l)))}
+          onDeleteLocationNode={(locationId) => {
+            const loc = cs.locations.find((l) => l.id === locationId);
+            const usedInShots = cs.frames.filter((f) => f.location === loc?.name).length;
+            const doDelete = () => {
+              cs.setLocationNodes((prev) => prev.filter((n) => n.locationId !== locationId));
+              cs.setSelected(null);
+            };
+            if (usedInShots > 0) {
+              setPendingDelete({
+                severity: "destructive",
+                title: "Delete Location",
+                description: `"${loc?.name || "This location"}" is in ${usedInShots} shot${usedInShots > 1 ? "s" : ""}. Deleting will remove it from all shots.`,
+                onConfirm: doDelete,
+              });
+            } else {
+              setPendingDelete({
+                severity: "warning",
+                title: "Delete Location",
+                description: `Are you sure you want to delete "${loc?.name || "this location"}"?`,
                 onConfirm: doDelete,
               });
             }

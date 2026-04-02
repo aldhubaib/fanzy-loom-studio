@@ -4,7 +4,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type {
-  Actor, FrameData, CastNode, LocationNode, ScriptNode,
+  Actor, FrameData, CastNode, LocationNode, LocationData, ScriptNode,
   Zone, Connection, Tool, SelectedItem, ZoneBounds,
   CanvasMenuState, PickerPosition, ConnectorData, ZoneType,
 } from "../types";
@@ -12,7 +12,7 @@ import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
   SCRIPT_W, SCRIPT_H, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H, DRAWER_W,
   ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, AUTOSAVE_DEBOUNCE_MS, FIT_DELAY_MS,
-  ZONE_CONNECTOR_CONFIGS, actorRoster,
+  ZONE_CONNECTOR_CONFIGS, actorRoster, locationRoster,
   initialZones, initialFrames, initialCastNodes,
   initialLocationNodes, initialScriptNodes, initialConnections,
   initialTimelineNodes, initialPreviewNodes,
@@ -34,6 +34,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
 
   // ── Core state ──────────────────────────────────────────
   const [actors, setActors] = useState<Actor[]>(saved?.actors ?? actorRoster);
+  const [locations, setLocations] = useState<LocationData[]>(saved?.locations ?? locationRoster);
   const [zones, setZones] = useState<Zone[]>(saved?.zones ?? initialZones);
   const [frames, setFrames] = useState<FrameData[]>(saved?.frames ?? initialFrames);
   const [castNodes, setCastNodes] = useState<CastNode[]>(saved?.castNodes ?? initialCastNodes);
@@ -75,11 +76,11 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveCanvasState(SAVE_KEY, {
-        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, shotAspectRatio, zoom, pan,
+        actors, locations, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, shotAspectRatio, zoom, pan,
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, shotAspectRatio, zoom, pan, SAVE_KEY]);
+  }, [actors, locations, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, shotAspectRatio, zoom, pan, SAVE_KEY]);
 
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
@@ -692,6 +693,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     containerRef,
     // Core state
     actors, setActors,
+    locations, setLocations,
     zones, setZones,
     frames, setFrames,
     castNodes, setCastNodes,

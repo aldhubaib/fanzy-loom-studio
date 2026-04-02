@@ -39,7 +39,7 @@ import locDetailRestaurant from "@/assets/locations/interior-restaurant.jpg";
 import locDetailCar from "@/assets/locations/interior-car.jpg";
 
 import type {
-  Actor, FrameData, CastNode, LocationNode, ScriptNode,
+  Actor, FrameData, CastNode, LocationNode, LocationData, ScriptNode,
   Zone, Connection, ZoneConnectorConfig, ZoneType,
 } from "./types";
 
@@ -190,11 +190,19 @@ export const initialCastNodes: CastNode[] = [
   { id: "cn3", actorId: "a3", x: -460, y: 340, zoneId: "z-casting" },
 ];
 
+// ─── Location Roster ────────────────────────────────────────
+export const locationRoster: LocationData[] = [
+  { id: "loc1", name: "Office", description: "A dimly lit 1940s detective office with wooden desk, filing cabinets, venetian blinds casting shadows.", setting: "Interior", timeOfDay: "Night", weather: "Clear", era: "1940s", mood: "Mysterious", portrait: locOffice, generatedImages: [{ id: "lg1a", src: locOffice, description: "Office — classic noir" }], selectedImageId: "lg1a" },
+  { id: "loc2", name: "Bridge", description: "A fog-covered suspension bridge at dusk, city lights glimmering in the distance.", setting: "Exterior", timeOfDay: "Dusk", weather: "Fog", era: "Modern", mood: "Tense", portrait: locBridge, generatedImages: [{ id: "lg2a", src: locBridge, description: "Bridge — foggy dusk" }], selectedImageId: "lg2a" },
+  { id: "loc3", name: "Jazz Club", description: "A smoky underground jazz club with dim amber lighting and a small stage.", setting: "Interior", timeOfDay: "Night", weather: "Clear", era: "1940s", mood: "Warm", portrait: locJazzClub, generatedImages: [{ id: "lg3a", src: locJazzClub, description: "Jazz Club — noir ambiance" }], selectedImageId: "lg3a" },
+  { id: "loc4", name: "Street", description: "Rain-slicked city streets with neon reflections and passing headlights.", setting: "Exterior", timeOfDay: "Night", weather: "Rain", era: "Modern", mood: "Gloomy", portrait: locStreet, generatedImages: [{ id: "lg4a", src: locStreet, description: "Street — rainy night" }], selectedImageId: "lg4a" },
+];
+
 export const initialLocationNodes: LocationNode[] = [
-  { id: "ln1", locationName: "Office", x: 1240, y: 80, zoneId: "z-locations" },
-  { id: "ln2", locationName: "Bridge", x: 1460, y: 80, zoneId: "z-locations" },
-  { id: "ln3", locationName: "Jazz Club", x: 1240, y: 260, zoneId: "z-locations" },
-  { id: "ln4", locationName: "Street", x: 1460, y: 260, zoneId: "z-locations" },
+  { id: "ln1", locationId: "loc1", x: 1240, y: 80, zoneId: "z-locations" },
+  { id: "ln2", locationId: "loc2", x: 1460, y: 80, zoneId: "z-locations" },
+  { id: "ln3", locationId: "loc3", x: 1240, y: 260, zoneId: "z-locations" },
+  { id: "ln4", locationId: "loc4", x: 1460, y: 260, zoneId: "z-locations" },
 ];
 
 export const initialScriptNodes: ScriptNode[] = [
