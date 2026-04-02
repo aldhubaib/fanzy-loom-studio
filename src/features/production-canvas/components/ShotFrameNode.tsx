@@ -151,7 +151,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                     setGalleryOpen(false);
                   }}
                   className={cn(
-                    "relative rounded-lg overflow-hidden border-2 transition-all aspect-video flex-shrink-0",
+                    "relative overflow-hidden border-2 transition-all aspect-video flex-shrink-0",
                     isViewing
                       ? "border-primary shadow-lg shadow-primary/30"
                       : "border-transparent hover:border-primary/40 opacity-60 hover:opacity-100",
