@@ -309,18 +309,15 @@ function ProductionCanvasPageInner() {
 
               scriptByZone.forEach((nodes, zoneId) => {
                 if (pageViewZones.has(zoneId)) {
-                  // Page view
-                  const zone = cs.zones.find((z) => z.id === zoneId);
-                  if (zone) {
+                  // Page view — render inside zone bounds
+                  const b = cs.zoneBounds[zoneId];
+                  if (b) {
                     elements.push(
                       <ScriptPageView
                         key={`page-${zoneId}`}
                         zoneId={zoneId}
                         nodes={nodes}
-                        zoneX={zone.x}
-                        zoneY={zone.y}
-                        isSelected={cs.selected?.type === "zone" && cs.selected.id === zoneId}
-                        onMouseDown={(e) => cs.startDrag(e, { id: nodes[0]?.id || zoneId, x: zone.x, y: zone.y })}
+                        bounds={b}
                         onUpdateNode={(id, updates) => cs.setScriptNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))}
                       />
                     );

@@ -1,20 +1,13 @@
 import { memo, useRef, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Heading1, Heading2, Heading3, Pilcrow, Minus } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { ScriptNode } from "../types";
-
-// A4 ratio: 210mm × 297mm ≈ 0.707 aspect
-const PAGE_W = 620;
-const PAGE_H = 877;
+import type { ZoneBounds } from "../types";
 
 interface ScriptPageViewProps {
   zoneId: string;
   nodes: ScriptNode[];
-  zoneX: number;
-  zoneY: number;
-  isSelected: boolean;
-  onMouseDown: (e: React.MouseEvent) => void;
+  bounds: ZoneBounds;
   onUpdateNode: (id: string, updates: Partial<ScriptNode>) => void;
 }
 
@@ -29,7 +22,7 @@ const formatButtons: { cmd: FormatCmd; icon: React.ReactNode; label: string }[] 
 ];
 
 export const ScriptPageView = memo(function ScriptPageView({
-  zoneId, nodes, zoneX, zoneY, isSelected, onMouseDown, onUpdateNode,
+  zoneId, nodes, bounds, onUpdateNode,
 }: ScriptPageViewProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -45,7 +38,6 @@ export const ScriptPageView = memo(function ScriptPageView({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    // Parse sections from the editor content back to nodes
     if (!editorRef.current) return;
     const sections = editorRef.current.querySelectorAll("[data-section-id]");
     sections.forEach((section) => {
@@ -62,59 +54,51 @@ export const ScriptPageView = memo(function ScriptPageView({
     });
   }, [nodes, onUpdateNode]);
 
-  // Position: offset from zone anchor
-  const posX = zoneX + 40;
-  const posY = zoneY + 80;
+  // Render inside the zone bounds with some padding
+  const PAD = 20;
 
   return (
     <div
       data-node
-      className={cn(
-        "absolute select-none",
-        isSelected && "ring-2 ring-purple-500/30 rounded-lg",
-      )}
-      style={{ left: posX, top: posY, width: PAGE_W }}
-      onMouseDown={onMouseDown}
+      className="absolute pointer-events-auto"
+      style={{
+        left: bounds.x + PAD,
+        top: bounds.y + PAD,
+        width: bounds.w - PAD * 2,
+        height: bounds.h - PAD * 2,
+      }}
     >
-      {/* Floating toolbar */}
+      {/* Floating format toolbar */}
       <div
         className={cn(
-          "absolute -top-10 left-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-sm border border-border/50 transition-opacity z-10",
-          isFocused || isSelected ? "opacity-100" : "opacity-0 pointer-events-none",
+          "absolute -top-9 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-sm border border-border/50 transition-opacity z-10",
+          isFocused ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {formatButtons.map((btn) => (
-          <TooltipProvider key={btn.cmd} delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onClick={() => execFormat(btn.cmd)}
-                >
-                  {btn.icon}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-[10px] py-0.5 px-1.5">
-                {btn.label}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <button
+            key={btn.cmd}
+            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+            title={btn.label}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={() => execFormat(btn.cmd)}
+          >
+            {btn.icon}
+          </button>
         ))}
       </div>
 
-      {/* A4 page */}
+      {/* A4-style page */}
       <div
-        className="rounded-lg border border-border/40 bg-card/95 shadow-xl overflow-hidden"
-        style={{ width: PAGE_W, minHeight: PAGE_H }}
+        className="rounded-lg border border-border/40 bg-card/95 shadow-xl overflow-auto h-full"
       >
         <div
           ref={editorRef}
           contentEditable
           suppressContentEditableWarning
           spellCheck={false}
-          className="p-8 outline-none text-sm text-foreground/90 leading-relaxed min-h-[400px] cursor-text
+          className="p-8 outline-none text-sm text-foreground/90 leading-relaxed min-h-full cursor-text
             [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-purple-400 [&_h1]:uppercase [&_h1]:tracking-wider [&_h1]:mb-2 [&_h1]:mt-4
             [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-purple-300 [&_h2]:mb-2 [&_h2]:mt-3
             [&_h3]:text-base [&_h3]:font-medium [&_h3]:text-purple-200 [&_h3]:mb-1.5 [&_h3]:mt-2.5
@@ -125,12 +109,14 @@ export const ScriptPageView = memo(function ScriptPageView({
           onMouseDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           dangerouslySetInnerHTML={{
-            __html: nodes
-              .map(
-                (n) =>
-                  `<div data-section-id="${n.id}"><h1 class="section-heading">${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
-              )
-              .join(""),
+            __html: nodes.length > 0
+              ? nodes
+                  .map(
+                    (n) =>
+                      `<div data-section-id="${n.id}"><h1 class="section-heading">${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
+                  )
+                  .join("")
+              : `<p style="color: rgba(255,255,255,0.3)">Start writing your script...</p>`,
           }}
         />
       </div>
