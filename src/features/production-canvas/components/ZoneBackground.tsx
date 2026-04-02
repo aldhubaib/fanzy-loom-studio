@@ -132,9 +132,9 @@ export const ZoneBackground = memo(function ZoneBackground({
       })}
 
       {/* Label + Zone tools */}
-      <div className="absolute top-1 left-4 flex items-center gap-2 pointer-events-auto">
+      <div className="absolute top-0 left-4 h-10 flex items-center gap-1.5 pointer-events-auto">
         <div
-          className="px-3 py-1 cursor-grab active:cursor-grabbing select-none"
+          className="px-2 cursor-grab active:cursor-grabbing select-none leading-none"
           onMouseDown={onZoneDragStart}
           onDoubleClick={(e) => { e.stopPropagation(); onLabelDoubleClick(); }}
         >
@@ -171,7 +171,7 @@ export const ZoneBackground = memo(function ZoneBackground({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    className="flex items-center justify-center w-6 h-6 rounded-md opacity-60 hover:opacity-100 transition-opacity"
+                    className="flex items-center justify-center w-7 h-7 rounded-md opacity-60 hover:opacity-100 transition-opacity"
                     style={{ color: `hsl(${zone.color} / 0.8)` }}
                     onClick={(e) => { e.stopPropagation(); onToolAction?.[tool.key]?.(); }}
                     onMouseDown={(e) => e.stopPropagation()}
