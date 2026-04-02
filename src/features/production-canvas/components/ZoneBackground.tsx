@@ -141,7 +141,7 @@ export const ZoneBackground = memo(function ZoneBackground({
           {isEditingLabel ? (
             <input
               autoFocus
-              className="text-lg font-bold bg-transparent border-b border-current outline-none"
+              className="text-lg font-bold bg-transparent border-none outline-none"
               style={{ color: `hsl(${zone.color} / 0.7)` }}
               defaultValue={zone.label}
               onBlur={(e) => {
