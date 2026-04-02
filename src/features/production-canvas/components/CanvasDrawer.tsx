@@ -34,6 +34,7 @@ interface CanvasDrawerProps {
   onUpdateScriptNode: (id: string, updates: Partial<ScriptNode>) => void;
   onDeleteScriptNode: (id: string) => void;
   onDeleteConnection: (from: string, to: string) => void;
+  onApproveShot?: (frameId: string) => void;
 }
 
 export const CanvasDrawer = memo(function CanvasDrawer({
