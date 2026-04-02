@@ -429,7 +429,7 @@ export function useCanvasState(projectId: string | undefined) {
 
   // ── Auto-grid zone nodes ───────────────────────────────
   const autoGridZone = useCallback(
-    (zoneId: string) => {
+    (zoneId: string, overrideCols?: number) => {
       const zone = zones.find((z) => z.id === zoneId);
       if (!zone) return;
 
