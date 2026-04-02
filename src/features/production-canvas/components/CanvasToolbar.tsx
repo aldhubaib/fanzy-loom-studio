@@ -19,7 +19,7 @@ interface CanvasToolbarProps {
 
 export const CanvasToolbar = memo(function CanvasToolbar({
   projectId, tool, zoom,
-  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut,
+  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
 }: CanvasToolbarProps) {
   return (
     <>
