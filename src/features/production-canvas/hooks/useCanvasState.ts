@@ -284,7 +284,22 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
 
       if (isCast) setCastNodes(recalcOrder);
       else if (isLocation) setLocationNodes(recalcOrder);
-      else if (isFrame) setFrames(recalcOrder);
+      else if (isFrame) setFrames((prev) => {
+        const reordered = recalcOrder(prev);
+        // Reassign scene labels based on new order within each zone
+        const zoneGroups = new Map<string, string[]>();
+        reordered.forEach((f) => {
+          if (!zoneGroups.has(f.zoneId)) zoneGroups.set(f.zoneId, []);
+        });
+        const sorted = [...reordered].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        sorted.forEach((f) => zoneGroups.get(f.zoneId)?.push(f.id));
+        return reordered.map((f) => {
+          const ids = zoneGroups.get(f.zoneId);
+          if (!ids) return f;
+          const idx = ids.indexOf(f.id);
+          return { ...f, scene: `SC ${idx + 1}` };
+        });
+      });
       else if (isScript) {
         setScriptNodes((prev) => {
           const draggedNode = prev.find((n) => n.id === dragging);
