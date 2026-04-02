@@ -12,7 +12,7 @@ import { useCanvasState } from "./hooks/useCanvasState";
 
 import { CanvasErrorBoundary } from "./components/ErrorBoundary";
 import { CanvasToolbar } from "./components/CanvasToolbar";
-import { CanvasConnectors } from "./components/CanvasConnectors";
+
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import { CastPicker, LocationPicker } from "./components/CanvasPickers";
 import { CanvasDrawer } from "./components/CanvasDrawer";
@@ -276,14 +276,8 @@ function ProductionCanvasPageInner() {
               );
             })}
 
-            {/* Connection lines */}
-            <CanvasConnectors
-              connectors={cs.connectors}
-              connectingFrom={cs.connectingFrom}
-              connectingFromPos={cs.connectingFrom ? cs.getPortPos(cs.connectingFrom, "right") : null}
-              connectingMouse={cs.connectingMouse}
-              onDeleteConnection={handleDeleteConnection}
-            />
+
+
 
             {/* Shot frames */}
             {cs.frames.map((frame, idx) => (
