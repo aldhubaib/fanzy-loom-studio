@@ -97,7 +97,7 @@ export const ZoneBackground = memo(function ZoneBackground({
       {ports.map((port) => {
         const portId = makeZonePortId(zone.id, port.key);
         const portColor = `hsl(${port.color})`;
-        const yPos = b.h * port.yFrac;
+        const yPos = 40 + b.h * port.yFrac;
         const isLeft = port.side === "left";
         const size = zone.type === "shots" ? 20 : 18;
         const borderW = zone.type === "shots" ? 4 : 3;
