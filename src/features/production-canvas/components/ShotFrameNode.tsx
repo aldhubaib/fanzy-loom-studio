@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Settings, Images, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -103,8 +104,8 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         </div>
       </div>
 
-      {/* Full-screen Image Gallery Modal */}
-      {galleryOpen && (
+      {/* Full-screen Image Gallery Modal - rendered via portal to escape canvas transform */}
+      {galleryOpen && typeof document !== "undefined" && document.body && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex"
           onClick={() => setGalleryOpen(false)}
@@ -191,7 +192,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             </button>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 });
