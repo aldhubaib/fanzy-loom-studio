@@ -118,10 +118,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Image counter */}
-          <div className="absolute top-4 right-4 z-10 bg-background/20 backdrop-blur-sm text-foreground text-sm font-medium px-3 py-1.5 rounded-full">
-            {(selectedPreview ?? 0) + 1} / {imageCount}
-          </div>
 
           {/* Main preview area */}
           <div
@@ -140,7 +136,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
 
           {/* Right-side thumbnail strip */}
           <div
-            className="w-20 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
+            className="w-40 flex flex-col gap-2 p-3 overflow-y-auto bg-background/10"
             onClick={(e) => e.stopPropagation()}
           >
             {frame.generatedImages?.map((img, i) => {
@@ -155,7 +151,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
                     setGalleryOpen(false);
                   }}
                   className={cn(
-                    "relative rounded-lg overflow-hidden border-2 transition-all aspect-video flex-shrink-0",
+                    "relative overflow-hidden border-2 transition-all aspect-video flex-shrink-0",
                     isViewing
                       ? "border-primary shadow-lg shadow-primary/30"
                       : "border-transparent hover:border-primary/40 opacity-60 hover:opacity-100",
