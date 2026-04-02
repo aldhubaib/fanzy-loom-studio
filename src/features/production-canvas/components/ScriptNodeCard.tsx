@@ -8,6 +8,7 @@ interface ScriptNodeCardProps {
   node: ScriptNode;
   sceneNumber: number;
   isSelected: boolean;
+  isStackView?: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onSettingsClick: () => void;
   onDelete: () => void;
@@ -15,7 +16,7 @@ interface ScriptNodeCardProps {
 }
 
 export const ScriptNodeCard = memo(function ScriptNodeCard({
-  node, sceneNumber, isSelected, onMouseDown, onSettingsClick, onDelete, onUpdate,
+  node, sceneNumber, isSelected, isStackView, onMouseDown, onSettingsClick, onDelete, onUpdate,
 }: ScriptNodeCardProps) {
   const headingRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
