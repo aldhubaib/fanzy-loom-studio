@@ -465,8 +465,9 @@ export function useCanvasState(projectId: string | undefined) {
       if (zone.type === "casting") setCastNodes(applyPositions);
       else if (zone.type === "locations") setLocationNodes(applyPositions);
       else if (zone.type === "script") setScriptNodes(applyPositions);
+      else if (zone.type === "shots") setFrames(applyPositions);
     },
-    [zones, castNodes, locationNodes, scriptNodes],
+    [zones, frames, castNodes, locationNodes, scriptNodes],
   );
 
   // ── Reset canvas ──────────────────────────────────────
