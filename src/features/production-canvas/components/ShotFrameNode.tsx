@@ -93,9 +93,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
           >
             <Settings className="w-3 h-3" />
           </button>
-          <div className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-            {status === "video_ready" && frame.videoDuration ? `▶ ${frame.videoDuration}` : frame.shot}
-          </div>
         </div>
 
         {/* Image area */}
@@ -176,6 +173,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
         <div className="p-2.5 space-y-1 rounded-b-[10px]" onMouseDown={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold text-primary">{frame.scene}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">{status === "video_ready" && frame.videoDuration ? `▶ ${frame.videoDuration}` : frame.shot}</span>
             <span className="text-[10px] text-muted-foreground">{frame.duration}</span>
           </div>
           <div className="flex items-center gap-1">
