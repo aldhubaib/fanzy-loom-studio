@@ -852,7 +852,59 @@ function ProductionCanvasPageInner() {
   );
 }
 
+function CanvasLoader() {
+  return (
+    <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center gap-6 animate-fade-in">
+      {/* Animated film reel icon */}
+      <div className="relative w-20 h-20">
+        <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]" />
+        <div className="absolute inset-2 rounded-xl bg-primary/10 flex items-center justify-center">
+          <svg
+            className="w-10 h-10 text-primary animate-[spin_3s_linear_infinite]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="3" />
+            <line x1="12" y1="2" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="22" y2="12" />
+            <line x1="4.93" y1="4.93" x2="7.05" y2="7.05" />
+            <line x1="16.95" y1="16.95" x2="19.07" y2="19.07" />
+            <line x1="4.93" y1="19.07" x2="7.05" y2="16.95" />
+            <line x1="16.95" y1="7.05" x2="19.07" y2="4.93" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Loading text */}
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-sm font-semibold text-foreground tracking-wide">Loading Canvas</p>
+        <div className="flex gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "0ms" }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "150ms" }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "300ms" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductionCanvasPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <CanvasLoader />;
+
   return (
     <CanvasErrorBoundary fallbackTitle="Canvas crashed">
       <ProductionCanvasPageInner />
