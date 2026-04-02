@@ -291,6 +291,18 @@ function ProductionCanvasPageInner() {
                 }
                 cs.setCanvasMenu(null);
               }}
+              onAddPreview={() => {
+                const zone = cs.zones.find((z) => z.id === cs.canvasMenu!.zoneId);
+                if (zone) {
+                  cs.setPreviewNodes((prev) => [...prev, {
+                    id: `pv-${Date.now()}`,
+                    x: cs.canvasMenu!.worldX - PREVIEW_MON_W / 2,
+                    y: cs.canvasMenu!.worldY,
+                    zoneId: zone.id,
+                  }]);
+                }
+                cs.setCanvasMenu(null);
+              }}
               onAddZone={(type) => {
                 const zoneId = `z-${type}-${Date.now()}`;
                 const wx = cs.canvasMenu!.worldX;
