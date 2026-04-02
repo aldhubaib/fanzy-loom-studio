@@ -4,7 +4,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type {
-  Actor, FrameData, CastNode, LocationNode, ScriptNode,
+  Actor, FrameData, CastNode, LocationNode, LocationData, ScriptNode,
   Zone, Connection, Tool, SelectedItem, ZoneBounds,
   CanvasMenuState, PickerPosition, ConnectorData, ZoneType,
 } from "../types";
