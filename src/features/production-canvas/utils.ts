@@ -81,11 +81,15 @@ export function computeZoneBounds(
   const maxY = Math.max(...children.map((c) => c.y + c.h)) + ZONE_PAD;
 
   if (isPageView) {
+    // Auto-expand: ~150px per scene, minimum A4_PAGE_H
+    const SCENE_HEIGHT = 150;
+    const contentH = children.length * SCENE_HEIGHT + 120;
+    const dynamicH = Math.max(A4_PAGE_H, contentH);
     return {
       x: minX,
       y: minY,
       w: A4_PAGE_W + ZONE_PAD * 2,
-      h: A4_PAGE_H + ZONE_PAD * 2 + ZONE_LABEL_H,
+      h: dynamicH + ZONE_PAD * 2 + ZONE_LABEL_H,
     };
   }
 
