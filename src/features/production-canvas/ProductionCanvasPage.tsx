@@ -661,9 +661,14 @@ function ProductionCanvasPageInner() {
               onClose={() => cs.setCastPickerPos(null)}
             />
           )}
-          {cs.locationPickerPos && (
+{cs.locationPickerPos && (
             <LocationPicker
               position={cs.locationPickerPos}
+              existingLocationNames={
+                cs.locationNodes
+                  .filter((n) => n.zoneId === cs.locationPickerPos!.zoneId)
+                  .map((n) => n.locationName)
+              }
               onSelect={(name) => {
                 cs.setLocationNodes((prev) => [...prev, {
                   id: `ln-${Date.now()}`,
