@@ -364,13 +364,14 @@ function ProductionCanvasPageInner() {
 
                   // Connector arrows between ordered script cards
                   if (nodes.length > 1) {
+                    const CARD_H = 80; // approximate card height for connector midpoint
                     for (let i = 0; i < nodes.length - 1; i++) {
                       const from = nodes[i];
                       const to = nodes[i + 1];
                       const x1 = from.x + SCRIPT_W;
-                      const y1 = from.y + SCRIPT_H / 2;
+                      const y1 = from.y + CARD_H / 2;
                       const x2 = to.x;
-                      const y2 = to.y + SCRIPT_H / 2;
+                      const y2 = to.y + CARD_H / 2;
                       const midX = (x1 + x2) / 2;
                       elements.push(
                         <svg
