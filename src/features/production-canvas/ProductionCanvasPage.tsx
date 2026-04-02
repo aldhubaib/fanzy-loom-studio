@@ -234,7 +234,6 @@ function ProductionCanvasPageInner() {
                       const sx = btnX * cs.zoom + cs.pan.x;
                       const sy = btnY * cs.zoom + cs.pan.y;
                       cs.setLocationPickerPos({ x: sx, y: sy, worldX: btnX, worldY: btnY, zoneId: zone.id });
-                      cs.setLocationPickerPos({ x: sx - rect.left, y: sy - rect.top, worldX: wx, worldY: wy, zoneId: zone.id });
                     } else if (zone.type === "script") {
                       const maxOrder = cs.scriptNodes.filter((n) => n.zoneId === zone.id).reduce((max, n) => Math.max(max, n.order ?? 0), -1);
                       cs.setScriptNodes((prev) => [...prev, {
