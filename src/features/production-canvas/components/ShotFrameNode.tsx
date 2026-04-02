@@ -118,10 +118,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Image counter */}
-          <div className="absolute top-4 right-4 z-10 bg-background/20 backdrop-blur-sm text-foreground text-sm font-medium px-3 py-1.5 rounded-full">
-            {(selectedPreview ?? 0) + 1} / {imageCount}
-          </div>
 
           {/* Main preview area */}
           <div
