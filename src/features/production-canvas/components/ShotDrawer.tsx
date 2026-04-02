@@ -32,6 +32,7 @@ export const ShotDrawer = memo(function ShotDrawer({
   const [selectedActors, setSelectedActors] = useState<string[]>(frame.actors);
   const [location, setLocation] = useState(frame.location || "");
   const [shotModalOpen, setShotModalOpen] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
 
   useEffect(() => {
     setPrompt(frame.description);
