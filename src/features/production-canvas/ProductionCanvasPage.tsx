@@ -39,6 +39,16 @@ function ProductionCanvasPageInner() {
 
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [pageViewZones, setPageViewZones] = useState<Set<string>>(new Set());
+
+  const togglePageView = useCallback((zoneId: string) => {
+    setPageViewZones((prev) => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) next.delete(zoneId);
+      else next.add(zoneId);
+      return next;
+    });
+  }, []);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
