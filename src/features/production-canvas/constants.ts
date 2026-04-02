@@ -58,9 +58,9 @@ export const DRAWER_W = 360;
 export const TIMELINE_W = 2400;
 export const TIMELINE_H = 1680;
 export const TIMELINE_PREVIEW_H = 780;
-export const TIMELINE_TRACK_H = 132;
-export const TIMELINE_HEADER_H = 108;
-export const TIMELINE_RULER_H = 72;
+export const TIMELINE_TRACK_H = 44;
+export const TIMELINE_HEADER_H = 36;
+export const TIMELINE_RULER_H = 24;
 export const PREVIEW_MON_W = 640;
 export const PREVIEW_MON_H = 480;
 
