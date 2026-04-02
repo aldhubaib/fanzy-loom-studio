@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from "react";
-import { Check, Sparkles, Trash2, Camera, MapPin } from "lucide-react";
+import { Check, Sparkles, Trash2, Camera, MapPin, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import type { Actor, FrameData } from "../types";
+import type { Actor, FrameData, ShotStatus } from "../types";
 import { shotTypes, locationDetailOptions, DURATION_OPTIONS } from "../constants";
 
 interface ShotDrawerProps {
@@ -21,10 +21,11 @@ interface ShotDrawerProps {
   connectedActors: Actor[];
   onUpdate: (f: FrameData) => void;
   onDelete: () => void;
+  onApprove?: (frameId: string) => void;
 }
 
 export const ShotDrawer = memo(function ShotDrawer({
-  frame, actors, connectedActors, onUpdate, onDelete,
+  frame, actors, connectedActors, onUpdate, onDelete, onApprove,
 }: ShotDrawerProps) {
   const [prompt, setPrompt] = useState(frame.description);
   const [shot, setShot] = useState(frame.shot);
@@ -237,8 +238,20 @@ export const ShotDrawer = memo(function ShotDrawer({
 
       <div className="flex gap-2">
         <Button size="sm" className="flex-1 gap-1.5" onClick={save}><Check className="w-3.5 h-3.5" /> Save</Button>
-        <Button size="sm" variant="outline" className="gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => toast("Generation started")}><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
       </div>
+
+      {frame.image && (!frame.shotStatus || frame.shotStatus === "empty" || frame.shotStatus === "preview") && onApprove && (
+        <Button size="sm" variant="outline" className="w-full gap-1.5 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300" onClick={() => { onApprove(frame.id); toast.success("Shot approved"); }}>
+          <CheckCircle className="w-3.5 h-3.5" /> Approve Shot
+        </Button>
+      )}
+
+      {frame.shotStatus === "approved" && (
+        <div className="flex items-center gap-1.5 text-xs text-emerald-400 justify-center py-1">
+          <CheckCircle className="w-3.5 h-3.5" /> Approved
+        </div>
+      )}
       <button onClick={onDelete} className="w-full flex items-center justify-center gap-1.5 text-xs text-destructive hover:text-destructive/80 py-2 transition-colors">
         <Trash2 className="w-3 h-3" /> Delete Shot
       </button>
