@@ -29,7 +29,7 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
     setAiMode(false);
     setAiPrompt("");
     // Navigate to new project concept page (using a mock new id)
-    navigate("/project/new/concept");
+    navigate("/project/new/canvas");
   };
 
   return (
