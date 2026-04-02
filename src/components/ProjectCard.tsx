@@ -30,7 +30,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
       className="group card-lift rounded-lg border border-border bg-card overflow-hidden cursor-pointer"
-      onClick={() => navigate(`/project/${project.id}/concept`)}
+      onClick={() => navigate(`/project/${project.id}/canvas`)}
     >
       {/* Thumbnail */}
       <div className={`aspect-video bg-gradient-to-br ${project.gradient} relative`}>
