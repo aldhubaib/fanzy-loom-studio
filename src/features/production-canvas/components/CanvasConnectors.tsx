@@ -15,7 +15,7 @@ export const CanvasConnectors = memo(function CanvasConnectors({
 }: CanvasConnectorsProps) {
   return (
     <svg
-      className="absolute pointer-events-none overflow-visible z-10"
+      className="absolute pointer-events-none overflow-visible z-0"
       style={{
         left: -CONNECTOR_SVG_OFFSET,
         top: -CONNECTOR_SVG_OFFSET,
