@@ -29,9 +29,6 @@ export const ShotFrameNode = memo(function ShotFrameNode({
       style={{ left: frame.x, top: frame.y, width: FRAME_W }}
       onMouseDown={onMouseDown}
     >
-      <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-        {index + 1}
-      </div>
       <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
         <button
           className="bg-background/70 backdrop-blur-sm text-foreground/70 hover:text-foreground hover:bg-background/90 w-5 h-5 flex items-center justify-center rounded-md transition-colors"
