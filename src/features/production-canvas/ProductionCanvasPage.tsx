@@ -437,11 +437,39 @@ function ProductionCanvasPageInner() {
 
                 cs.setCanvasMenu(null);
 
-                if (totalNodes > 0) {
+                // Find connected zones via connections
+                const connectedZones = cs.connections
+                  .filter((c) => c.from.startsWith(zoneId) || c.to.startsWith(zoneId))
+                  .map((c) => {
+                    const otherId = c.from.startsWith(zoneId) ? c.to.split("::")[0] : c.from.split("::")[0];
+                    return cs.zones.find((z) => z.id === otherId);
+                  })
+                  .filter(Boolean);
+
+                const connectedShotsZone = connectedZones.find((z) => z!.type === "shots");
+
+                if (totalNodes > 0 || connectedZones.length > 0) {
+                  let description = "";
+                  
+                  if (zone?.type === "locations" && connectedShotsZone) {
+                    description = `This zone is connected to "${connectedShotsZone.label}". If you delete it, all shot locations will be empty.`;
+                  } else if (zone?.type === "casting" && connectedShotsZone) {
+                    description = `This zone is connected to "${connectedShotsZone.label}". If you delete it, all actor assignments in shots will be removed.`;
+                  } else if (zone?.type === "script" && connectedShotsZone) {
+                    description = `This zone is connected to "${connectedShotsZone.label}". If you delete it, all script references for shots will be lost.`;
+                  } else if (zone?.type === "shots" && connectedZones.length > 0) {
+                    const names = connectedZones.map((z) => `"${z!.label}"`).join(", ");
+                    description = `This zone is connected to ${names}. Deleting it will remove all ${zoneFrames.length} shot${zoneFrames.length !== 1 ? "s" : ""} and break those connections.`;
+                  } else if (zone?.type === "production") {
+                    description = `This zone contains the production timeline. Deleting it will remove the timeline and all production data.`;
+                  } else {
+                    description = `This zone contains ${totalNodes} node${totalNodes !== 1 ? "s" : ""}. All contents will be permanently deleted.`;
+                  }
+
                   setPendingDelete({
                     severity: "destructive",
                     title: `Delete "${zone?.label || "Zone"}"`,
-                    description: `This zone contains ${totalNodes} node${totalNodes > 1 ? "s" : ""} (${zoneFrames.length} shots, ${zoneCast.length} cast, ${zoneLoc.length} locations, ${zoneScripts.length} scripts). All contents will be permanently deleted.`,
+                    description,
                     onConfirm: doDelete,
                   });
                 } else {
