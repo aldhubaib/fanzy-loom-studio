@@ -43,6 +43,14 @@ export interface ScriptNode {
   zoneId: string;
 }
 
+export interface ScreenplayNode {
+  id: string;
+  content: string; // HTML content from contentEditable
+  x: number;
+  y: number;
+  zoneId: string;
+}
+
 export interface Zone {
   id: string;
   label: string;
