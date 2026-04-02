@@ -176,7 +176,7 @@ export const initialZones: Zone[] = [
 ];
 
 export const initialFrames: FrameData[] = [
-  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office", zoneId: "z-shots", generatedImages: [frame1, frame4] },
+  { id: "f1", x: 80, y: 80, image: frame1, scene: "SC 1", shot: "WIDE", description: "Marlowe sits at his desk, smoke curling from a cigarette.", duration: "4s", actors: ["a1"], location: "Office", zoneId: "z-shots", generatedImages: [frame1, frame4, frame3, frame5] },
   { id: "f2", x: 400, y: 80, image: frame2, scene: "SC 2", shot: "MED", description: "Vivian appears in the rain-soaked alley.", duration: "3s", actors: ["a2"], zoneId: "z-shots", generatedImages: [frame2] },
   { id: "f3", x: 720, y: 80, image: frame3, scene: "SC 3", shot: "WIDE", description: "The Blue Note Jazz Club — establishing shot.", duration: "5s", actors: ["a3"], location: "Jazz Club", zoneId: "z-shots", generatedImages: [frame3, frame1, frame6] },
   { id: "f4", x: 80, y: 340, image: frame4, scene: "SC 4", shot: "CU", description: "Marlowe examines a photograph under his desk lamp.", duration: "3s", actors: ["a1"], location: "Office", zoneId: "z-shots", generatedImages: [frame4] },
