@@ -115,7 +115,7 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
           className="text-xs text-muted-foreground leading-relaxed outline-none cursor-text select-text min-h-[1.25em]"
           onMouseDown={stopDrag}
           onBlur={handleBodyBlur}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { /* allow newlines */ } }}
+          onKeyDown={(e) => { e.stopPropagation(); }}
         >
           {node.body}
         </div>
