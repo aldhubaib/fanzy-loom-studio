@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Settings, X } from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LocationNode } from "../types";
 import { LOC_W, locationImages } from "../constants";
