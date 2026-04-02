@@ -32,12 +32,6 @@ export const CanvasToolbar = memo(function CanvasToolbar({
         <span className="text-xs">Back to Pipeline</span>
       </Link>
 
-      {/* Title */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-lg">
-        <Film className="w-4 h-4 text-primary" />
-        <span className="text-sm font-bold text-foreground">Production Canvas</span>
-        <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Beta</span>
-      </div>
 
       {/* Tool buttons */}
       <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 flex flex-col items-center gap-1 p-1.5 rounded-2xl bg-card/90 backdrop-blur-md border border-border shadow-2xl">
