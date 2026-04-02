@@ -43,7 +43,7 @@ export const ZoneBackground = memo(function ZoneBackground({
           isSelected && "border-opacity-80",
         )}
         style={{
-          borderColor: `hsl(${zone.color} / ${isSelected ? 0.6 : 0.25})`,
+          borderColor: `hsl(${zone.color} / ${isSelected || hovered ? 0.55 : 0.25})`,
           background: "hsl(var(--background))",
         }}
         onMouseDown={onZoneDragStart}
