@@ -25,7 +25,7 @@ interface ShotDrawerProps {
 }
 
 export const ShotDrawer = memo(function ShotDrawer({
-  frame, actors, connectedActors, onUpdate, onDelete,
+  frame, actors, connectedActors, onUpdate, onDelete, onApprove,
 }: ShotDrawerProps) {
   const [prompt, setPrompt] = useState(frame.description);
   const [shot, setShot] = useState(frame.shot);
