@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import type { Actor, FrameData } from "../types";
+import type { Actor, FrameData, ShotStatus } from "../types";
 import { shotTypes, locationDetailOptions, DURATION_OPTIONS } from "../constants";
 
 interface ShotDrawerProps {
@@ -21,6 +21,7 @@ interface ShotDrawerProps {
   connectedActors: Actor[];
   onUpdate: (f: FrameData) => void;
   onDelete: () => void;
+  onApprove?: (frameId: string) => void;
 }
 
 export const ShotDrawer = memo(function ShotDrawer({
