@@ -44,6 +44,7 @@ interface ZoneBackgroundProps {
   bounds: ZoneBounds;
   isSelected: boolean;
   isEditingLabel: boolean;
+  isPageView?: boolean;
   onZoneDragStart: (e: React.MouseEvent) => void;
   onLabelDoubleClick: () => void;
   onLabelRename: (newLabel: string) => void;
@@ -56,7 +57,7 @@ interface ZoneBackgroundProps {
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
-  zone, bounds, isSelected, isEditingLabel,
+  zone, bounds, isSelected, isEditingLabel, isPageView,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction,
 }: ZoneBackgroundProps) {
@@ -165,7 +166,10 @@ export const ZoneBackground = memo(function ZoneBackground({
 
         {/* Zone tools — visible on hover or when selected */}
         {(hovered || isSelected) && tools.map((tool) => {
-          const Icon = tool.icon;
+          // Swap icon & label for the pageView toggle
+          const isPageToggle = tool.key === "pageView";
+          const Icon = isPageToggle ? (isPageView ? LayoutGrid : FileText) : tool.icon;
+          const label = isPageToggle ? (isPageView ? "Card View" : "Page View") : tool.label;
           return (
             <TooltipProvider key={tool.key} delayDuration={200}>
               <Tooltip>
@@ -180,7 +184,7 @@ export const ZoneBackground = memo(function ZoneBackground({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={8} className="text-[10px] py-0.5 px-1.5">
-                  {tool.label}
+                  {label}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
