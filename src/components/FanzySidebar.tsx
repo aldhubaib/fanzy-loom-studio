@@ -12,11 +12,7 @@ import {
 import { mockProjects } from "@/data/mockProjects";
 
 const pipelineStages = [
-  { title: "Concept", slug: "concept", icon: Lightbulb },
-  { title: "Script", slug: "script", icon: FileText },
-  { title: "Shots", slug: "storyboard", icon: LayoutGrid },
-  { title: "Casting", slug: "casting", icon: Users },
-  { title: "Production", slug: "production", icon: Film },
+  { title: "Canvas", slug: "canvas", icon: Sparkles },
 ];
 
 const recentProjects = [
