@@ -10,12 +10,14 @@ import type {
 } from "../types";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
-  SCRIPT_W, SCRIPT_H, ZONE_PAD, ZONE_LABEL_H, DRAWER_W,
+  SCRIPT_W, SCRIPT_H, TIMELINE_W, ZONE_PAD, ZONE_LABEL_H, DRAWER_W,
   ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, AUTOSAVE_DEBOUNCE_MS, FIT_DELAY_MS,
   ZONE_CONNECTOR_CONFIGS, actorRoster,
   initialZones, initialFrames, initialCastNodes,
   initialLocationNodes, initialScriptNodes, initialConnections,
+  initialTimelineNodes,
 } from "../constants";
+import type { TimelineNodeData } from "../components/TimelineNode";
 import {
   computeZoneBounds, loadCanvasState, saveCanvasState,
   makeZonePortId, getConnectionBaseId, getConnectionPortKey,
