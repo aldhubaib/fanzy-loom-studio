@@ -44,10 +44,6 @@ export const ScriptNodeCard = memo(function ScriptNodeCard({
       style={{ left: node.x, top: node.y, width: SCRIPT_W }}
       onMouseDown={onMouseDown}
     >
-      {/* Scene number badge */}
-      <div className="absolute -top-3 -left-3 w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md z-10">
-        {sceneNumber}
-      </div>
       <button
         className="absolute top-2 right-2 z-10 bg-background/70 text-foreground/70 hover:text-foreground w-5 h-5 flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-all"
         onMouseDown={(e) => e.stopPropagation()}
