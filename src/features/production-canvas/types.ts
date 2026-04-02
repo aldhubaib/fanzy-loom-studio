@@ -60,7 +60,7 @@ export interface Connection {
 }
 
 export interface ZoneConnectorConfig {
-  key: "casting" | "script" | "locations" | "production";
+  key: "casting" | "script" | "locations" | "production" | "screenplay";
   color: string;
   label: string;
   side: "left" | "right";
