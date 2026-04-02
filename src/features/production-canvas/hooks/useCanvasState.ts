@@ -413,6 +413,60 @@ export function useCanvasState(projectId: string | undefined) {
     [frames, zones, zoneBounds],
   );
 
+  // ── Auto-grid zone nodes ───────────────────────────────
+  const autoGridZone = useCallback(
+    (zoneId: string) => {
+      const zone = zones.find((z) => z.id === zoneId);
+      if (!zone) return;
+
+      const GAP = 24;
+      const sizeMap: Partial<Record<ZoneType, { w: number; h: number }>> = {
+        casting: { w: CAST_W, h: CAST_H },
+        locations: { w: LOC_W, h: LOC_H },
+        script: { w: SCRIPT_W, h: SCRIPT_H },
+      };
+      const size = sizeMap[zone.type];
+      if (!size) return;
+
+      // Collect nodes for this zone
+      const getNodes = (): { x: number; y: number; id: string }[] => {
+        if (zone.type === "casting") return castNodes.filter((n) => n.zoneId === zoneId);
+        if (zone.type === "locations") return locationNodes.filter((n) => n.zoneId === zoneId);
+        if (zone.type === "script") return scriptNodes.filter((n) => n.zoneId === zoneId);
+        return [];
+      };
+
+      const nodes = getNodes();
+      if (nodes.length === 0) return;
+
+      // Calculate grid columns based on count
+      const cols = Math.ceil(Math.sqrt(nodes.length));
+      
+      // Use the zone's anchor position as the starting point
+      const startX = zone.x + ZONE_PAD;
+      const startY = zone.y + ZONE_PAD + ZONE_LABEL_H;
+
+      const positions = nodes.map((n, i) => ({
+        id: n.id,
+        x: startX + (i % cols) * (size.w + GAP),
+        y: startY + Math.floor(i / cols) * (size.h + GAP),
+      }));
+
+      const applyPositions = <T extends { id: string; x: number; y: number }>(
+        prev: T[],
+      ): T[] =>
+        prev.map((n) => {
+          const pos = positions.find((p) => p.id === n.id);
+          return pos ? { ...n, x: pos.x, y: pos.y } : n;
+        });
+
+      if (zone.type === "casting") setCastNodes(applyPositions);
+      else if (zone.type === "locations") setLocationNodes(applyPositions);
+      else if (zone.type === "script") setScriptNodes(applyPositions);
+    },
+    [zones, castNodes, locationNodes, scriptNodes],
+  );
+
   // ── Reset canvas ──────────────────────────────────────
   const resetCanvas = useCallback(() => {
     localStorage.removeItem(SAVE_KEY);
