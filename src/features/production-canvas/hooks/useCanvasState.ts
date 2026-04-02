@@ -321,7 +321,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
 
   // ── Drag start ────────────────────────────────────────
   const startDrag = useCallback(
-    (e: React.MouseEvent, node: { id: string; x: number; y: number }) => {
+    (e: React.MouseEvent, node: { id: string; x: number; y: number; zoneId?: string }) => {
       if (tool !== "select" || e.button !== 0) return;
       e.stopPropagation();
       const rect = containerRef.current?.getBoundingClientRect();
@@ -330,9 +330,12 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
       const my = (e.clientY - rect.top - pan.y) / zoom;
       setDragOffset({ x: mx - node.x, y: my - node.y });
       setDragging(node.id);
+      if (node.zoneId && zoneBounds[node.zoneId]) {
+        setFrozenDragZoneBounds({ zoneId: node.zoneId, bounds: zoneBounds[node.zoneId] });
+      }
       setSelected(null);
     },
-    [tool, pan, zoom],
+    [tool, pan, zoom, zoneBounds],
   );
 
   // ── Connection drag ───────────────────────────────────
