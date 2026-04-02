@@ -59,21 +59,6 @@ export function FanzySidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/" end activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
-                    <FolderOpen className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
-                    {!collapsed && <span>All Projects</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
                   <NavLink to="/cast" activeClassName="bg-sidebar-accent text-foreground font-medium" className="hover:bg-sidebar-accent/50">
                     <Users className={collapsed ? "h-4 w-4" : "mr-2 h-4 w-4"} />
                     {!collapsed && <span>Cast</span>}
