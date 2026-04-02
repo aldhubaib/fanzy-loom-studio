@@ -12,7 +12,7 @@ import { useCanvasState } from "./hooks/useCanvasState";
 
 import { CanvasErrorBoundary } from "./components/ErrorBoundary";
 import { CanvasToolbar } from "./components/CanvasToolbar";
-import { CanvasConnectors } from "./components/CanvasConnectors";
+
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import { CastPicker, LocationPicker } from "./components/CanvasPickers";
 import { CanvasDrawer } from "./components/CanvasDrawer";
