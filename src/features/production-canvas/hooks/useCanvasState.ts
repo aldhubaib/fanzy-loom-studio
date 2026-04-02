@@ -72,7 +72,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveCanvasState(SAVE_KEY, {
-        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan,
+        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoneCols, zoom, pan,
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
