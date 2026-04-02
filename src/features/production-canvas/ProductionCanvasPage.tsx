@@ -267,6 +267,13 @@ function ProductionCanvasPageInner() {
                   }}
                   shotAspectRatio={cs.shotAspectRatio}
                   onAspectRatioChange={(ratio) => cs.setShotAspectRatio(ratio)}
+                  shotStats={zone.type === "shots" ? (() => {
+                    const zoneFrames = cs.frames.filter((f) => f.zoneId === zone.id);
+                    const approved = zoneFrames.filter((f) => f.shotStatus === "approved").length;
+                    const drafts = zoneFrames.filter((f) => !f.shotStatus || f.shotStatus === "empty" || f.shotStatus === "preview").length;
+                    return { total: zoneFrames.length, approved, drafts, animatable: approved };
+                  })() : undefined}
+                  onAnimateAll={zone.type === "shots" ? handleAnimateAll : undefined}
                   onToolAction={{
                     autoGrid: () => cs.autoGridZone(zone.id, zone.type === "script" ? 1 : (cs.zoneCols[zone.id] ?? 3)),
                   }}
