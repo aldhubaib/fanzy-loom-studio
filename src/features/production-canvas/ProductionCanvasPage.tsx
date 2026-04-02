@@ -23,6 +23,7 @@ import { CastNodeCard } from "./components/CastNodeCard";
 import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
+import { PreviewMonitorNode } from "./components/PreviewMonitorNode";
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
