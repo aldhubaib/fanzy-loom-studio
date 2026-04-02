@@ -26,7 +26,7 @@ const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [
 
 /** Tools unique to a specific zone type */
 const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {
-  // Example: shots: [{ key: "sortByScene", icon: ArrowUpDown, label: "Sort by Scene" }],
+  script: [{ key: "pageView", icon: FileText, label: "Page View" }],
 };
 
 function getToolsForZone(type: ZoneType): ZoneToolDef[] {
