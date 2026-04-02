@@ -25,9 +25,7 @@ const SHARED_ZONE_TOOLS: { tool: ZoneToolDef; zones: ZoneType[] }[] = [
 ];
 
 /** Tools unique to a specific zone type */
-const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {
-  script: [{ key: "stackView", icon: FileText, label: "Stack View" }],
-};
+const ZONE_SPECIFIC_TOOLS: Partial<Record<ZoneType, ZoneToolDef[]>> = {};
 
 function getToolsForZone(type: ZoneType): ZoneToolDef[] {
   const shared = SHARED_ZONE_TOOLS

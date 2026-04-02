@@ -25,7 +25,7 @@ import {
   getPortPosition, getZoneColor as resolveZoneColor,
 } from "../utils";
 
-export function useCanvasState(projectId: string | undefined, stackZoneIds: Set<string> = new Set()) {
+export function useCanvasState(projectId: string | undefined) {
   const containerRef = useRef<HTMLDivElement>(null);
   const SAVE_KEY = `canvas-${projectId ?? "default"}`;
 
@@ -81,10 +81,10 @@ export function useCanvasState(projectId: string | undefined, stackZoneIds: Set<
   const zoneBounds = useMemo(() => {
     const map: Record<string, ZoneBounds> = {};
     zones.forEach((z) => {
-      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, stackZoneIds);
+      map[z.id] = computeZoneBounds(z, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes);
     });
     return map;
-  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, stackZoneIds]);
+  }, [zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes]);
 
   // ── Connection normalization ──────────────────────────
   useEffect(() => {
@@ -433,18 +433,17 @@ export function useCanvasState(projectId: string | undefined, stackZoneIds: Set<
       const zone = zones.find((z) => z.id === zoneId);
       if (!zone) return;
 
-      const GAP = overrideCols === 1 ? 8 : 24;
+      const isScriptZone = zone.type === "script";
+      const GAP = isScriptZone ? 8 : 24;
       const sizeMap: Partial<Record<ZoneType, { w: number; h: number }>> = {
         casting: { w: CAST_W, h: CAST_H },
         locations: { w: LOC_W, h: LOC_H },
-        script: { w: SCRIPT_W, h: SCRIPT_H },
+        script: { w: SCRIPT_W * 3, h: SCRIPT_H },
         shots: { w: FRAME_W, h: FRAME_H },
       };
       const size = sizeMap[zone.type];
       if (!size) return;
-      // In stack view (1 col), script cards are 3x wider with more vertical space for text wrap
-      const isStack = overrideCols === 1 && zone.type === "script";
-      const effectiveSize = isStack ? { w: size.w * 3, h: 220 } : size;
+      const effectiveSize = size;
 
       // Collect nodes for this zone, sorted by logical order when available
       const getNodes = (): { x: number; y: number; id: string }[] => {
