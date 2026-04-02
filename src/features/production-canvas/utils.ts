@@ -200,7 +200,7 @@ export function loadCanvasState(key: string): CanvasState | null {
 
 export function saveCanvasState(key: string, state: CanvasState): void {
   try {
-    localStorage.setItem(key, JSON.stringify(state));
+    localStorage.setItem(key, JSON.stringify({ ...state, _version: CANVAS_STATE_VERSION }));
   } catch (err) {
     console.warn("[Canvas] Failed to save state (quota?):", err);
   }
