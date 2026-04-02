@@ -44,7 +44,7 @@ interface ZoneBackgroundProps {
   bounds: ZoneBounds;
   isSelected: boolean;
   isEditingLabel: boolean;
-  isPageView?: boolean;
+  isStackView?: boolean;
   onZoneDragStart: (e: React.MouseEvent) => void;
   onLabelDoubleClick: () => void;
   onLabelRename: (newLabel: string) => void;
