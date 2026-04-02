@@ -35,6 +35,7 @@ export function computeZoneBounds(
   castNodes: CastNode[],
   locationNodes: LocationNode[],
   scriptNodes: ScriptNode[] = [],
+  timelineNodes: TimelineNodeData[] = [],
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -43,6 +44,7 @@ export function computeZoneBounds(
     casting: { w: CAST_W, h: CAST_H },
     locations: { w: LOC_W, h: LOC_H },
     script: { w: SCRIPT_W, h: SCRIPT_H },
+    production: { w: TIMELINE_W, h: TIMELINE_HEADER_H + TIMELINE_RULER_H + TIMELINE_TRACK_H * 4 + 40 },
   };
 
   const nodeMap: Record<string, Array<{ x: number; y: number; zoneId?: string }>> = {
@@ -50,6 +52,7 @@ export function computeZoneBounds(
     casting: castNodes,
     locations: locationNodes,
     script: scriptNodes,
+    production: timelineNodes,
   };
 
   const nodes = nodeMap[zone.type] ?? [];
