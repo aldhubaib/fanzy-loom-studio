@@ -109,8 +109,11 @@ export const CanvasToolbar = memo(function CanvasToolbar({
         <button onClick={onFitToScreen} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Fit to screen">
           <Maximize className="w-4 h-4" />
         </button>
-        <button onClick={onResetCanvas} className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors" title="Reset Canvas">
-          <RotateCcw className="w-4 h-4" />
+        <button onClick={onUndo} disabled={!canUndo} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", canUndo ? "text-muted-foreground hover:text-foreground hover:bg-secondary/60" : "text-muted-foreground/30 cursor-not-allowed")} title="Undo">
+          <Undo2 className="w-4 h-4" />
+        </button>
+        <button onClick={onRedo} disabled={!canRedo} className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-colors", canRedo ? "text-muted-foreground hover:text-foreground hover:bg-secondary/60" : "text-muted-foreground/30 cursor-not-allowed")} title="Redo">
+          <Redo2 className="w-4 h-4" />
         </button>
       </div>
 
