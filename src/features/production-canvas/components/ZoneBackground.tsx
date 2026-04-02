@@ -69,7 +69,7 @@ export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
-  shotAspectRatio, onAspectRatioChange,
+  shotAspectRatio, onAspectRatioChange, shotStats, onAnimateAll,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
