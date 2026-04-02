@@ -17,7 +17,6 @@ export const LocationNodeCard = memo(function LocationNodeCard({
   node, isSelected, shotCount, onMouseDown, onSettingsClick, onDelete,
 }: LocationNodeCardProps) {
   const img = locationImages[node.locationName];
-  if (!img) return null;
 
   return (
     <div
