@@ -38,6 +38,7 @@ export function computeZoneBounds(
   scriptNodes: ScriptNode[] = [],
   timelineNodes: TimelineNodeData[] = [],
   previewNodes: PreviewNodeData[] = [],
+  scriptStackHeights: Record<string, number> = {},
 ): ZoneBounds {
   const children: { x: number; y: number; w: number; h: number }[] = [];
 
@@ -66,18 +67,18 @@ export function computeZoneBounds(
     if (zoneNodes.length === 0) {
       return { x: zone.x, y: zone.y, w: MIN_ZONE_W, h: MIN_ZONE_H };
     }
-    // Use the first node's position as anchor; total height = count * estimated card height
     const firstNode = zoneNodes[0];
-    const cardH = SCRIPT_H;
-    const gap = 8;
-    const totalH = zoneNodes.length * cardH + (zoneNodes.length - 1) * gap;
+    // Use measured DOM height if available, otherwise estimate
+    const measuredH = scriptStackHeights[zone.id];
+    const estimatedH = zoneNodes.length * SCRIPT_H + (zoneNodes.length - 1) * 8;
+    const contentH = measuredH ?? estimatedH;
     const x = firstNode.x - ZONE_PAD;
     const y = firstNode.y - ZONE_PAD - ZONE_LABEL_H;
     return {
       x,
       y,
       w: Math.max(MIN_ZONE_W, SCRIPT_W * 3 + ZONE_PAD * 2),
-      h: Math.max(MIN_ZONE_H, totalH + ZONE_PAD * 2 + ZONE_LABEL_H),
+      h: Math.max(MIN_ZONE_H, contentH + ZONE_PAD * 2 + ZONE_LABEL_H),
     };
   }
 

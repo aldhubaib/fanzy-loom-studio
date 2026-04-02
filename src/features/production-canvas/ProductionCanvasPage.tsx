@@ -2,7 +2,7 @@
 // Composed from isolated sub-components. All constants, types,
 // and logic are extracted — this file is purely composition.
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { ZoneType, ScriptNode } from "./types";
@@ -35,9 +35,34 @@ interface PendingDelete {
 
 function ProductionCanvasPageInner() {
   const { projectId } = useParams();
-  const cs = useCanvasState(projectId);
+  const [scriptStackHeights, setScriptStackHeights] = useState<Record<string, number>>({});
+  const cs = useCanvasState(projectId, scriptStackHeights);
 
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const stackRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const stackObservers = useRef<Record<string, ResizeObserver>>({});
+
+  const setStackRef = useCallback((zoneId: string, el: HTMLDivElement | null) => {
+    // Cleanup old observer
+    if (stackObservers.current[zoneId]) {
+      stackObservers.current[zoneId].disconnect();
+      delete stackObservers.current[zoneId];
+    }
+    stackRefs.current[zoneId] = el;
+    if (el) {
+      const obs = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const h = entry.contentRect.height;
+          setScriptStackHeights((prev) => {
+            if (prev[zoneId] === h) return prev;
+            return { ...prev, [zoneId]: h };
+          });
+        }
+      });
+      obs.observe(el);
+      stackObservers.current[zoneId] = obs;
+    }
+  }, []);
 
   const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
@@ -352,6 +377,7 @@ function ProductionCanvasPageInner() {
                     elements.push(
                       <div
                         key={`stack-${zoneId}`}
+                        ref={(el) => setStackRef(zoneId, el)}
                         className="absolute flex flex-col gap-2"
                         style={{
                           left: b.x + 40,
