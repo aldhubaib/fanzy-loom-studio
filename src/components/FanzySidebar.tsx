@@ -139,7 +139,7 @@ export function FanzySidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-center group-data-[state=expanded]:justify-start">
           <div className="w-8 h-8 min-w-[2rem] min-h-[2rem] rounded-full bg-gradient-to-br from-primary/60 to-accent/40 flex items-center justify-center text-xs font-semibold text-foreground shrink-0">
             JD
           </div>
