@@ -71,11 +71,11 @@ export function useCanvasState(projectId: string | undefined) {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveCanvasState(SAVE_KEY, {
-        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, connections, zoom, pan,
+        actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan,
       });
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => clearTimeout(saveTimerRef.current);
-  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, connections, zoom, pan, SAVE_KEY]);
+  }, [actors, zones, frames, castNodes, locationNodes, scriptNodes, timelineNodes, previewNodes, connections, zoom, pan, SAVE_KEY]);
 
   // ── Computed zone bounds ──────────────────────────────
   const zoneBounds = useMemo(() => {
