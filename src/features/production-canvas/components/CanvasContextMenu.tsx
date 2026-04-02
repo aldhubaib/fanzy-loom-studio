@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Camera, Users, MapPin, FileText, Maximize } from "lucide-react";
+import { Camera, Users, MapPin, FileText, Film, Maximize } from "lucide-react";
 import type { Zone, ZoneType, CanvasMenuState } from "../types";
 import { ZONE_COLORS, ZONE_LABELS, SCRIPT_W } from "../constants";
 
@@ -10,6 +10,7 @@ interface CanvasContextMenuProps {
   onAddCastPicker: () => void;
   onAddLocationPicker: () => void;
   onAddScriptNode: () => void;
+  onAddTimeline: () => void;
   onAddZone: (type: ZoneType) => void;
   onFitToScreen: () => void;
   onClose: () => void;
@@ -20,6 +21,7 @@ const zoneTypeIcons: Record<ZoneType, React.ReactNode> = {
   shots: <Camera className="w-4 h-4" />,
   locations: <MapPin className="w-4 h-4" />,
   script: <FileText className="w-4 h-4" />,
+  production: <Film className="w-4 h-4" />,
 };
 
 export const CanvasContextMenu = memo(function CanvasContextMenu({
