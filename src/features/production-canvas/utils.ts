@@ -152,7 +152,7 @@ export function getPortPosition(
 }
 
 // ─── Persistence ────────────────────────────────────────────
-export const CANVAS_STATE_VERSION = 3;
+export const CANVAS_STATE_VERSION = 4;
 
 export function loadCanvasState(key: string): CanvasState | null {
   try {
