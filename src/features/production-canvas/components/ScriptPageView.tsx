@@ -215,6 +215,12 @@ export const ScriptPageView = memo(function ScriptPageView({
     };
   }, [updateToolbarPos]);
 
+  /* ── Section selection ── */
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const handleSelectSection = useCallback((id: string) => {
+    setSelectedSection((prev) => (prev === id ? null : id));
+  }, []);
+
   /* ── Drag & drop reorder ── */
   const handleDragStart = useCallback((id: string) => setDragId(id), []);
   const handleDragOver = useCallback((id: string) => setDragOverId(id), []);
