@@ -63,13 +63,14 @@ interface ZoneBackgroundProps {
   /** Shot stats for shots zone header */
   shotStats?: { total: number; approved: number; drafts: number; animatable: number };
   onAnimateAll?: () => void;
+  isAnimatingAny?: boolean;
 }
 
 export const ZoneBackground = memo(function ZoneBackground({
   zone, bounds, isSelected, isEditingLabel, isStackView, zoneCols,
   onZoneDragStart, onLabelDoubleClick, onLabelRename, onLabelEditCancel,
   onStartConnect, onEndConnect, onSelect, onToolAction, onAddItem, onDuplicateZone, onColsChange,
-  shotAspectRatio, onAspectRatioChange, shotStats, onAnimateAll,
+  shotAspectRatio, onAspectRatioChange, shotStats, onAnimateAll, isAnimatingAny,
 }: ZoneBackgroundProps) {
   const b = bounds;
   const ports = ZONE_CONNECTOR_CONFIGS[zone.type];
@@ -310,7 +311,13 @@ export const ZoneBackground = memo(function ZoneBackground({
               <button
                 onClick={(e) => { e.stopPropagation(); onAnimateAll(); }}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-1"
+                disabled={isAnimatingAny}
+                className={cn(
+                  "flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-colors ml-1",
+                  isAnimatingAny
+                    ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                )}
               >
                 <Zap className="w-3 h-3" />
                 Animate All ({shotStats.animatable})
