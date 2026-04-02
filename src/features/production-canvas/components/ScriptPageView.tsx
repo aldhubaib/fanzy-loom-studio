@@ -115,7 +115,9 @@ export const ScriptPageView = memo(function ScriptPageView({
       sectionIds.push(id);
       const headingEl = section.querySelector("h1, h2, h3, .section-heading");
       const bodyEl = section.querySelector(".section-body");
-      const heading = headingEl?.textContent?.trim() || "";
+      let heading = headingEl?.textContent?.trim() || "";
+      // Strip the non-editable "SC X" prefix from the text content
+      heading = heading.replace(/^SC\s*\d+\s*/, "");
       const body = bodyEl?.textContent?.trim() || "";
       const node = nodes.find((n) => n.id === id);
       if (node && (heading !== node.heading || body !== node.body)) {
@@ -188,8 +190,8 @@ export const ScriptPageView = memo(function ScriptPageView({
             __html: nodes.length > 0
               ? nodes
                   .map(
-                    (n) =>
-                      `<div data-section-id="${n.id}"><h1 class="section-heading">${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
+                    (n, i) =>
+                      `<div data-section-id="${n.id}"><h1 class="section-heading"><span contenteditable="false" style="user-select:none;pointer-events:none;margin-right:8px;opacity:0.5;font-size:0.75em;">SC ${i + 1}</span>${escapeHtml(n.heading)}</h1><p class="section-body">${escapeHtml(n.body)}</p></div><hr />`
                   )
                   .join("")
               : `<p style="color: rgba(255,255,255,0.3)">Start writing your script...</p>`,
