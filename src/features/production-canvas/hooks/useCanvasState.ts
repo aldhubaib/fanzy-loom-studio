@@ -423,6 +423,7 @@ export function useCanvasState(projectId: string | undefined) {
     setLocationNodes(initialLocationNodes);
     setScriptNodes(initialScriptNodes);
     setTimelineNodes(initialTimelineNodes);
+    setPreviewNodes([]);
     setConnections(initialConnections);
     setZoom(1);
     setPan({ x: 0, y: 0 });
