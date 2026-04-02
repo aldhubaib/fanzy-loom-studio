@@ -26,6 +26,7 @@ import { LocationNodeCard } from "./components/LocationNodeCard";
 import { ScriptNodeCard } from "./components/ScriptNodeCard";
 import { TimelineNode } from "./components/TimelineNode";
 import { DeleteConfirmDialog, type DeleteSeverity } from "./components/DeleteConfirmDialog";
+import { CollabPresence, CommentsPanel, ActivityFeed, ShareDialog } from "./components/CollabOverlay";
 
 
 interface PendingDelete {
@@ -44,6 +45,9 @@ function ProductionCanvasPageInner() {
   const cs = useCanvasState(projectId, scriptStackHeights);
 
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const stackRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const stackObservers = useRef<Record<string, ResizeObserver>>({});
 
@@ -169,6 +173,15 @@ function ProductionCanvasPageInner() {
           canUndo={false}
           canRedo={false}
         />
+
+        <CollabPresence
+          onOpenComments={() => { setCommentsOpen(true); setActivityOpen(false); }}
+          onOpenActivity={() => { setActivityOpen(true); setCommentsOpen(false); }}
+          onOpenShare={() => setShareOpen(true)}
+        />
+        <CommentsPanel open={commentsOpen} onClose={() => setCommentsOpen(false)} />
+        <ActivityFeed open={activityOpen} onClose={() => setActivityOpen(false)} />
+        <ShareDialog open={shareOpen} onClose={() => setShareOpen(false)} />
 
         {/* Canvas surface */}
         <div
