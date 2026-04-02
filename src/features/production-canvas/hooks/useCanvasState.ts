@@ -535,6 +535,7 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
     },
     [zones, zoneBounds, frames, castNodes, locationNodes, scriptNodes],
   );
+  autoGridZoneRef.current = autoGridZone;
 
   // ── Reorder node within zone ───────────────────────────
   const reorderNode = useCallback(
