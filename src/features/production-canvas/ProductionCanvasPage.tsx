@@ -336,6 +336,7 @@ function ProductionCanvasPageInner() {
                 cs.setLocationNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
                 cs.setScriptNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
                 cs.setTimelineNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
+                cs.setPreviewNodes((prev) => prev.filter((n) => n.zoneId !== zoneId));
                 cs.setConnections((prev) => prev.filter((c) => !c.from.startsWith(zoneId) && !c.to.startsWith(zoneId)));
                 if (cs.selected?.type === "zone" && cs.selected.id === zoneId) cs.setSelected(null);
                 cs.setCanvasMenu(null);
