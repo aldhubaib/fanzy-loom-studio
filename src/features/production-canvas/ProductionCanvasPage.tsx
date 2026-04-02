@@ -346,7 +346,7 @@ function ProductionCanvasPageInner() {
                   node={node}
                   isSelected={cs.selected?.id === node.id}
                   shotCount={shotCount}
-                  onMouseDown={(e) => cs.startDrag(e, node)}
+                  onMouseDown={(e) => { e.stopPropagation(); cs.setSelected({ type: "location", id: node.id }); }}
                   onSettingsClick={() => cs.setSelected({ type: "location", id: node.id })}
                   onDelete={() => {
                     const doDelete = () => {
