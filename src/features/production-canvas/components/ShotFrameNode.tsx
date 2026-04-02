@@ -192,7 +192,7 @@ export const ShotFrameNode = memo(function ShotFrameNode({
             </button>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 });
