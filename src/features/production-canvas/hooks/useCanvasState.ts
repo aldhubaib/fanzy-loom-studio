@@ -6,7 +6,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type {
   Actor, FrameData, CastNode, LocationNode, ScriptNode,
   Zone, Connection, Tool, SelectedItem, ZoneBounds,
-  CanvasMenuState, PickerPosition, ConnectorData,
+  CanvasMenuState, PickerPosition, ConnectorData, ZoneType,
 } from "../types";
 import {
   FRAME_W, FRAME_H, CAST_W, CAST_H, LOC_W, LOC_H,
