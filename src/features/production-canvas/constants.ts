@@ -92,8 +92,9 @@ export const ZONE_CONNECTOR_CONFIGS = {
     { key: "casting", color: "190 80% 50%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   shots: [
-    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.22 },
-    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.5 },
+    { key: "script", color: "280 60% 55%", label: "Script", side: "left", yFrac: 0.15 },
+    { key: "screenplay", color: "45 85% 55%", label: "Screenplay", side: "left", yFrac: 0.35 },
+    { key: "casting", color: "190 80% 50%", label: "Casting", side: "left", yFrac: 0.55 },
     { key: "locations", color: "150 60% 45%", label: "Locations", side: "left", yFrac: 0.78 },
     { key: "production", color: "350 75% 55%", label: "Production", side: "right", yFrac: 0.5 },
   ],
@@ -102,6 +103,9 @@ export const ZONE_CONNECTOR_CONFIGS = {
   ],
   script: [
     { key: "script", color: "280 60% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
+  ],
+  screenplay: [
+    { key: "screenplay", color: "45 85% 55%", label: "Connect to Shots", side: "right", yFrac: 0.5 },
   ],
   production: [
     { key: "production", color: "350 75% 55%", label: "Connect to Shots", side: "left", yFrac: 0.5 },
