@@ -73,6 +73,7 @@ export type SelectedItem =
   | { type: "location"; id: string }
   | { type: "script"; id: string }
   | { type: "zone"; id: string }
+  | { type: "preview"; id: string }
   | null;
 
 export type Tool = "select" | "hand";
