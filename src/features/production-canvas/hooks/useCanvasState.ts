@@ -247,26 +247,66 @@ export function useCanvasState(projectId: string | undefined, scriptStackHeights
   );
 
   const handleMouseUp = useCallback(() => {
-    // Sync script node order from y-positions after drag
-    if (dragging && scriptNodes.some((n) => n.id === dragging)) {
-      setScriptNodes((prev) => {
+    if (dragging) {
+      // Recalculate order based on position for all grid-based node types
+      const recalcOrder = <T extends { id: string; zoneId: string; x: number; y: number; order?: number }>(
+        prev: T[],
+      ): T[] => {
         const draggedNode = prev.find((n) => n.id === dragging);
         if (!draggedNode) return prev;
         const zoneId = draggedNode.zoneId;
-        const zoneNodes = prev.filter((n) => n.zoneId === zoneId).sort((a, b) => a.y - b.y);
+        const zoneNodes = prev.filter((n) => n.zoneId === zoneId).sort((a, b) => {
+          // Sort by row (y) first, then column (x)
+          if (Math.abs(a.y - b.y) > 20) return a.y - b.y;
+          return a.x - b.x;
+        });
         const orderMap = new Map(zoneNodes.map((n, i) => [n.id, i]));
         return prev.map((n) => {
           const newOrder = orderMap.get(n.id);
           return newOrder !== undefined ? { ...n, order: newOrder } : n;
         });
-      });
+      };
+
+      const isCast = castNodes.some((n) => n.id === dragging);
+      const isLocation = locationNodes.some((n) => n.id === dragging);
+      const isFrame = frames.some((f) => f.id === dragging);
+      const isScript = scriptNodes.some((n) => n.id === dragging);
+
+      if (isCast) setCastNodes(recalcOrder);
+      else if (isLocation) setLocationNodes(recalcOrder);
+      else if (isFrame) setFrames(recalcOrder);
+      else if (isScript) {
+        setScriptNodes((prev) => {
+          const draggedNode = prev.find((n) => n.id === dragging);
+          if (!draggedNode) return prev;
+          const zoneId = draggedNode.zoneId;
+          const zoneNodes = prev.filter((n) => n.zoneId === zoneId).sort((a, b) => a.y - b.y);
+          const orderMap = new Map(zoneNodes.map((n, i) => [n.id, i]));
+          return prev.map((n) => {
+            const newOrder = orderMap.get(n.id);
+            return newOrder !== undefined ? { ...n, order: newOrder } : n;
+          });
+        });
+      }
+
+      // Find zone and re-grid after a short delay
+      const findZoneId = () => {
+        if (isCast) return castNodes.find((n) => n.id === dragging)?.zoneId;
+        if (isLocation) return locationNodes.find((n) => n.id === dragging)?.zoneId;
+        if (isFrame) return frames.find((f) => f.id === dragging)?.zoneId;
+        return undefined;
+      };
+      const zId = findZoneId();
+      if (zId) {
+        setTimeout(() => autoGridZone(zId), 10);
+      }
     }
     setPanning(false);
     setDragging(null);
     setDraggingZone(null);
     setZoneDragStart(null);
     setConnectingFrom(null);
-  }, [dragging, scriptNodes]);
+  }, [dragging, castNodes, locationNodes, frames, scriptNodes, autoGridZone]);
 
   // ── Drag start ────────────────────────────────────────
   const startDrag = useCallback(
