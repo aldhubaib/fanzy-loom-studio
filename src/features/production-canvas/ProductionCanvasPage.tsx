@@ -52,9 +52,27 @@ function ProductionCanvasPageInner() {
   // ── Callbacks ─────────────────────────────────────────
   const handleDeleteConnection = useCallback(
     (from: string, to: string) => {
-      cs.setConnections((prev) => prev.filter((c) => !(c.from === from && c.to === to)));
+      // Check if this is a zone-level connection (data flows through it)
+      const isZoneConn = from.includes("::") || to.includes("::");
+      const fromZone = cs.zones.find((z) => from.startsWith(z.id));
+      const toZone = cs.zones.find((z) => to.startsWith(z.id));
+
+      const doDelete = () => {
+        cs.setConnections((prev) => prev.filter((c) => !(c.from === from && c.to === to)));
+      };
+
+      if (isZoneConn && fromZone && toZone) {
+        setPendingDelete({
+          severity: "destructive",
+          title: "Delete Connection",
+          description: `Disconnecting "${fromZone.label}" from "${toZone.label}" will break the data flow between these zones. All linked shots, actors, and locations will be unlinked.`,
+          onConfirm: doDelete,
+        });
+      } else {
+        doDelete();
+      }
     },
-    [cs.setConnections],
+    [cs.setConnections, cs.zones],
   );
 
   const handleContextMenu = useCallback(
