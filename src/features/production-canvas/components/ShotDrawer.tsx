@@ -238,8 +238,20 @@ export const ShotDrawer = memo(function ShotDrawer({
 
       <div className="flex gap-2">
         <Button size="sm" className="flex-1 gap-1.5" onClick={save}><Check className="w-3.5 h-3.5" /> Save</Button>
-        <Button size="sm" variant="outline" className="gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => toast("Generation started")}><Sparkles className="w-3.5 h-3.5" /> Generate</Button>
       </div>
+
+      {frame.image && (!frame.shotStatus || frame.shotStatus === "empty" || frame.shotStatus === "preview") && onApprove && (
+        <Button size="sm" variant="outline" className="w-full gap-1.5 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300" onClick={() => { onApprove(frame.id); toast.success("Shot approved"); }}>
+          <CheckCircle className="w-3.5 h-3.5" /> Approve Shot
+        </Button>
+      )}
+
+      {frame.shotStatus === "approved" && (
+        <div className="flex items-center gap-1.5 text-xs text-emerald-400 justify-center py-1">
+          <CheckCircle className="w-3.5 h-3.5" /> Approved
+        </div>
+      )}
       <button onClick={onDelete} className="w-full flex items-center justify-center gap-1.5 text-xs text-destructive hover:text-destructive/80 py-2 transition-colors">
         <Trash2 className="w-3 h-3" /> Delete Shot
       </button>
