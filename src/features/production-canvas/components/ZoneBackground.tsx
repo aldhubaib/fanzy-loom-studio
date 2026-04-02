@@ -311,7 +311,13 @@ export const ZoneBackground = memo(function ZoneBackground({
               <button
                 onClick={(e) => { e.stopPropagation(); onAnimateAll(); }}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-1"
+                disabled={isAnimatingAny}
+                className={cn(
+                  "flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-colors ml-1",
+                  isAnimatingAny
+                    ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                )}
               >
                 <Zap className="w-3 h-3" />
                 Animate All ({shotStats.animatable})
