@@ -30,7 +30,7 @@ interface CanvasToolbarProps {
 
 export const CanvasToolbar = memo(function CanvasToolbar({
   projectId, projectName, onProjectNameChange, tool, zoom,
-  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onResetCanvas,
+  onSetTool, onAddFrame, onFitToScreen, onZoomIn, onZoomOut, onUndo, onRedo, canUndo, canRedo,
 }: CanvasToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
