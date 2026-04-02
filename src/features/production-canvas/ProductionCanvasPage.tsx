@@ -39,7 +39,7 @@ function ProductionCanvasPageInner() {
   // ── Derived values ────────────────────────────────────
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
-  const showDrawer = !!cs.selected;
+  const showDrawer = cs.selected != null && cs.selected.type !== "zone";
 
   const selectedFrame = cs.selected?.type === "frame"
     ? cs.frames.find((f) => f.id === cs.selected!.id)
